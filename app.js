@@ -1,48 +1,73 @@
-// Data Population Logic
-function initializeDashboard() {
-    // Timestamp
-    document.getElementById('timestamp').innerText = new Date().toLocaleString();
+// Function to handle tab switching
+function openTab(tabId) {
+    // Hide all tab contents
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => {
+        content.classList.remove('active');
+    });
 
-    // 1. Barrier Health
-    document.getElementById('dew-point').innerText = '45°F';
-    document.getElementById('wind-speed').innerText = '15 mph';
-    document.getElementById('barrier-status').innerText = 'Occlusive Day. Skip harsh exfoliants. Apply heavy ceramides.';
+    // Remove active class from all buttons
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(button => {
+        button.classList.remove('active');
+    });
 
-    // 2. Sebum & Pore Congestion
-    document.getElementById('heat-index').innerText = 'High (85°F / 70% RH)';
-    document.getElementById('aqi-level').innerText = '65 (Moderate)';
-    document.getElementById('sebum-forecast').innerText = 'High Congestion Risk. Double cleanse recommended tonight.';
-
-    // 3. Antioxidant Shield
-    document.getElementById('uv-index').innerText = '8 (Very High)';
-    document.getElementById('allergen-level').innerText = 'High Pollen';
-    document.getElementById('antioxidant-action').innerText = 'Apply Vitamin C & SPF 50. Micellar water rinse upon indoor return.';
-
-    // 4. Dynamic Skin Cycling
-    document.getElementById('temp-drop').innerText = '20°F drop expected tonight';
-    document.getElementById('routine-rec').innerText = 'Safety Shift: Bypass retinoids. Focus on lipid replenishment.';
-
-    // 5. Active Flexibility
-    document.getElementById('pressure').innerText = '29.7 inHg (Falling)';
-    document.getElementById('flex-rating').innerText = 'High Resistance';
-    document.getElementById('flex-focus').innerText = 'Extended heat warm-up required before active oversplits.';
-
-    // 6. Lymphatic Fluid Index
-    document.getElementById('pressure-shift').innerText = 'Rapid Drop Detected';
-    document.getElementById('puffiness-prob').innerText = 'High. Execute facial lymphatic drainage sequence.';
-
-    // 7. Somatic Reset
-    document.getElementById('tension-marker').innerText = 'Cold/Gray Induced Slouching';
-    document.getElementById('somatic-protocol').innerText = 'Pelvic floor & jaw down-regulation required (2 min).';
-
-    // 8. Digital Oracle
-    document.getElementById('lunar-phase').innerText = 'Waning Crescent';
-    document.getElementById('oracle-alignment').innerText = 'Focus on introspection and hidden variables today.';
-
-    // 9. Atmospheric Frequency Soundscapes
-    document.getElementById('external-audio').innerText = 'Heavy Rain & Low Thunder';
-    document.getElementById('generated-track').innerText = 'Low-frequency binaural beats blended with ambient rain cadence.';
+    // Show the clicked tab and set button to active
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
 }
 
-// Execute immediately without delay
-initializeDashboard();
+// Function to handle logging data
+function logData(type) {
+    const date = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    let listId, input1Id, input2Id;
+
+    if (type === 'skin') {
+        listId = 'skin-log-list';
+        input1Id = 'skin-feel';
+        input2Id = 'skin-products';
+    } else if (type === 'flex') {
+        listId = 'flex-log-list';
+        input1Id = 'flex-focus';
+        input2Id = 'flex-notes';
+    }
+
+    const input1 = document.getElementById(input1Id);
+    const input2 = document.getElementById(input2Id);
+
+    if (input1.value === '' && input2.value === '') {
+        alert("Please enter something to log!");
+        return;
+    }
+
+    const ul = document.getElementById(listId);
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>[${date}]</strong> ${input1.value} <br> <em>Notes/Products:</em> ${input2.value}`;
+    
+    // Add to the top of the list
+    ul.prepend(li);
+
+    // Clear inputs
+    input1.value = '';
+    input2.value = '';
+}
+
+// Function to handle the Digital Oracle
+const oracleDeck = [
+    { name: "The Static", meaning: "A day of high noise. Clear your mind, turn off notifications, and focus strictly on your physical body." },
+    { name: "The Dew Drop", meaning: "Embrace moisture and flexibility. Drink water, focus on hydration in your routine, and flow gently into your stretches." },
+    { name: "The Pressure Drop", meaning: "Atmospheric shifts are causing tension. Take it easy today; do not push past your normal limits. Rest is productive." },
+    { name: "The Sun Flare", meaning: "High energy day. Perfect for pushing into new active flexibility goals. Protect your skin, but embrace the heat." },
+    { name: "The Root System", meaning: "Focus on grounding. Look at the foundation of your routines rather than the final results. Check your basics." }
+];
+
+function drawCard() {
+    const cardNameDisplay = document.getElementById('card-name');
+    const cardMeaningDisplay = document.getElementById('card-meaning');
+
+    // Pick a random card from the array
+    const randomCard = oracleDeck[Math.floor(Math.random() * oracleDeck.length)];
+
+    cardNameDisplay.innerText = `🎴 ${randomCard.name}`;
+    cardMeaningDisplay.innerText = randomCard.meaning;
+}
