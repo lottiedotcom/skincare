@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wellness & Atmospheric Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>Atmospheric Wellness Monitor</h1>
+        <div id="timestamp" class="timestamp"></div>
+    </header>
+
+    <main class="dashboard-grid">
+        <section class="module-card">
+            <h2>🛡️ Barrier Health</h2>
+            <div class="data-readout" id="barrier-data">
+                <p>Dew Point: <span id="dew-point">--</span></p>
+                <p>Wind Speed: <span id="wind-speed">--</span></p>
+                <p>Status: <strong id="barrier-status">--</strong></p>
+            </div>
+        </section>
+
+        <section class="module-card">
+            <h2>🧴 Sebum & Congestion</h2>
+            <div class="data-readout">
+                <p>Temp/Humidity Index: <span id="heat-index">--</span></p>
+                <p>Air Quality (AQI): <span id="aqi-level">--</span></p>
+                <p>Forecast: <strong id="sebum-forecast">--</strong></p>
+            </div>
+        </section>
+
+        <section class="module-card">
+            <h2>🌤️ Antioxidant Shield</h2>
+            <div class="data-readout">
+                <p>Peak UV: <span id="uv-index">--</span></p>
+                <p>Ozone/Allergen: <span id="allergen-level">--</span></p>
+                <p>Action: <strong id="antioxidant-action">--</strong></p>
+            </div>
+        </section>
+
+        <section class="module-card">
+            <h2>🔄 Skin Cycling</h2>
+            <div class="data-readout">
+                <p>Night Temp Drop: <span id="temp-drop">--</span></p>
+                <p>Routine Recommendation: <strong id="routine-rec">--</strong></p>
+            </div>
+        </section>
+
+        <section class="module-card">
+            <h2>🧘 Flexibility</h2>
+            <div class="data-readout">
+                <p>Barometric Pressure: <span id="pressure">--</span></p>
+                <p>Resistance Rating: <strong id="flex-rating">--</strong></p>
+                <p>Conditioning Focus: <span id="flex-focus">--</span></p>
+            </div>
+        </section>
+
+        <section class="module-card">
+            <h2>💧 Lymphatic Index</h2>
+            <div class="data-readout">
+                <p>Pressure Shift: <span id="pressure-shift">--</span></p>
+                <p>Puffiness Probability: <strong id="puffiness-prob">--</strong></p>
+            </div>
+        </section>
+
+        <section class="module-card">
+            <h2>🧠 Somatic Reset</h2>
+            <div class="data-readout">
+                <p>Weather Tension Marker: <span id="tension-marker">--</span></p>
+                <p>Protocol: <strong id="somatic-protocol">--</strong></p>
+            </div>
+        </section>
+
+        <section class="module-card">
+            <h2>🎴 Oracle</h2>
+            <div class="data-readout">
+                <p>Lunar Phase: <span id="lunar-phase">--</span></p>
+                <p>Alignment: <strong id="oracle-alignment">--</strong></p>
+            </div>
+        </section>
+
+        <section class="module-card">
+            <h2>📻 Soundscapes</h2>
+            <div class="data-readout">
+                <p>External Audio: <span id="external-audio">--</span></p>
+                <p>Generated Track: <strong id="generated-track">--</strong></p>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
