@@ -17,14 +17,14 @@ async function fetchRealData() {
     const lon = -108.222;
 
     try {
-        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,surface_pressure&temperature_unit=fahrenheit&wind_speed_unit=mph`);
+        // UPDATED API URL: Now explicitly asking for dewpoint_2m directly from the source
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,dewpoint_2m,wind_speed_10m,surface_pressure&temperature_unit=fahrenheit&wind_speed_unit=mph`);
         const data = await response.json();
         const current = data.current;
 
-        // 1. Calculate Dew Point
-        const tempF = current.temperature_2m;
+        // 1. Get exact Dew Point and Humidity directly from API
+        const dewPoint = current.dewpoint_2m;
         const humidity = current.relative_humidity_2m;
-        const dewPoint = tempF - ((100 - humidity) * 9/25);
 
         // Update Skincare UI
         document.getElementById('live-dew').innerText = `${dewPoint.toFixed(1)}°F`;
