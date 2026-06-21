@@ -9,7 +9,7 @@ body {
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    background-color: #ffccf2; /* Cute pink fallback */
+    background-color: #ffccf2;
     font-family: 'Verdana', 'Tahoma', sans-serif;
     color: #553344;
     padding: 20px;
@@ -67,12 +67,12 @@ body {
 }
 
 .tab-content {
-    display: none; /* Hides pages by default */
+    display: none; 
     animation: fadeIn 0.3s ease-in-out;
 }
 
 .tab-content.active {
-    display: block; /* Shows active page */
+    display: block; 
 }
 
 .tab-content h2 {
