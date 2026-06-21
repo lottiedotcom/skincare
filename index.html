@@ -3,91 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wellness & Atmospheric Dashboard</title>
+    <title>Wellness Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="app-header">
-        <h1>Atmospheric Wellness Monitor</h1>
-        <div id="timestamp" class="timestamp"></div>
+
+    <header class="top-header">
+        <h1>✨ Daily Wellness & Aura ✨</h1>
+        <nav class="tab-container">
+            <button class="tab-btn active" onclick="openTab('skincare')">🧴 Skincare</button>
+            <button class="tab-btn" onclick="openTab('flexibility')">🧘 Flexibility</button>
+            <button class="tab-btn" onclick="openTab('oracle')">🎴 Oracle</button>
+        </nav>
     </header>
 
-    <main class="dashboard-grid">
-        <section class="module-card">
-            <h2>🛡️ Barrier Health</h2>
-            <div class="data-readout" id="barrier-data">
-                <p>Dew Point: <span id="dew-point">--</span></p>
-                <p>Wind Speed: <span id="wind-speed">--</span></p>
-                <p>Status: <strong id="barrier-status">--</strong></p>
+    <main class="content-area">
+        
+        <section id="skincare" class="tab-content active">
+            <h2>🌸 Skincare & Barrier Health</h2>
+            <div class="bubbly-box">
+                <h3>Today's Atmosphere</h3>
+                <p>Dew Point: <strong>45°F</strong> | Wind: <strong>15 mph</strong></p>
+                <p class="highlight-text">Action: Occlusive Day! Skip exfoliants, grab the heavy ceramides.</p>
+            </div>
+
+            <div class="bubbly-box">
+                <h3>Log Your Skin</h3>
+                <input type="text" id="skin-feel" placeholder="How does your skin feel today? (e.g., tight, oily, clear)">
+                <input type="text" id="skin-products" placeholder="What products did you use?">
+                <button class="action-btn" onclick="logData('skin')">Log Entry</button>
+                <ul id="skin-log-list" class="log-list"></ul>
             </div>
         </section>
 
-        <section class="module-card">
-            <h2>🧴 Sebum & Congestion</h2>
-            <div class="data-readout">
-                <p>Temp/Humidity Index: <span id="heat-index">--</span></p>
-                <p>Air Quality (AQI): <span id="aqi-level">--</span></p>
-                <p>Forecast: <strong id="sebum-forecast">--</strong></p>
+        <section id="flexibility" class="tab-content">
+            <h2>🎀 Active Flexibility</h2>
+            <div class="bubbly-box">
+                <h3>Atmospheric Resistance</h3>
+                <p>Barometric Pressure: <strong>29.7 inHg (Falling)</strong></p>
+                <p class="highlight-text">Focus: High resistance today. Do an extended heat warm-up before deep oversplits.</p>
+            </div>
+
+            <div class="bubbly-box">
+                <h3>Log Your Session</h3>
+                <input type="text" id="flex-focus" placeholder="What did you stretch? (e.g., backbends, oversplits)">
+                <input type="text" id="flex-notes" placeholder="Any tension or breakthroughs?">
+                <button class="action-btn" onclick="logData('flex')">Log Entry</button>
+                <ul id="flex-log-list" class="log-list"></ul>
             </div>
         </section>
 
-        <section class="module-card">
-            <h2>🌤️ Antioxidant Shield</h2>
-            <div class="data-readout">
-                <p>Peak UV: <span id="uv-index">--</span></p>
-                <p>Ozone/Allergen: <span id="allergen-level">--</span></p>
-                <p>Action: <strong id="antioxidant-action">--</strong></p>
+        <section id="oracle" class="tab-content">
+            <h2>🔮 Digital Oracle</h2>
+            <div class="bubbly-box">
+                <h3>Current Lunar Phase: Waning Crescent</h3>
+                <p>Draw a card to set your daily intention based on the atmospheric alignment.</p>
+                
+                <div class="oracle-draw-area">
+                    <button class="action-btn draw-btn" onclick="drawCard()">Draw a Card</button>
+                    <div id="card-result" class="card-display">
+                        <p id="card-name">--</p>
+                        <p id="card-meaning">Waiting for draw...</p>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section class="module-card">
-            <h2>🔄 Skin Cycling</h2>
-            <div class="data-readout">
-                <p>Night Temp Drop: <span id="temp-drop">--</span></p>
-                <p>Routine Recommendation: <strong id="routine-rec">--</strong></p>
-            </div>
-        </section>
-
-        <section class="module-card">
-            <h2>🧘 Flexibility</h2>
-            <div class="data-readout">
-                <p>Barometric Pressure: <span id="pressure">--</span></p>
-                <p>Resistance Rating: <strong id="flex-rating">--</strong></p>
-                <p>Conditioning Focus: <span id="flex-focus">--</span></p>
-            </div>
-        </section>
-
-        <section class="module-card">
-            <h2>💧 Lymphatic Index</h2>
-            <div class="data-readout">
-                <p>Pressure Shift: <span id="pressure-shift">--</span></p>
-                <p>Puffiness Probability: <strong id="puffiness-prob">--</strong></p>
-            </div>
-        </section>
-
-        <section class="module-card">
-            <h2>🧠 Somatic Reset</h2>
-            <div class="data-readout">
-                <p>Weather Tension Marker: <span id="tension-marker">--</span></p>
-                <p>Protocol: <strong id="somatic-protocol">--</strong></p>
-            </div>
-        </section>
-
-        <section class="module-card">
-            <h2>🎴 Oracle</h2>
-            <div class="data-readout">
-                <p>Lunar Phase: <span id="lunar-phase">--</span></p>
-                <p>Alignment: <strong id="oracle-alignment">--</strong></p>
-            </div>
-        </section>
-
-        <section class="module-card">
-            <h2>📻 Soundscapes</h2>
-            <div class="data-readout">
-                <p>External Audio: <span id="external-audio">--</span></p>
-                <p>Generated Track: <strong id="generated-track">--</strong></p>
-            </div>
-        </section>
     </main>
 
     <script src="app.js"></script>
