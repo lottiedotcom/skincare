@@ -4,38 +4,27 @@ body {
     background-image: url('background20.jpg'); background-size: cover;
     background-position: center; background-attachment: fixed;
     background-color: #ffccf2; font-family: 'Verdana', 'Tahoma', sans-serif;
-    color: #553344; padding: 0px 20px 40px 20px; 
+    color: #553344; padding: 20px; 
 }
 
-/* STICKY TOP HEADER & NAV FIX */
-.top-header { 
-    text-align: center; 
-    margin-bottom: 20px; 
-    position: sticky; 
-    top: 0; 
-    z-index: 10000; 
-    background: rgba(255, 204, 242, 0.95); 
-    padding: 15px 0 10px 0; 
-    border-bottom: 3px solid #ff99cc; 
-    border-radius: 0 0 25px 25px; 
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.1); 
-    margin-left: -20px; 
-    margin-right: -20px;
-}
-.top-header h1 { font-size: 1.8rem; color: #fff; text-shadow: 2px 2px 4px rgba(255, 102, 178, 0.8); margin-bottom: 10px; }
+/* TOP HEADER & NAVIGATION TABS */
+.top-header { text-align: center; margin-bottom: 20px; }
+.top-header h1 { font-size: 2rem; color: #fff; text-shadow: 2px 2px 4px rgba(255, 102, 178, 0.8); margin-bottom: 15px; }
 
-.main-nav {
-    display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; padding: 0 10px;
+.tab-container { 
+    display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; 
+    margin-bottom: 20px;
 }
-.nav-btn {
-    background: #fff; border: 2px solid #ff99cc; border-radius: 15px;
-    padding: 8px 10px; font-size: 0.8rem; font-weight: bold; color: #cc0066;
-    cursor: pointer; transition: all 0.1s; flex: 1; min-width: 55px; text-align: center;
+.tab-btn {
+    background: linear-gradient(180deg, #ffffff 0%, #ffe6f2 100%);
+    border: 3px solid #ff99cc; border-radius: 20px; padding: 10px 15px;
+    font-size: 0.95rem; font-weight: bold; color: #cc0066; cursor: pointer;
+    box-shadow: 0px 4px 0px #ff99cc; transition: all 0.1s;
 }
-.nav-btn:active { transform: translateY(2px); }
-.nav-btn.active { background: #ff66b2; color: white; border-color: #fff; box-shadow: inset 0px 2px 5px rgba(0,0,0,0.2);}
+.tab-btn:active { transform: translateY(4px); box-shadow: 0px 0px 0px #ff99cc; }
+.tab-btn.active { background: linear-gradient(180deg, #ff99cc 0%, #ff66b2 100%); color: white; border-color: #fff; }
 
-.content-area { max-width: 600px; margin: 0 auto; padding-top: 10px;}
+.content-area { max-width: 600px; margin: 0 auto; }
 .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
 .tab-content.active { display: block; }
 .tab-content h2 { color: #fff; text-shadow: 1px 1px 3px #ff66b2; margin-bottom: 15px; text-align: center; }
