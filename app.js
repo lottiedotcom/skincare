@@ -33,7 +33,6 @@ const bodyZones = [
     { id: 27, name: 'L Hamstring', x: 62, y: 70 }, { id: 28, name: 'R Hamstring', x: 78, y: 70 }, { id: 29, name: 'L Calf', x: 62, y: 85 }, { id: 30, name: 'R Calf', x: 78, y: 85 }
 ];
 
-// Instantly run functions on load. No welcome screen.
 window.onload = () => {
     loadData(); fetchRealData(); populateSelects();
     renderTodayRoutine(); renderSettingsRoutine(); renderProducts(); renderJournals(); renderVault(); checkWeeklyAura(); checkSkillLocks();
@@ -41,8 +40,8 @@ window.onload = () => {
     let lastCompile = localStorage.getItem('lastCompileDate');
     if(lastCompile === new Date().toLocaleDateString()) {
         hasCompiledToday = true;
-        document.getElementById('journal-warning').style.display = 'block';
-        document.getElementById('journal-warning').innerText = "✅ Journal already compiled for today.";
+        let warnEl = document.getElementById('journal-warning');
+        if(warnEl) { warnEl.style.display = 'block'; warnEl.innerText = "✅ Journal already compiled for today."; }
     }
 };
 
@@ -275,12 +274,6 @@ function generateLymphatic() {
 }
 
 // SMART COACH & VAULT
-function calculateFascia() {
-    let sleep = document.getElementById('sleep-hours').value; let water = document.getElementById('water-oz').value;
-    let res = document.getElementById('fascia-result'); res.style.display = 'block';
-    if(sleep < 5 && liveData.pressure < 29.8) res.innerText = "🚨 HIGH STIFFNESS. Extend warm-up."; else res.innerText = "✨ Fascia is primed!";
-}
-
 function addToVault() {
     let title = document.getElementById('vault-title').value; let url = document.getElementById('vault-url').value;
     let duration = document.getElementById('vault-duration').value; let focus = document.getElementById('vault-focus').value;
@@ -333,4 +326,13 @@ function checkSkillLocks() {
 
 function loadSkillLocks() {
     let skills = JSON.parse(localStorage.getItem('skillLocks')) || [];
-    skills.forEach(id => { let el = document.getElementById(id); if(el) el.checked =
+    skills.forEach(id => { let el = document.getElementById(id); if(el) el.checked = true; });
+    checkSkillLocks(); 
+}
+
+// FULL 50 CARD ORACLE DECK
+const deck = [
+    { suit: "Lunar", name: "🌑 The Void Moon", meaning: "Rest completely. No active holds." },
+    { suit: "Lunar", name: "🌓 The Waxing Pull", meaning: "Building energy. Prep and hydrate." },
+    { suit: "Lunar", name: "🌕 The Full Pull", meaning: "Maximum intensity. Push your peaks." },
+    { suit: "Lunar", name: "🌗 The Waning Crescent", meaning: 
