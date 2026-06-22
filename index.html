@@ -10,10 +10,8 @@
 
     <div id="loading-screen">
         <div class="loader-box">
-            <h1 class="blink">✨ SYSTEM INITIALIZING ✨</h1>
-            <p>Loading Aura Modules...</p>
-            <div class="progress-bar"><div class="progress-fill"></div></div>
-            <button class="action-btn" id="enter-btn" onclick="enterApp()" style="display: none; margin-top: 20px; font-size: 1.2rem;">ENTER</button>
+            <h1 style="color: #cc0066; text-shadow: 1px 1px 3px #ffb3d9; margin-bottom: 25px; font-size: 2.5rem;">✨ Welcome! ✨</h1>
+            <button class="action-btn" onclick="enterApp()" style="font-size: 1.2rem; padding: 15px;">ENTER</button>
         </div>
     </div>
 
@@ -260,7 +258,7 @@
             <h2>📝 Auto-Synthesis Journal</h2>
             <div class="bubbly-box">
                 <h3>The Vacuum Compiler</h3>
-                <p class="small-text">Type your brain dump, then hit Compile. The system will grab your staged Face Map, Body Map, checked Routine, Weather, and Oracle card, fusing it into one daily receipt. (Logs can only be compiled once per day to prevent spam).</p>
+                <p class="small-text">Type your brain dump, then hit Compile. The system will grab your staged Face Map, Body Map, checked Routine, Weather, and Oracle card, fusing it into one daily receipt. (Logs can only be compiled once per day).</p>
                 <textarea id="brain-dump" rows="4" placeholder="How did today feel?"></textarea>
                 <button class="action-btn" onclick="compileJournal()" style="width:100%; background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Compile Today's Master Journal</button>
                 <p id="journal-warning" style="color: red; font-size: 0.85rem; font-weight: bold; margin-top: 10px; display: none;"></p>
@@ -331,3 +329,7 @@
         <button class="nav-btn" onclick="openTab('flexibility')">🧘 Flex</button>
         <button class="nav-btn" onclick="openTab('oracle-aura')">🔮 Aura</button>
         <button class="nav-btn" onclick="openTab('logs')">📝 Logs</button>
+        <button class="nav-btn" onclick="openTab('settings')">⚙️ Set</button>
+    </nav>
+
+    <s
