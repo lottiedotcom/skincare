@@ -69,12 +69,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 
 .tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .check-tag {
-    background: #e6ccff; color: #4b0082; padding: 8px 12px;
-    border-radius: 15px; font-size: 0.85rem; cursor: pointer;
-    border: 1px solid #cc99ff; font-weight: bold; display: flex; align-items: center;
+    background: #e6ccff; color: #4b0082; padding: 8px 12px; border-radius: 15px; font-size: 0.85rem; cursor: pointer;
+    border: 1px solid #cc99ff; font-weight: bold; display: flex; align-items: center; justify-content: center;
 }
 .routine-checklist { display: flex; flex-direction: column; gap: 8px; }
-.routine-checklist .check-tag { background: #ffe6f2; border-color: #ffb3d9; color: #cc0066; font-size: 1rem; }
+.routine-checklist .check-tag { background: #ffe6f2; border-color: #ffb3d9; color: #cc0066; font-size: 1rem; justify-content: flex-start;}
 
 .action-btn {
     background: #ff99cc; color: white; border: none; padding: 10px 20px;
@@ -83,20 +82,51 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 }
 .action-btn:active { transform: translateY(3px); box-shadow: 0px 0px 0px #cc0066; }
 
-/* PRODUCT CARD */
-.product-card {
-    background: #fff; border: 2px solid #ffb3d9; border-radius: 15px; padding: 15px;
-    display: flex; flex-direction: column; gap: 5px; font-size: 0.9rem;
+/* MAPS & NUMBERED DOTS */
+.map-container {
+    position: relative; display: block; margin: 0 auto 15px auto;
+    width: 100%; max-width: 500px; background: #fff; border: 2px dashed #ffb3d9; 
+    border-radius: 15px; overflow: hidden;
 }
-.prod-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; color: #cc0066; border-bottom: 1px dashed #ffb3d9; padding-bottom: 5px; margin-bottom: 5px;}
-.prod-tag { display: inline-block; background: #e6ccff; color: #4b0082; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; margin-right: 5px;}
-.prod-del { background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 2px 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem;}
+.interactive-map { width: 100%; display: block; pointer-events: none;}
+.target-dot {
+    position: absolute; width: 20px; height: 20px;
+    background: rgba(255, 255, 255, 0.9); border: 2px solid #ff66b2;
+    border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 0.65rem; font-weight: bold; color: #cc0066;
+    transition: all 0.2s; box-shadow: 0px 0px 5px rgba(255, 102, 178, 0.8); z-index: 10;
+}
+.target-dot:hover { transform: translate(-50%, -50%) scale(1.3); background: #ff99cc; color: #fff;}
+
+/* PASTEL PRODUCT GRID */
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.product-card {
+    background: #fff; border: 2px dashed #ffb3d9; border-radius: 15px; padding: 12px;
+    display: flex; flex-direction: column; gap: 5px; font-size: 0.8rem; text-align: center;
+    box-shadow: 2px 2px 5px rgba(255, 102, 178, 0.1);
+}
+.prod-header { font-weight: bold; font-size: 1rem; color: #cc0066; margin-bottom: 5px;}
+.prod-tag { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold;}
+.tag-serum { background: #ffe6e6; color: #cc0000; }
+.tag-moisturizer { background: #e6f2ff; color: #0066cc; }
+.tag-cleanser { background: #e6ffe6; color: #008000; }
+.tag-spf { background: #fff2e6; color: #cc6600; }
+.tag-mask { background: #f2e6ff; color: #6600cc; }
+.tag-active { background: #ffe6f9; color: #cc0099; }
+.prod-del { background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 4px; font-weight: bold; cursor: pointer; margin-top: 5px;}
+
+/* SKILL TREE */
+.skill-tier { background: #fff; border: 2px solid #ff99cc; border-radius: 15px; padding: 15px; margin-bottom: 10px; transition: all 0.3s ease; }
+.skill-tier.locked { opacity: 0.5; filter: grayscale(100%); pointer-events: none; border-style: dashed; }
+.skill-tier h4 { color: #cc0066; margin-bottom: 5px; }
 
 .log-list { list-style-type: none; margin-top: 15px; padding:0;}
 .log-list li { background: #fff; border: 2px solid #ffb3d9; padding: 15px; border-radius: 15px; margin-bottom: 12px; font-size: 0.9rem; }
 .journal-header { color: #cc0066; font-weight: bold; border-bottom: 1px dashed #ffb3d9; padding-bottom: 5px; margin-bottom: 8px; display: block; }
-.journal-data { font-size: 0.8rem; color: #555; background: #f9f9f9; padding: 8px; border-radius: 8px; margin-bottom: 8px;}
+.journal-data { font-size: 0.8rem; color: #555; background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ff99cc;}
 
 .card-display { background: #ffe6f2; border: 2px dashed #ff99cc; border-radius: 15px; padding: 20px; text-align: center; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+               
