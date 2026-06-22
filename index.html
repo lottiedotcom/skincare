@@ -58,15 +58,26 @@
 
             <div class="bubbly-box">
                 <h3>2D Face Map (Acne Tracker)</h3>
-                <p class="small-text">Click the numbered zones to log specific breakout types.</p>
-                <div class="map-container" id="face-map-container">
-                    <img src="Face2d.jpg" alt="Face Map" class="interactive-map">
-                    </div>
-                <button class="action-btn" onclick="saveMapToJournal('face')" style="background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Save Map to Journal</button>
+                <p class="small-text">Reference the numbered zones on the map, then select the zone and acne type below to log it.</p>
+                <img src="Face2d.jpg" alt="Face Map" style="width: 100%; border-radius: 15px; margin-bottom: 15px; border: 2px dashed #ffb3d9;">
+                
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <select id="face-zone-select" style="flex: 2; margin: 0;"></select>
+                    <select id="face-acne-type" style="flex: 1; margin: 0;">
+                        <option value="Cystic">Cystic</option>
+                        <option value="Whitehead">Whitehead</option>
+                        <option value="Blackhead">Blackhead</option>
+                        <option value="Pustule">Pustule</option>
+                        <option value="Papule">Papule</option>
+                    </select>
+                    <button class="action-btn" onclick="logFaceZone()" style="margin: 0; flex: 1;">Log</button>
+                </div>
+                <ul id="face-log-list" class="log-list"></ul>
+                <button class="action-btn" onclick="saveMapToJournal('face')" style="background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Save Face Data to Journal</button>
             </div>
 
             <div class="bubbly-box">
-                <h3>🧴 Notion-Style Product Database</h3>
+                <h3>🧴 Product Tracking Diary</h3>
                 <p class="small-text">Log new products below to track PAO and repurchases.</p>
                 <input type="text" id="prod-name" placeholder="Product Name (e.g., Glycolic Acid 5%)">
                 <div style="display: flex; gap: 8px;">
@@ -91,9 +102,7 @@
                 </div>
                 
                 <button class="action-btn" onclick="addProduct()">+ Add to Database</button>
-                
-                <div id="product-database-list" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
-                    </div>
+                <div id="product-database-list" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
             
             <div class="bubbly-box">
@@ -113,21 +122,75 @@
             </div>
 
             <div class="bubbly-box">
-                <h3>2D Body Map (Nerve vs. Muscle)</h3>
-                <p class="small-text">Click numbered zones to log tension. Blue = Muscle, Yellow = Nerve.</p>
-                <div class="map-container" id="body-map-container">
-                    <img src="body2d.jpg" alt="Body Map" class="interactive-map">
+                <h3>2D Body Map (Tension Tracker)</h3>
+                <p class="small-text">Reference the map, select the specific muscle zone, and log the tension type.</p>
+                <img src="body2d.jpg" alt="Body Map" style="width: 100%; border-radius: 15px; margin-bottom: 15px; border: 2px dashed #ffb3d9;">
+                
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <select id="body-zone-select" style="flex: 2; margin: 0;"></select>
+                    <select id="body-tension-type" style="flex: 1; margin: 0;">
+                        <option value="Muscle (Dull)">Muscle (Dull)</option>
+                        <option value="Nerve (Sharp)">Nerve (Sharp/Tingly)</option>
+                    </select>
+                    <button class="action-btn" onclick="logBodyZone()" style="margin: 0; flex: 1;">Log</button>
                 </div>
-                <button class="action-btn" onclick="saveMapToJournal('body')" style="background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Save Map to Journal</button>
+                <ul id="body-log-list" class="log-list"></ul>
+                <button class="action-btn" onclick="saveMapToJournal('body')" style="background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Save Body Data to Journal</button>
             </div>
 
             <div class="bubbly-box">
                 <h3>Fascia Glide & Preparation</h3>
+                <p class="small-text">Input this data BEFORE asking the Smart Suggester for a routine!</p>
                 <input type="number" id="sleep-hours" placeholder="Hours slept just now?">
                 <input type="number" id="water-oz" placeholder="Ounces of water drank today?">
                 <button class="action-btn" onclick="calculateFascia()">Calculate Fascia State</button>
                 <p id="fascia-result" class="highlight-text" style="display:none;"></p>
             </div>
+
+            <div class="bubbly-box">
+                <h3>📼 The Video Vault & Smart Suggester</h3>
+                <p class="small-text">Log your routines here. The Suggester will read your sleep and barometric pressure to pick the safest routine for today.</p>
+                
+                <input type="text" id="vault-title" placeholder="Routine Name (e.g., 45m Restorative)">
+                <input type="text" id="vault-url" placeholder="Video Link (Optional)">
+                <div style="display: flex; gap: 8px;">
+                    <input type="number" id="vault-duration" placeholder="Mins">
+                    <select id="vault-focus">
+                        <option value="Active Oversplits">Active Oversplits</option>
+                        <option value="Restorative Decompression">Restorative Decompression</option>
+                        <option value="Deep Backbends">Deep Backbends</option>
+                        <option value="Mobility & Prep">Mobility & Prep</option>
+                    </select>
+                </div>
+                <button class="action-btn" onclick="addToVault()">+ Save to Vault</button>
+                
+                <div style="margin-top: 15px; padding: 15px; background: #ffe6f2; border: 2px dashed #ffb3d9; border-radius: 15px;">
+                    <button class="action-btn" onclick="smartSuggest()" style="background:#cc0066; box-shadow:0px 3px 0px #880044; width:100%; margin-top:0;">🔮 What should I do today?</button>
+                    <p id="vault-suggestion" class="highlight-text" style="display:none;"></p>
+                </div>
+                
+                <ul id="vault-list" class="log-list"></ul>
+            </div>
+
+            <div class="bubbly-box">
+                <h3>🌳 Contortion Skill Tree</h3>
+                <p class="small-text">Master the micro-prerequisites before pushing the peak poses.</p>
+                
+                <div class="skill-tree-node" style="margin-bottom: 15px; border-bottom: 1px dashed #ffb3d9; padding-bottom: 10px;">
+                    <h4 style="color: #cc0066;">🎯 Chest Stand</h4>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Cervical Spine Mobility" onchange="saveSkills()"> Cervical Spine Mobility</label>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Thoracic Extension" onchange="saveSkills()"> Thoracic Extension</label>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Active Glute Engagement" onchange="saveSkills()"> Active Glute Engagement</label>
+                </div>
+                
+                <div class="skill-tree-node">
+                    <h4 style="color: #cc0066;">🎯 Needle Scale</h4>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Active Shoulder Flexion" onchange="saveSkills()"> Active Shoulder Flexion</label>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Psoas/Hip Flexor Length" onchange="saveSkills()"> Psoas/Hip Flexor Length</label>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Standing Leg Stability" onchange="saveSkills()"> Standing Leg Stability</label>
+                </div>
+            </div>
+
         </section>
 
         <section id="oracle-aura" class="tab-content">
@@ -217,8 +280,7 @@
                     <input type="text" id="new-routine-step" placeholder="e.g., Snail Mucin">
                     <button class="action-btn" onclick="addRoutineStep()" style="margin-top:0;">Add</button>
                 </div>
-                <ul id="settings-routine-list" class="log-list" style="margin-top: 15px;">
-                    </ul>
+                <ul id="settings-routine-list" class="log-list" style="margin-top: 15px;"></ul>
             </div>
         </section>
 
