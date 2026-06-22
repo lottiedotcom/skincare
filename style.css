@@ -24,13 +24,13 @@ body {
 }
 
 .tab-container {
-    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+    display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
 }
 
 .tab-btn {
     background: linear-gradient(180deg, #ffffff 0%, #ffe6f2 100%);
     border: 3px solid #ff99cc; border-radius: 20px;
-    padding: 10px 15px; font-size: 1rem; font-weight: bold;
+    padding: 10px 15px; font-size: 0.95rem; font-weight: bold;
     color: #cc0066; cursor: pointer; box-shadow: 0px 4px 0px #ff99cc;
     transition: all 0.1s;
 }
@@ -62,18 +62,17 @@ body {
     border-radius: 10px; margin-top: 10px; font-weight: bold; color: #cc0066;
 }
 
-.small-text { font-size: 0.85rem; color: #885566; margin-bottom: 10px; }
+.small-text { font-size: 0.85rem; color: #885566; margin-bottom: 10px; display: block; }
 
 /* Inputs, Selects & Buttons */
-input[type="text"], select, textarea {
-    width: 100%; padding: 12px; margin: 8px 0;
+input[type="text"], input[type="number"], select, textarea {
+    width: 100%; padding: 12px; margin: 6px 0 12px 0;
     border: 2px solid #ffb3d9; border-radius: 15px;
     font-family: inherit; font-size: 0.95rem;
     background: rgba(255, 255, 255, 0.9);
 }
 
 textarea { resize: vertical; }
-
 input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2; background: #fff; }
 
 .action-btn {
@@ -85,11 +84,27 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 
 .action-btn:active { transform: translateY(3px); box-shadow: 0px 0px 0px #cc0066; }
 
+/* Scanner Result Box */
+.scanner-box {
+    margin-top: 15px; padding: 15px; border-radius: 15px; font-weight: bold; font-size: 0.9rem;
+}
+.scan-danger { background: #ffcccc; color: #cc0000; border: 2px solid #ff6666; }
+.scan-warning { background: #ffeecc; color: #cc6600; border: 2px solid #ffcc66; }
+.scan-safe { background: #ccffcc; color: #008800; border: 2px solid #66cc66; }
+
 /* Timer Display */
 #timer-display {
     font-size: 2.5rem; font-weight: bold; color: #cc0066;
     text-align: center; margin-top: 15px; text-shadow: 1px 1px 2px #ffb3d9;
 }
+
+/* Master Logs */
+.log-list { list-style-type: none; margin-top: 15px; }
+.log-list li {
+    background: #fff; border: 2px solid #ffb3d9;
+    padding: 15px; border-radius: 15px; margin-bottom: 12px; font-size: 0.9rem;
+}
+.log-date { color: #cc0066; font-weight: bold; border-bottom: 1px dashed #ffb3d9; padding-bottom: 5px; margin-bottom: 5px; display: block; }
 
 /* Aura Board - 99x99 Square Grid */
 .stamp-container {
