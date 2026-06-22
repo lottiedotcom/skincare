@@ -29,18 +29,9 @@
             <div class="bubbly-box">
                 <h3>🦠 Clinical Environmental Matrix</h3>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <div class="data-pod">
-                        <p class="small-text">Dew Point</p>
-                        <p><strong id="live-dew">--</strong></p>
-                    </div>
-                    <div class="data-pod">
-                        <p class="small-text">UV Index</p>
-                        <p><strong id="live-uv">--</strong></p>
-                    </div>
-                    <div class="data-pod">
-                        <p class="small-text">AQI (PM2.5)</p>
-                        <p><strong id="live-aqi">--</strong></p>
-                    </div>
+                    <div class="data-pod"><p class="small-text">Dew Point</p><p><strong id="live-dew">--</strong></p></div>
+                    <div class="data-pod"><p class="small-text">UV Index</p><p><strong id="live-uv">--</strong></p></div>
+                    <div class="data-pod"><p class="small-text">AQI</p><p><strong id="live-aqi">--</strong></p></div>
                 </div>
                 <div id="bio-impact-warnings" style="margin-top: 10px;">
                     <p class="highlight-text" id="action-dew">Analyzing atmosphere...</p>
@@ -50,17 +41,18 @@
             </div>
 
             <div class="bubbly-box">
-                <h3>✅ Custom Daily Routine</h3>
-                <p class="small-text">Check off your routine steps. (Edit these in Settings!)</p>
+                <h3 id="today-routine-header">✅ Today's Custom Routine</h3>
+                <p class="small-text">Your specific checklist for today. (Edit in Settings!)</p>
                 <div class="routine-checklist" id="custom-routine-list">
                     </div>
             </div>
 
             <div class="bubbly-box">
                 <h3>2D Face Map (Acne Tracker)</h3>
-                <p class="small-text">Reference the numbered zones on the map, then select the zone and acne type below to log it.</p>
-                <img src="Face2d.jpg" alt="Face Map" style="width: 100%; border-radius: 15px; margin-bottom: 15px; border: 2px dashed #ffb3d9;">
-                
+                <p class="small-text">Reference the numbered zones on the map, then select the zone and acne type below.</p>
+                <div class="map-container" id="face-map-container">
+                    <img src="Face2d.jpg" alt="Face Map" class="interactive-map">
+                </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <select id="face-zone-select" style="flex: 2; margin: 0;"></select>
                     <select id="face-acne-type" style="flex: 1; margin: 0;">
@@ -70,17 +62,16 @@
                         <option value="Pustule">Pustule</option>
                         <option value="Papule">Papule</option>
                     </select>
-                    <button class="action-btn" onclick="logFaceZone()" style="margin: 0; flex: 1;">Log</button>
+                    <button class="action-btn" onclick="logFaceZone()" style="margin: 0; flex: 1;">Stage</button>
                 </div>
                 <ul id="face-log-list" class="log-list"></ul>
-                <button class="action-btn" onclick="saveMapToJournal('face')" style="background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Save Face Data to Journal</button>
             </div>
 
             <div class="bubbly-box">
                 <h3>🧴 Product Tracking Diary</h3>
-                <p class="small-text">Log new products below to track PAO and repurchases.</p>
-                <input type="text" id="prod-name" placeholder="Product Name (e.g., Glycolic Acid 5%)">
-                <div style="display: flex; gap: 8px;">
+                <p class="small-text">Track your arsenal, PAO, and repurchases.</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <input type="text" id="prod-name" placeholder="Product Name" style="grid-column: span 2;">
                     <input type="text" id="prod-brand" placeholder="Brand">
                     <select id="prod-type">
                         <option value="Serum">Serum</option>
@@ -88,27 +79,20 @@
                         <option value="Moisturizer">Moisturizer</option>
                         <option value="Active">Active/Treatment</option>
                         <option value="SPF">SPF</option>
+                        <option value="Mask">Mask</option>
                     </select>
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <input type="number" id="prod-pao" placeholder="PAO (Months open)">
+                    <input type="number" id="prod-pao" placeholder="PAO (Months)">
                     <input type="text" id="prod-price" placeholder="Price (e.g., $15.00)">
+                    <input type="text" id="prod-url" placeholder="Product URL" style="grid-column: span 2;">
                 </div>
-                <input type="text" id="prod-url" placeholder="Product URL (e.g., amazon.com/...)">
                 
-                <div style="display: flex; gap: 15px; margin-top: 10px; align-items: center;">
-                    <label class="check-tag"><input type="checkbox" id="prod-wishlist"> Wishlist Item</label>
+                <div style="display: flex; gap: 15px; margin-top: 10px;">
+                    <label class="check-tag"><input type="checkbox" id="prod-wishlist"> Wishlist</label>
                     <label class="check-tag" style="background:#ffe6f2; color:#cc0066;"><input type="checkbox" id="prod-fav"> ❤️ Favorite</label>
                 </div>
+                <button class="action-btn" onclick="addProduct()">+ Add to Diary</button>
                 
-                <button class="action-btn" onclick="addProduct()">+ Add to Database</button>
-                <div id="product-database-list" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;"></div>
-            </div>
-            
-            <div class="bubbly-box">
-                <h3>Hygiene Trackers</h3>
-                <p>Last Pillowcase Change: <strong id="pillowcase-date">Not Logged</strong></p>
-                <button class="action-btn" onclick="logHygiene('pillow')">I Changed My Pillowcase Today</button>
+                <div id="product-database-grid" class="product-grid"></div>
             </div>
         </section>
 
@@ -123,74 +107,130 @@
 
             <div class="bubbly-box">
                 <h3>2D Body Map (Tension Tracker)</h3>
-                <p class="small-text">Reference the map, select the specific muscle zone, and log the tension type.</p>
-                <img src="body2d.jpg" alt="Body Map" style="width: 100%; border-radius: 15px; margin-bottom: 15px; border: 2px dashed #ffb3d9;">
-                
+                <p class="small-text">Select the specific muscle zone and log the tension type.</p>
+                <div class="map-container" id="body-map-container">
+                    <img src="body2d.jpg" alt="Body Map" class="interactive-map">
+                </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <select id="body-zone-select" style="flex: 2; margin: 0;"></select>
-                    <select id="body-tension-type" style="flex: 1; margin: 0;">
-                        <option value="Muscle (Dull)">Muscle (Dull)</option>
-                        <option value="Nerve (Sharp)">Nerve (Sharp/Tingly)</option>
+                    <select id="body-tension-type" style="flex: 2; margin: 0;">
+                        <option value="DOMS (Soreness)">DOMS (Soreness)</option>
+                        <option value="Muscle (Dull/Pull)">Muscle (Dull/Pull)</option>
+                        <option value="Fascia (Tight/Stuck)">Fascia (Tight/Stuck)</option>
+                        <option value="Joint (Pinching/Blocked)">Joint (Pinching/Blocked)</option>
+                        <option value="Nerve (Sharp/Tingly)">Nerve (Sharp/Tingly)</option>
                     </select>
-                    <button class="action-btn" onclick="logBodyZone()" style="margin: 0; flex: 1;">Log</button>
+                    <button class="action-btn" onclick="logBodyZone()" style="margin: 0; flex: 1;">Stage</button>
                 </div>
                 <ul id="body-log-list" class="log-list"></ul>
-                <button class="action-btn" onclick="saveMapToJournal('body')" style="background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Save Body Data to Journal</button>
+            </div>
+
+            <div class="bubbly-box" style="background: #e6e6ff; border-color: #ccccff;">
+                <h3 style="color: #4b0082; border-bottom-color: #ccccff;">🎓 Contortion Academy</h3>
+                <p class="small-text">Enter the clinical research, skill tree, and goal tracker portal.</p>
+                <button class="action-btn" onclick="openTab('skill-tree-tab')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; width: 100%;">Enter Education & Skill Tree ➔</button>
             </div>
 
             <div class="bubbly-box">
-                <h3>Fascia Glide & Preparation</h3>
-                <p class="small-text">Input this data BEFORE asking the Smart Suggester for a routine!</p>
-                <input type="number" id="sleep-hours" placeholder="Hours slept just now?">
-                <input type="number" id="water-oz" placeholder="Ounces of water drank today?">
-                <button class="action-btn" onclick="calculateFascia()">Calculate Fascia State</button>
-                <p id="fascia-result" class="highlight-text" style="display:none;"></p>
+                <h3>📼 Video Vault & Smart Coach</h3>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <input type="number" id="sleep-hours" placeholder="Hours Slept" style="flex:1; margin:0;">
+                    <input type="number" id="water-oz" placeholder="Oz Water" style="flex:1; margin:0;">
+                </div>
+                <select id="focus-selector" onchange="document.getElementById('vault-suggestion').style.display='none';">
+                    <option value="General">General Training</option>
+                    <option value="Chest Stand">Chest Stand</option>
+                    <option value="Needle Scale">Needle Scale</option>
+                    <option value="Middle Splits">Middle Splits</option>
+                </select>
+                <button class="action-btn" onclick="smartSuggest()" style="background:#cc0066; width:100%;">🔮 Coach, what's safe today?</button>
+                <p id="vault-suggestion" class="highlight-text" style="display:none;"></p>
             </div>
 
             <div class="bubbly-box">
-                <h3>📼 The Video Vault & Smart Suggester</h3>
-                <p class="small-text">Log your routines here. The Suggester will read your sleep and barometric pressure to pick the safest routine for today.</p>
-                
-                <input type="text" id="vault-title" placeholder="Routine Name (e.g., 45m Restorative)">
-                <input type="text" id="vault-url" placeholder="Video Link (Optional)">
-                <div style="display: flex; gap: 8px;">
-                    <input type="number" id="vault-duration" placeholder="Mins">
-                    <select id="vault-focus">
-                        <option value="Active Oversplits">Active Oversplits</option>
-                        <option value="Restorative Decompression">Restorative Decompression</option>
-                        <option value="Deep Backbends">Deep Backbends</option>
-                        <option value="Mobility & Prep">Mobility & Prep</option>
-                    </select>
-                </div>
-                <button class="action-btn" onclick="addToVault()">+ Save to Vault</button>
-                
-                <div style="margin-top: 15px; padding: 15px; background: #ffe6f2; border: 2px dashed #ffb3d9; border-radius: 15px;">
-                    <button class="action-btn" onclick="smartSuggest()" style="background:#cc0066; box-shadow:0px 3px 0px #880044; width:100%; margin-top:0;">🔮 What should I do today?</button>
-                    <p id="vault-suggestion" class="highlight-text" style="display:none;"></p>
-                </div>
-                
-                <ul id="vault-list" class="log-list"></ul>
+                <details class="cute-details">
+                    <summary>➕ Add Routine to Vault</summary>
+                    <div class="details-content">
+                        <input type="text" id="vault-title" placeholder="Routine Name">
+                        <input type="text" id="vault-url" placeholder="Video Link (Optional)">
+                        <div style="display: flex; gap: 8px;">
+                            <input type="number" id="vault-duration" placeholder="Mins">
+                            <select id="vault-focus">
+                                <option value="Active Oversplits">Active Oversplits</option>
+                                <option value="Restorative Decompression">Restorative Decompression</option>
+                                <option value="Deep Backbends">Deep Backbends</option>
+                                <option value="Mobility & Prep">Mobility & Prep</option>
+                            </select>
+                        </div>
+                        <button class="action-btn" onclick="addToVault()">Save</button>
+                    </div>
+                </details>
+                <ul id="vault-list" class="log-list" style="margin-top:10px;"></ul>
+            </div>
+        </section>
+
+        <section id="skill-tree-tab" class="tab-content">
+            <h2>🎓 Education & Skill Tree</h2>
+            
+            <div class="bubbly-box" style="background:#fff9e6; border-color:#ffcc66;">
+                <h3 style="color:#cc8800; border-bottom-color:#ffcc66;">🧠 Science of Flexibility</h3>
+                <p class="small-text" style="color:#996600;">Research dictates that passive flexibility without active strength leads to joint subluxation. <strong>End-Range Strength</strong> is mandatory.</p>
+                <ul style="font-size:0.85rem; color:#664400; padding-left:20px; margin-top:10px;">
+                    <li><strong>AROM (Active Range of Motion):</strong> How far your muscles can lift your limb without gravity/assistance.</li>
+                    <li><strong>Neural Gliding:</strong> Nerves don't stretch; they glide. If you feel sharp/tingling pain, stretching it causes inflammation.</li>
+                    <li><strong>Thixotropy:</strong> Fascia becomes fluid with heat. Cold stretching risks micro-tears.</li>
+                </ul>
+                <h4 style="margin-top:15px; color:#cc8800;">Mini-Quiz</h4>
+                <p class="small-text" style="color:#996600;">What sensation indicates you should immediately stop static stretching?</p>
+                <button class="check-tag" onclick="alert('Incorrect. Dull aches usually indicate muscle stretching.')">Dull Ache</button>
+                <button class="check-tag" onclick="alert('Correct! Sharp or tingling pain is the nervous system. Switch to nerve flossing.')" style="margin-top:5px;">Sharp / Tingling</button>
             </div>
 
             <div class="bubbly-box">
-                <h3>🌳 Contortion Skill Tree</h3>
-                <p class="small-text">Master the micro-prerequisites before pushing the peak poses.</p>
-                
-                <div class="skill-tree-node" style="margin-bottom: 15px; border-bottom: 1px dashed #ffb3d9; padding-bottom: 10px;">
-                    <h4 style="color: #cc0066;">🎯 Chest Stand</h4>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Cervical Spine Mobility" onchange="saveSkills()"> Cervical Spine Mobility</label>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Thoracic Extension" onchange="saveSkills()"> Thoracic Extension</label>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Active Glute Engagement" onchange="saveSkills()"> Active Glute Engagement</label>
+                <h3>🌳 Chest Stand Skill Path</h3>
+                <p class="small-text">Complete a tier's routine to unlock the next level.</p>
+                <div class="skill-tier" id="tier-cs-1">
+                    <h4>Tier 1: Foundation</h4>
+                    <p class="small-text">Routine: Cervical/Thoracic Mobility & Cat-Cows.</p>
+                    <label class="check-tag"><input type="checkbox" id="chk-cs-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
                 </div>
-                
-                <div class="skill-tree-node">
-                    <h4 style="color: #cc0066;">🎯 Needle Scale</h4>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Active Shoulder Flexion" onchange="saveSkills()"> Active Shoulder Flexion</label>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Psoas/Hip Flexor Length" onchange="saveSkills()"> Psoas/Hip Flexor Length</label>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" value="Standing Leg Stability" onchange="saveSkills()"> Standing Leg Stability</label>
+                <div class="skill-tier locked" id="tier-cs-2">
+                    <h4>Tier 2: Activation</h4>
+                    <p class="small-text">Routine: Scapular Retractions & Glute Bridges.</p>
+                    <label class="check-tag"><input type="checkbox" id="chk-cs-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
+                </div>
+                <div class="skill-tier locked" id="tier-cs-3">
+                    <h4>Tier 3: Sub-Shape</h4>
+                    <p class="small-text">Routine: Active Cobra Liftoffs & Sphinx holds.</p>
+                    <label class="check-tag"><input type="checkbox" id="chk-cs-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
+                </div>
+                <div class="skill-tier locked" id="tier-cs-4">
+                    <h4>Tier 4: Peak</h4>
+                    <p class="small-text">Routine: Unassisted Chest Stand Hold.</p>
+                    <label class="check-tag"><input type="checkbox" id="chk-cs-4" onchange="checkSkillLocks()" disabled> Mastered Peak</label>
                 </div>
             </div>
 
+            <div class="bubbly-box">
+                <h3>🌳 Middle Splits Skill Path</h3>
+                <div class="skill-tier" id="tier-ms-1">
+                    <h4>Tier 1: Isolation</h4>
+                    <p class="small-text">Routine: Hip Capsule Rotations & Frog Pose.</p>
+                    <label class="check-tag"><input type="checkbox" id="chk-ms-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
+                </div>
+                <div class="skill-tier locked" id="tier-ms-2">
+                    <h4>Tier 2: Lengthening</h4>
+                    <p class="small-text">Routine: PNF Adductor Contractions & Pancake.</p>
+                    <label class="check-tag"><input type="checkbox" id="chk-ms-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
+                </div>
+                <div class="skill-tier locked" id="tier-ms-3">
+                    <h4>Tier 3: Active Strength</h4>
+                    <p class="small-text">Routine: Isometric Straddle Lifts.</p>
+                    <label class="check-tag"><input type="checkbox" id="chk-ms-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
+                </div>
+            </div>
+            
+            <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff;">⬅ Back to Flexibility</button>
         </section>
 
         <section id="oracle-aura" class="tab-content">
@@ -208,7 +248,6 @@
 
             <div class="bubbly-box">
                 <h3>Weekly Aura Stamp</h3>
-                <p class="small-text">Auto-generates every Sunday at 12:00 PM MST based on your 7-day logs.</p>
                 <button class="action-btn" onclick="forceAuraGeneration()">+ Debug: Force Aura Check</button>
                 <div id="weekly-aura-display" class="card-display" style="margin-top:15px; background:#e6f9ff; border-color:#66ccff;">
                     <p id="aura-name" style="font-size:1.5rem; font-weight:bold; color:#007799;">Waiting...</p>
@@ -220,10 +259,10 @@
         <section id="logs" class="tab-content">
             <h2>📝 Auto-Synthesis Journal</h2>
             <div class="bubbly-box">
-                <h3>Daily Brain Dump</h3>
-                <p class="small-text">Type out routine adjustments or random thoughts. The system grabs your weather, routine, and oracle automatically.</p>
+                <h3>The Vacuum Compiler</h3>
+                <p class="small-text">Type your brain dump, then hit Compile. The system will grab your staged Face Map, Body Map, checked Routine, Weather, and Oracle card, fusing it into one daily receipt. (Logs can only be compiled once per day to prevent spam).</p>
                 <textarea id="brain-dump" rows="4" placeholder="How did today feel?"></textarea>
-                <button class="action-btn" onclick="compileJournal()" style="width:100%; background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Compile Today's Journal</button>
+                <button class="action-btn" onclick="compileJournal()" style="width:100%; background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Compile Today's Master Journal</button>
                 <p id="journal-warning" style="color: red; font-size: 0.85rem; font-weight: bold; margin-top: 10px; display: none;"></p>
             </div>
             <div class="bubbly-box">
@@ -236,7 +275,7 @@
             <h2>⚙️ System Settings & Profile</h2>
             
             <div class="bubbly-box">
-                <h3>📍 Location Accuracy (Auto-Grab)</h3>
+                <h3>📍 Location Accuracy</h3>
                 <button class="action-btn" onclick="grabLocation()" style="background: #99ccff; box-shadow: 0px 3px 0px #0066cc;">📍 Auto-Grab My Location</button>
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <input type="text" id="lat-input" placeholder="Latitude" onchange="saveSettings()">
@@ -245,7 +284,7 @@
             </div>
 
             <div class="bubbly-box">
-                <h3>🕰️ Biphasic Clock Tracker</h3>
+                <h3>🕰️ Biphasic Clock</h3>
                 <div style="display: flex; gap: 10px;">
                     <input type="time" id="wake-time" onchange="saveSettings()">
                     <input type="time" id="sleep-time" onchange="saveSettings()">
@@ -263,21 +302,22 @@
                 </select>
                 <h3 style="margin-top: 15px;">Allergies</h3>
                 <input type="text" id="allergy-input" placeholder="e.g., Niacinamide" onchange="saveSettings()">
-                
-                <h3 style="margin-top: 15px;">Concerns & Goals</h3>
-                <div class="tag-group" id="profile-tags">
-                    <label class="check-tag"><input type="checkbox" value="Aging" onchange="saveSettings()"> Aging</label>
-                    <label class="check-tag"><input type="checkbox" value="Dryness" onchange="saveSettings()"> Dryness</label>
-                    <label class="check-tag"><input type="checkbox" value="Acne" onchange="saveSettings()"> Acne</label>
-                    <label class="check-tag"><input type="checkbox" value="Barrier Repair" onchange="saveSettings()"> Barrier Repair</label>
-                </div>
             </div>
 
             <div class="bubbly-box">
-                <h3>✅ Custom Routine Builder</h3>
-                <p class="small-text">Add steps to your daily routine checklist.</p>
-                <div style="display: flex; gap: 8px;">
-                    <input type="text" id="new-routine-step" placeholder="e.g., Snail Mucin">
+                <h3>✅ Daily Routine Builder</h3>
+                <p class="small-text">Build specific routines for each day of the week.</p>
+                <select id="routine-day-select" onchange="renderSettingsRoutine()">
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+                <div style="display: flex; gap: 8px; margin-top:10px;">
+                    <input type="text" id="new-routine-step" placeholder="e.g., Exfoliating Mask">
                     <button class="action-btn" onclick="addRoutineStep()" style="margin-top:0;">Add</button>
                 </div>
                 <ul id="settings-routine-list" class="log-list" style="margin-top: 15px;"></ul>
@@ -291,9 +331,3 @@
         <button class="nav-btn" onclick="openTab('flexibility')">🧘 Flex</button>
         <button class="nav-btn" onclick="openTab('oracle-aura')">🔮 Aura</button>
         <button class="nav-btn" onclick="openTab('logs')">📝 Logs</button>
-        <button class="nav-btn" onclick="openTab('settings')">⚙️ Set</button>
-    </nav>
-
-    <script src="app.js"></script>
-</body>
-</html>
