@@ -8,6 +8,14 @@
 </head>
 <body>
 
+    <div id="loading-screen">
+        <div class="loader-box">
+            <h1 class="blink">✨ SYSTEM INITIALIZING ✨</h1>
+            <p>Loading Aura Modules...</p>
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+        </div>
+    </div>
+
     <header class="top-header">
         <h1>✨ Daily Wellness & Aura ✨</h1>
         <nav class="tab-container">
@@ -22,19 +30,48 @@
     <main class="content-area">
         
         <section id="profile" class="tab-content active">
-            <h2>📋 Your Profile</h2>
+            <h2>📋 Clinical Skin & Routine Profile</h2>
+            
             <div class="bubbly-box">
-                <h3>Skin State</h3>
+                <h3>Skin Type</h3>
                 <select id="skin-type-select" onchange="saveProfile()">
-                    <option value="balanced">Balanced</option>
-                    <option value="compromised">Compromised Barrier / Dry</option>
-                    <option value="congested">Congestion Prone</option>
+                    <option value="combination">Combination</option>
+                    <option value="dry">Dry</option>
+                    <option value="oily">Oily</option>
+                    <option value="normal">Normal</option>
+                    <option value="sensitive">Sensitive</option>
                 </select>
-                
-                <h3 style="margin-top: 15px;">Biphasic Clock Tracker</h3>
-                <p class="small-text">What time do you usually wake up and go to sleep?</p>
-                <input type="time" id="wake-time" onchange="saveProfile()">
-                <input type="time" id="sleep-time" onchange="saveProfile()">
+
+                <h3 style="margin-top: 15px;">Allergies & Sensitivities</h3>
+                <input type="text" id="allergy-input" placeholder="e.g., Niacinamide, Fragrance, Witch Hazel" onchange="saveProfile()">
+
+                <h3 style="margin-top: 15px;">Skin Care Concerns</h3>
+                <div class="tag-group" id="concern-tags">
+                    <label class="check-tag"><input type="checkbox" value="Aging" onchange="saveProfile()"> Aging</label>
+                    <label class="check-tag"><input type="checkbox" value="Dryness" onchange="saveProfile()"> Dryness</label>
+                    <label class="check-tag"><input type="checkbox" value="Acne" onchange="saveProfile()"> Acne</label>
+                    <label class="check-tag"><input type="checkbox" value="Redness" onchange="saveProfile()"> Redness</label>
+                    <label class="check-tag"><input type="checkbox" value="Texture" onchange="saveProfile()"> Texture</label>
+                </div>
+
+                <h3 style="margin-top: 15px;">Skin Care Goals</h3>
+                <div class="tag-group" id="goal-tags">
+                    <label class="check-tag"><input type="checkbox" value="Clear Skin" onchange="saveProfile()"> Clear Skin</label>
+                    <label class="check-tag"><input type="checkbox" value="Sun Protection" onchange="saveProfile()"> Sun Protection</label>
+                    <label class="check-tag"><input type="checkbox" value="Glowing Skin" onchange="saveProfile()"> Glowing Skin</label>
+                    <label class="check-tag"><input type="checkbox" value="Barrier Repair" onchange="saveProfile()"> Barrier Repair</label>
+                </div>
+            </div>
+
+            <div class="bubbly-box">
+                <details class="cute-details">
+                    <summary>🕰️ Toggle Biphasic Clock Tracker</summary>
+                    <div class="details-content">
+                        <p class="small-text">What time do you usually wake up and go to sleep?</p>
+                        <input type="time" id="wake-time" onchange="saveProfile()">
+                        <input type="time" id="sleep-time" onchange="saveProfile()">
+                    </div>
+                </details>
             </div>
         </section>
 
@@ -42,8 +79,17 @@
             <h2>🌸 Skincare & Barrier Health</h2>
             
             <div class="bubbly-box">
-                <h3>Today's Atmosphere</h3>
-                <p>Dew Point: <strong id="live-dew">Loading...</strong></p>
+                <h3>Atmospheric Matrix</h3>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px;">
+                        <p class="small-text">Outdoor (API)</p>
+                        <p>Dew Point: <strong id="live-dew">--</strong></p>
+                    </div>
+                    <div style="flex: 1; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px;">
+                        <p class="small-text">Indoor (Estimated)</p>
+                        <p>Dew Point: <strong id="indoor-dew">--</strong></p>
+                    </div>
+                </div>
                 <p class="highlight-text" id="live-skin-action">Analyzing atmosphere...</p>
             </div>
 
