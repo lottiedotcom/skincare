@@ -91,7 +91,6 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
     font-size: 0.65rem; font-weight: bold; color: #cc0066;
     transition: all 0.2s; box-shadow: 0px 0px 5px rgba(255, 102, 178, 0.8); z-index: 10;
 }
-.target-dot:hover { transform: translate(-50%, -50%) scale(1.3); background: #ff99cc; color: #fff;}
 
 /* PASTEL PRODUCT GRID */
 .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
