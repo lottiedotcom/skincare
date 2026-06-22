@@ -9,13 +9,13 @@
 <body>
 
     <header class="top-header">
-        <h1>✨ Wellness & Aura ✨</h1>
-        <nav class="main-nav">
-            <button class="nav-btn active" onclick="openTab('skincare')">🧴 Skin</button>
-            <button class="nav-btn" onclick="openTab('flexibility')">🧘 Flex</button>
-            <button class="nav-btn" onclick="openTab('oracle-aura')">🔮 Aura</button>
-            <button class="nav-btn" onclick="openTab('logs')">📝 Logs</button>
-            <button class="nav-btn" onclick="openTab('settings')">⚙️ Set</button>
+        <h1>✨ Daily Wellness & Aura ✨</h1>
+        <nav class="tab-container">
+            <button class="tab-btn active" onclick="openTab('skincare')">🧴 Skin</button>
+            <button class="tab-btn" onclick="openTab('flexibility')">🧘 Flex</button>
+            <button class="tab-btn" onclick="openTab('oracle-aura')">🔮 Aura</button>
+            <button class="tab-btn" onclick="openTab('logs')">📝 Logs</button>
+            <button class="tab-btn" onclick="openTab('settings')">⚙️ Settings</button>
         </nav>
     </header>
 
@@ -41,7 +41,8 @@
             <div class="bubbly-box">
                 <h3 id="today-routine-header">✅ Today's Custom Routine</h3>
                 <p class="small-text">Your specific checklist for today. (Edit in Settings!)</p>
-                <div class="routine-checklist" id="custom-routine-list"></div>
+                <div class="routine-checklist" id="custom-routine-list">
+                    </div>
             </div>
 
             <div class="bubbly-box">
@@ -89,7 +90,7 @@
                 </div>
                 <button class="action-btn" onclick="addProduct()">+ Add to Diary</button>
                 
-                <div id="product-database-grid" class="product-grid" style="margin-top: 15px;"></div>
+                <div id="product-database-grid" class="product-grid"></div>
             </div>
 
             <div class="bubbly-box">
@@ -314,4 +315,4 @@
                 </div>
             </div>
 
-            <div class="
+            <
