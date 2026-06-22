@@ -6,7 +6,6 @@ let loggedFaceZones = {};
 let loggedBodyZones = {}; 
 let currentPressure = 0;
 
-// RECALCULATED ZONES FOR FACE (Based on face2d.jpg Diagram)
 const faceZones = [
     { id: 'f1', name: 'Forehead Center', x: 50, y: 15 },
     { id: 'f2', name: 'Forehead Left', x: 30, y: 22 },
@@ -22,9 +21,7 @@ const faceZones = [
     { id: 'f12', name: 'Chin', x: 50, y: 88 }
 ];
 
-// RECALCULATED ZONES FOR BODY (Based on muscle diagram, splitting anterior/posterior)
 const bodyZones = [
-    // ANTERIOR (Left side of image, ~25% X-axis center)
     { id: 'b1', name: 'Chest/Pecs', x: 25, y: 35 },
     { id: 'b2', name: 'Abs', x: 25, y: 48 },
     { id: 'b3', name: 'Left Anterior Shoulder', x: 15, y: 32 },
@@ -33,7 +30,6 @@ const bodyZones = [
     { id: 'b6', name: 'Right Quad', x: 30, y: 68 },
     { id: 'b7', name: 'Left Shin', x: 21, y: 85 },
     { id: 'b8', name: 'Right Shin', x: 29, y: 85 },
-    // POSTERIOR (Right side of image, ~75% X-axis center)
     { id: 'b9', name: 'Traps/Upper Back', x: 75, y: 30 },
     { id: 'b10', name: 'Lats/Mid Back', x: 75, y: 42 },
     { id: 'b11', name: 'Glutes', x: 75, y: 55 },
@@ -44,17 +40,14 @@ const bodyZones = [
 ];
 
 window.onload = () => {
-    // Handle Loading Screen
+    // Show the Enter button after 1.5s to match the progress bar animation
     setTimeout(() => {
-        const loader = document.getElementById('loading-screen');
-        loader.style.opacity = '0';
-        setTimeout(() => loader.style.display = 'none', 500);
-    }, 2000);
+        document.getElementById('enter-btn').style.display = 'block';
+    }, 1500);
 
     loadData();
     fetchRealData();
     
-    // Ensure maps render immediately
     setTimeout(() => {
         renderMapTargets('face');
         renderMapTargets('body');
@@ -64,6 +57,13 @@ window.onload = () => {
     renderPAO();
     checkWeeklyAura();
 };
+
+// NEW: Button to manually enter the app and dismiss the loading screen
+function enterApp() {
+    const loader = document.getElementById('loading-screen');
+    loader.style.opacity = '0';
+    setTimeout(() => loader.style.display = 'none', 500);
+}
 
 function openTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -76,11 +76,8 @@ function openTab(tabId) {
 function saveProfile() {
     userProfile.skinType = document.getElementById('skin-type-select').value;
     userProfile.allergies = document.getElementById('allergy-input').value;
-    
-    // Grab all checked boxes
     userProfile.concerns = Array.from(document.querySelectorAll('#concern-tags input:checked')).map(cb => cb.value);
     userProfile.goals = Array.from(document.querySelectorAll('#goal-tags input:checked')).map(cb => cb.value);
-    
     userProfile.wakeTime = document.getElementById('wake-time').value;
     userProfile.sleepTime = document.getElementById('sleep-time').value;
     
@@ -96,7 +93,6 @@ function loadData() {
         document.getElementById('wake-time').value = userProfile.wakeTime || '';
         document.getElementById('sleep-time').value = userProfile.sleepTime || '';
         
-        // Restore checkboxes
         document.querySelectorAll('#concern-tags input').forEach(cb => {
             if(userProfile.concerns.includes(cb.value)) cb.checked = true;
         });
@@ -112,19 +108,15 @@ function loadData() {
     if(pillowDate) document.getElementById('pillowcase-date').innerText = pillowDate;
 }
 
-// WEATHER FETCH (Outdoor + Indoor Estimation)
+// WEATHER FETCH
 async function fetchRealData() {
     try {
         const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=32.864&longitude=-108.222&current=temperature_2m,relative_humidity_2m,dewpoint_2m,surface_pressure&temperature_unit=fahrenheit`);
         const data = await response.json();
         const current = data.current;
 
-        // OUTDOOR
         document.getElementById('live-dew').innerText = `${current.dewpoint_2m.toFixed(1)}°F`;
         
-        // INDOOR ESTIMATION (Assuming standard 70F temp and 45% humidity internally)
-        // Indoor dew point usually hovers around 48F under these conditions. 
-        // We calculate a rough indoor offset based on outdoor humidity pulling inside.
         let estimatedIndoorDew = current.dewpoint_2m > 55 ? 52 : (current.dewpoint_2m < 30 ? 38 : 45);
         document.getElementById('indoor-dew').innerText = `~${estimatedIndoorDew}°F`;
 
