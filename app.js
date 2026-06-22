@@ -33,28 +33,35 @@ const bodyZones = [
     { id: 27, name: 'L Hamstring', x: 62, y: 70 }, { id: 28, name: 'R Hamstring', x: 78, y: 70 }, { id: 29, name: 'L Calf', x: 62, y: 85 }, { id: 30, name: 'R Calf', x: 78, y: 85 }
 ];
 
+// Execute immediately without wait
 window.onload = () => {
-    loadData(); fetchRealData(); populateSelects();
-    renderTodayRoutine(); renderSettingsRoutine(); renderProducts(); renderJournals(); renderVault(); checkWeeklyAura(); checkSkillLocks();
-    
-    let lastCompile = localStorage.getItem('lastCompileDate');
-    if(lastCompile === new Date().toLocaleDateString()) {
-        hasCompiledToday = true;
-        let warnEl = document.getElementById('journal-warning');
-        if(warnEl) { warnEl.style.display = 'block'; warnEl.innerText = "✅ Journal already compiled for today."; }
-    }
+    try {
+        loadData(); fetchRealData(); populateSelects();
+        renderTodayRoutine(); renderSettingsRoutine(); renderProducts(); renderJournals(); renderVault(); checkWeeklyAura(); checkSkillLocks();
+        
+        let lastCompile = localStorage.getItem('lastCompileDate');
+        if(lastCompile === new Date().toLocaleDateString()) {
+            hasCompiledToday = true;
+            let warning = document.getElementById('journal-warning');
+            if(warning) {
+                warning.style.display = 'block';
+                warning.innerText = "✅ Journal already compiled for today.";
+            }
+        }
+    } catch(e) { console.error("Load Error: ", e); }
 };
 
 function openTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     
+    let targetSection = document.getElementById(tabId);
+    if(targetSection) targetSection.classList.add('active');
+    
+    // Highlight correct top tab
     let navId = tabId === 'skill-tree-tab' ? 'flexibility' : tabId;
-    let targetNav = document.querySelector(`.nav-btn[onclick="openTab('${navId}')"]`);
+    let targetNav = document.querySelector(`.tab-btn[onclick="openTab('${navId}')"]`);
     if(targetNav) targetNav.classList.add('active');
-    
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function grabLocation() {
@@ -81,9 +88,10 @@ function loadData() {
         if(!userProfile.routine || Array.isArray(userProfile.routine)) {
             userProfile.routine = { "Monday":[], "Tuesday":[], "Wednesday":[], "Thursday":[], "Friday":[], "Saturday":[], "Sunday":[] };
         }
-        document.getElementById('lat-input').value = userProfile.lat || ''; document.getElementById('lon-input').value = userProfile.lon || '';
-        document.getElementById('skin-type-select').value = userProfile.skinType || 'combination';
-        document.getElementById('allergy-input').value = userProfile.allergies || '';
+        let latEl = document.getElementById('lat-input'); if(latEl) latEl.value = userProfile.lat || '';
+        let lonEl = document.getElementById('lon-input'); if(lonEl) lonEl.value = userProfile.lon || '';
+        let skinEl = document.getElementById('skin-type-select'); if(skinEl) skinEl.value = userProfile.skinType || 'combination';
+        let allEl = document.getElementById('allergy-input'); if(allEl) allEl.value = userProfile.allergies || '';
     } else {
         userProfile.routine = { "Monday":[], "Tuesday":[], "Wednesday":[], "Thursday":[], "Friday":[], "Saturday":[], "Sunday":[] };
     }
@@ -99,13 +107,16 @@ function loadData() {
 
 // ROUTINE BY DAY
 function addRoutineStep() {
-    let day = document.getElementById('routine-day-select').value;
-    let step = document.getElementById('new-routine-step').value;
+    let dayEl = document.getElementById('routine-day-select');
+    let stepEl = document.getElementById('new-routine-step');
+    if(!dayEl || !stepEl) return;
+    
+    let day = dayEl.value; let step = stepEl.value;
     if(!step) return;
     if(!userProfile.routine[day]) userProfile.routine[day] = [];
     userProfile.routine[day].push(step);
     localStorage.setItem('userProfile', JSON.stringify(userProfile));
-    document.getElementById('new-routine-step').value = '';
+    stepEl.value = '';
     renderSettingsRoutine(); renderTodayRoutine();
 }
 
@@ -116,8 +127,12 @@ function removeRoutineStep(day, index) {
 }
 
 function renderSettingsRoutine() {
-    let day = document.getElementById('routine-day-select').value;
-    let list = document.getElementById('settings-routine-list'); list.innerHTML = '';
+    let dayEl = document.getElementById('routine-day-select');
+    let list = document.getElementById('settings-routine-list'); 
+    if(!dayEl || !list) return;
+    
+    list.innerHTML = '';
+    let day = dayEl.value;
     let dayRoutines = userProfile.routine[day] || [];
     dayRoutines.forEach((step, idx) => {
         list.innerHTML += `<li style="display:flex; justify-content:space-between;">${step} <button class="prod-del" onclick="removeRoutineStep('${day}', ${idx})">X</button></li>`;
@@ -125,8 +140,12 @@ function renderSettingsRoutine() {
 }
 
 function renderTodayRoutine() {
-    document.getElementById('today-routine-header').innerText = `✅ ${todayName}'s Routine`;
-    let list = document.getElementById('custom-routine-list'); list.innerHTML = '';
+    let head = document.getElementById('today-routine-header');
+    let list = document.getElementById('custom-routine-list'); 
+    if(!head || !list) return;
+    
+    head.innerText = `✅ ${todayName}'s Routine`;
+    list.innerHTML = '';
     let dayRoutines = userProfile.routine[todayName] || [];
     if(dayRoutines.length === 0) { list.innerHTML = "<p class='small-text'>No routines set for today. Go to Settings!</p>"; return; }
     dayRoutines.forEach(step => {
@@ -145,46 +164,58 @@ async function fetchRealData() {
 
         liveData.dew = cur.dewpoint_2m; liveData.uv = cur.uv_index; liveData.aqi = pm25; liveData.pressure = (cur.surface_pressure * 0.02953).toFixed(2);
         
-        document.getElementById('live-dew').innerText = `${liveData.dew.toFixed(1)}°F`; document.getElementById('live-uv').innerText = liveData.uv;
-        document.getElementById('live-aqi').innerText = `${liveData.aqi} µg/m³`; document.getElementById('live-pressure').innerText = `${liveData.pressure} inHg`;
-        document.getElementById('action-dew').innerText = cur.relative_humidity_2m < 30 ? "Occlusive day. TEWL is high." : "Atmosphere balanced.";
+        let dewEl = document.getElementById('live-dew'); if(dewEl) dewEl.innerText = `${liveData.dew.toFixed(1)}°F`; 
+        let uvEl = document.getElementById('live-uv'); if(uvEl) uvEl.innerText = liveData.uv;
+        let aqiEl = document.getElementById('live-aqi'); if(aqiEl) aqiEl.innerText = `${liveData.aqi} µg/m³`; 
+        let presEl = document.getElementById('live-pressure'); if(presEl) presEl.innerText = `${liveData.pressure} inHg`;
+        let actEl = document.getElementById('action-dew'); if(actEl) actEl.innerText = cur.relative_humidity_2m < 30 ? "Occlusive day. TEWL is high." : "Atmosphere balanced.";
     } catch (error) { console.error("API Error"); }
 }
 
 // 2D MAPS
 function populateSelects() {
-    let fSel = document.getElementById('face-zone-select'); faceZones.forEach(z => fSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`);
-    let bSel = document.getElementById('body-zone-select'); bodyZones.forEach(z => bSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`);
+    let fSel = document.getElementById('face-zone-select'); 
+    if(fSel) faceZones.forEach(z => fSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`);
+    
+    let bSel = document.getElementById('body-zone-select'); 
+    if(bSel) bodyZones.forEach(z => bSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`);
 }
 
 function logFaceZone() {
-    let zone = document.getElementById('face-zone-select').value; let type = document.getElementById('face-acne-type').value;
+    let zoneEl = document.getElementById('face-zone-select'); let typeEl = document.getElementById('face-acne-type');
+    if(!zoneEl || !typeEl) return;
+    let zone = zoneEl.value; let type = typeEl.value;
     let colorMap = {"Cystic":"#cc0000", "Whitehead":"#e6e6e6", "Blackhead":"#333333", "Pustule":"#ff9933", "Papule":"#ff66b2"};
     loggedFaceZones.push({ zone, type, color: colorMap[type] });
     localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones)); renderMapLogs('face');
 }
 
 function logBodyZone() {
-    let zone = document.getElementById('body-zone-select').value; let type = document.getElementById('body-tension-type').value;
+    let zoneEl = document.getElementById('body-zone-select'); let typeEl = document.getElementById('body-tension-type');
+    if(!zoneEl || !typeEl) return;
+    let zone = zoneEl.value; let type = typeEl.value;
     let colorMap = {"DOMS (Soreness)":"#99ccff", "Muscle (Dull/Pull)":"#3399ff", "Fascia (Tight/Stuck)":"#ff99cc", "Joint (Pinching/Blocked)":"#cc0000", "Nerve (Sharp/Tingly)":"#ffcc00"};
     loggedBodyZones.push({ zone, type, color: colorMap[type] });
     localStorage.setItem('stagedBody', JSON.stringify(loggedBodyZones)); renderMapLogs('body');
 }
 
 function renderMapLogs(mapType) {
-    let list = document.getElementById(`${mapType}-log-list`); list.innerHTML = '';
+    let list = document.getElementById(`${mapType}-log-list`); if(!list) return;
+    list.innerHTML = '';
     let logs = mapType === 'face' ? loggedFaceZones : loggedBodyZones;
     let container = document.getElementById(`${mapType}-map-container`);
-    container.querySelectorAll('.target-dot').forEach(el => el.remove());
-    const zones = mapType === 'face' ? faceZones : bodyZones;
+    if(container) {
+        container.querySelectorAll('.target-dot').forEach(el => el.remove());
+        const zones = mapType === 'face' ? faceZones : bodyZones;
 
-    zones.forEach(zone => {
-        let dot = document.createElement('div'); dot.className = 'target-dot'; dot.style.left = `${zone.x}%`; dot.style.top = `${zone.y}%`; 
-        dot.innerText = zone.id;
-        let match = logs.find(l => parseInt(l.zone.split(":")[0]) === zone.id);
-        if(match) { dot.style.backgroundColor = match.color; dot.style.color = '#fff'; }
-        container.appendChild(dot);
-    });
+        zones.forEach(zone => {
+            let dot = document.createElement('div'); dot.className = 'target-dot'; dot.style.left = `${zone.x}%`; dot.style.top = `${zone.y}%`; 
+            dot.innerText = zone.id;
+            let match = logs.find(l => parseInt(l.zone.split(":")[0]) === zone.id);
+            if(match) { dot.style.backgroundColor = match.color; dot.style.color = '#fff'; }
+            container.appendChild(dot);
+        });
+    }
 
     logs.forEach((log, idx) => {
         list.innerHTML += `<li style="border-left: 5px solid ${log.color};"><strong>${log.zone}</strong>: ${log.type} <button class="prod-del" style="float:right;" onclick="removeMapLog('${mapType}', ${idx})">X</button></li>`;
@@ -199,7 +230,8 @@ function removeMapLog(mapType, idx) {
 
 // PRODUCT DIARY
 function addProduct() {
-    let name = document.getElementById('prod-name').value; let brand = document.getElementById('prod-brand').value;
+    let nameEl = document.getElementById('prod-name'); if(!nameEl) return;
+    let name = nameEl.value; let brand = document.getElementById('prod-brand').value;
     let type = document.getElementById('prod-type').value; let pao = parseInt(document.getElementById('prod-pao').value);
     let price = document.getElementById('prod-price').value; let url = document.getElementById('prod-url').value;
     let wish = document.getElementById('prod-wishlist').checked; let fav = document.getElementById('prod-fav').checked;
@@ -221,7 +253,8 @@ function removeProduct(idx) {
 
 function renderProducts() {
     let prods = JSON.parse(localStorage.getItem('products')) || []; 
-    let grid = document.getElementById('product-database-grid'); grid.innerHTML = '';
+    let grid = document.getElementById('product-database-grid'); if(!grid) return;
+    grid.innerHTML = '';
     prods.forEach((p, idx) => {
         let f = p.fav ? '❤️ ' : ''; let tagClass = `tag-${p.type.split('/')[0].toLowerCase()}`;
         grid.innerHTML += `
@@ -235,13 +268,18 @@ function renderProducts() {
     });
 }
 
-function logHygiene(type) { let d = new Date().toLocaleDateString(); localStorage.setItem('pillowDate', d); document.getElementById('pillowcase-date').innerText = d; }
+function logHygiene(type) { 
+    let d = new Date().toLocaleDateString(); 
+    localStorage.setItem('pillowDate', d); 
+    let pEl = document.getElementById('pillowcase-date'); if(pEl) pEl.innerText = d; 
+}
 
 // RECOVERY & REGULATION
 function toggleSomaticReset() {
     const pacer = document.getElementById('somatic-pacer');
     const circle = document.getElementById('breath-circle');
     const text = document.getElementById('breath-text');
+    if(!pacer) return;
     
     if (pacer.style.display === 'none') {
         pacer.style.display = 'block';
@@ -254,7 +292,7 @@ function toggleSomaticReset() {
             else if(phase === 2) { text.innerText = "Exhale..."; circle.classList.add('breathe-out'); circle.classList.remove('breathe-in'); }
             else if(phase === 3) { text.innerText = "Hold..."; }
             phase = (phase + 1) % 4;
-        }, 4000); // 4 second box breathing
+        }, 4000); 
     } else {
         pacer.style.display = 'none';
         clearInterval(breathingInterval);
@@ -262,7 +300,7 @@ function toggleSomaticReset() {
 }
 
 function generateLymphatic() {
-    const display = document.getElementById('lymphatic-sequence');
+    const display = document.getElementById('lymphatic-sequence'); if(!display) return;
     display.style.display = 'block';
     display.innerHTML = `
         <strong>Lymphatic Clearing Sequence:</strong><br><br>
@@ -275,12 +313,13 @@ function generateLymphatic() {
 
 // SMART COACH & VAULT
 function addToVault() {
-    let title = document.getElementById('vault-title').value; let url = document.getElementById('vault-url').value;
+    let titleEl = document.getElementById('vault-title'); if(!titleEl) return;
+    let title = titleEl.value; let url = document.getElementById('vault-url').value;
     let duration = document.getElementById('vault-duration').value; let focus = document.getElementById('vault-focus').value;
     if(!title || !duration) return;
     let vaults = JSON.parse(localStorage.getItem('vaults')) || [];
     vaults.push({ title, url, duration, focus }); localStorage.setItem('vaults', JSON.stringify(vaults));
-    document.getElementById('vault-title').value = ''; document.getElementById('vault-url').value = ''; document.getElementById('vault-duration').value = '';
+    titleEl.value = ''; document.getElementById('vault-url').value = ''; document.getElementById('vault-duration').value = '';
     renderVault();
 }
 
@@ -289,7 +328,8 @@ function removeVault(idx) {
 }
 
 function renderVault() {
-    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; let list = document.getElementById('vault-list'); list.innerHTML = '';
+    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; let list = document.getElementById('vault-list'); if(!list) return;
+    list.innerHTML = '';
     vaults.forEach((v, idx) => {
         let l = v.url ? `<a href="${v.url.startsWith('http') ? v.url : 'http://'+v.url}" target="_blank" style="color:#cc0066; font-weight:bold;">[Watch]</a>` : '';
         list.innerHTML += `<li><strong>${v.title}</strong> (${v.duration}m) - <em>${v.focus}</em> ${l} <button class="prod-del" style="float:right;" onclick="removeVault(${idx})">X</button></li>`;
@@ -297,7 +337,8 @@ function renderVault() {
 }
 
 function smartSuggest() {
-    let focus = document.getElementById('focus-selector').value;
+    let focusEl = document.getElementById('focus-selector'); if(!focusEl) return;
+    let focus = focusEl.value;
     let res = document.getElementById('vault-suggestion'); res.style.display = 'block';
     let nervePain = loggedBodyZones.some(log => log.type.includes("Nerve"));
     if (nervePain) {
@@ -311,28 +352,11 @@ function smartSuggest() {
 
 // SKILL TREE LOGIC
 function checkSkillLocks() {
-    let cs1 = document.getElementById('chk-cs-1').checked; let cs2 = document.getElementById('chk-cs-2'); let cs3 = document.getElementById('chk-cs-3'); let cs4 = document.getElementById('chk-cs-4');
-    if(cs1) { cs2.disabled = false; document.getElementById('tier-cs-2').classList.remove('locked'); } else { cs2.disabled = true; cs2.checked = false; document.getElementById('tier-cs-2').classList.add('locked'); }
+    let cs1 = document.getElementById('chk-cs-1'); if(!cs1) return;
+    let cs2 = document.getElementById('chk-cs-2'); let cs3 = document.getElementById('chk-cs-3'); let cs4 = document.getElementById('chk-cs-4');
+    if(cs1.checked) { cs2.disabled = false; document.getElementById('tier-cs-2').classList.remove('locked'); } else { cs2.disabled = true; cs2.checked = false; document.getElementById('tier-cs-2').classList.add('locked'); }
     if(cs2.checked) { cs3.disabled = false; document.getElementById('tier-cs-3').classList.remove('locked'); } else { cs3.disabled = true; cs3.checked = false; document.getElementById('tier-cs-3').classList.add('locked'); }
     if(cs3.checked) { cs4.disabled = false; document.getElementById('tier-cs-4').classList.remove('locked'); } else { cs4.disabled = true; cs4.checked = false; document.getElementById('tier-cs-4').classList.add('locked'); }
 
-    let ms1 = document.getElementById('chk-ms-1').checked; let ms2 = document.getElementById('chk-ms-2'); let ms3 = document.getElementById('chk-ms-3');
-    if(ms1) { ms2.disabled = false; document.getElementById('tier-ms-2').classList.remove('locked'); } else { ms2.disabled = true; ms2.checked = false; document.getElementById('tier-ms-2').classList.add('locked'); }
-    if(ms2.checked) { ms3.disabled = false; document.getElementById('tier-ms-3').classList.remove('locked'); } else { ms3.disabled = true; ms3.checked = false; document.getElementById('tier-ms-3').classList.add('locked'); }
-
-    let skills = Array.from(document.querySelectorAll('.skill-chk:checked')).map(cb => cb.id);
-    localStorage.setItem('skillLocks', JSON.stringify(skills));
-}
-
-function loadSkillLocks() {
-    let skills = JSON.parse(localStorage.getItem('skillLocks')) || [];
-    skills.forEach(id => { let el = document.getElementById(id); if(el) el.checked = true; });
-    checkSkillLocks(); 
-}
-
-// FULL 50 CARD ORACLE DECK
-const deck = [
-    { suit: "Lunar", name: "🌑 The Void Moon", meaning: "Rest completely. No active holds." },
-    { suit: "Lunar", name: "🌓 The Waxing Pull", meaning: "Building energy. Prep and hydrate." },
-    { suit: "Lunar", name: "🌕 The Full Pull", meaning: "Maximum intensity. Push your peaks." },
-    { suit: "Lunar", name: "🌗 The Waning Crescent", meaning: 
+    let ms1 = document.getElementById('chk-ms-1'); let ms2 = document.getElementById('chk-ms-2'); let ms3 = document.getElementById('chk-ms-3');
+    if(ms1.checked) { ms2.disabl
