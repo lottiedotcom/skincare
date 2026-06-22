@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wellness Dashboard</title>
+    <title>Wellness & Aura Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,15 +11,36 @@
     <header class="top-header">
         <h1>✨ Daily Wellness & Aura ✨</h1>
         <nav class="tab-container">
-            <button class="tab-btn active" onclick="openTab('skincare')">🧴 Skincare</button>
+            <button class="tab-btn active" onclick="openTab('profile')">📋 Profile</button>
+            <button class="tab-btn" onclick="openTab('skincare')">🧴 Skincare</button>
             <button class="tab-btn" onclick="openTab('flexibility')">🧘 Flexibility</button>
             <button class="tab-btn" onclick="openTab('oracle')">🎴 Oracle</button>
+            <button class="tab-btn" onclick="openTab('aura')">💖 Aura Board</button>
         </nav>
     </header>
 
     <main class="content-area">
         
-        <section id="skincare" class="tab-content active">
+        <section id="profile" class="tab-content active">
+            <h2>📋 Your Profile</h2>
+            <div class="bubbly-box">
+                <h3>Skin State</h3>
+                <select id="skin-type-select" onchange="saveProfile()">
+                    <option value="balanced">Balanced</option>
+                    <option value="compromised">Compromised Barrier / Dry</option>
+                    <option value="congested">Congestion Prone</option>
+                </select>
+                
+                <h3 style="margin-top: 15px;">Circadian Rhythm</h3>
+                <label>
+                    <input type="checkbox" id="night-owl-toggle" onchange="saveProfile()"> 
+                    Night Owl Mode (10 PM - 7 AM shift)
+                </label>
+                <p class="small-text">Shifts weather warnings and morning-after checks to fit your actual waking hours.</p>
+            </div>
+        </section>
+
+        <section id="skincare" class="tab-content">
             <h2>🌸 Skincare & Barrier Health</h2>
             <div class="bubbly-box">
                 <h3>Today's Atmosphere</h3>
@@ -28,11 +49,11 @@
             </div>
 
             <div class="bubbly-box">
-                <h3>Log Your Skin</h3>
-                <input type="text" id="skin-feel" placeholder="How does your skin feel today? (e.g., tight, oily, clear)">
-                <input type="text" id="skin-products" placeholder="What products did you use?">
-                <button class="action-btn" onclick="logData('skin')">Log Entry</button>
-                <ul id="skin-log-list" class="log-list"></ul>
+                <h3>Ingredient Scanner</h3>
+                <p class="small-text">Paste an ingredient list below to check for clashes with your current Skin Profile.</p>
+                <textarea id="ingredient-input" rows="4" placeholder="Paste ingredients here (e.g., Water, Glycerin, Alcohol Denat...)"></textarea>
+                <button class="action-btn" onclick="scanIngredients()">Scan Ingredients</button>
+                <p id="scanner-result" class="highlight-text" style="display:none;"></p>
             </div>
         </section>
 
@@ -45,11 +66,22 @@
             </div>
 
             <div class="bubbly-box">
-                <h3>Log Your Session</h3>
-                <input type="text" id="flex-focus" placeholder="What did you stretch? (e.g., backbends, oversplits)">
-                <input type="text" id="flex-notes" placeholder="Any tension or breakthroughs?">
-                <button class="action-btn" onclick="logData('flex')">Log Entry</button>
-                <ul id="flex-log-list" class="log-list"></ul>
+                <h3>Hold Timer & Tension Map</h3>
+                <select id="pose-select">
+                    <option value="oversplits">Active Oversplits</option>
+                    <option value="chest-stand">Chest Stand</option>
+                    <option value="needles">Needles</option>
+                </select>
+                <button class="action-btn" id="timer-btn" onclick="startTimer()">Start 60s Hold</button>
+                <p id="timer-display">01:00</p>
+            </div>
+
+            <div class="bubbly-box">
+                <h3>Propagating Habits</h3>
+                <input type="text" id="plant-name" placeholder="Plant Cutting (e.g., Tetrasperma)">
+                <input type="text" id="flex-goal" placeholder="Linked Goal (e.g., Flat splits)">
+                <button class="action-btn" onclick="logHabit()">Sync Goal</button>
+                <ul id="habit-list" class="log-list"></ul>
             </div>
         </section>
 
@@ -57,8 +89,7 @@
             <h2>🔮 Digital Oracle</h2>
             <div class="bubbly-box">
                 <h3>Current Lunar Phase: Waning Crescent</h3>
-                <p>Draw a card to set your daily intention based on the atmospheric alignment.</p>
-                
+                <p>Draw a card to set your daily intention. The deck adapts to your logs.</p>
                 <div class="oracle-draw-area">
                     <button class="action-btn draw-btn" onclick="drawCard()">Draw a Card</button>
                     <div id="card-result" class="card-display">
@@ -66,6 +97,17 @@
                         <p id="card-meaning">Waiting for draw...</p>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <section id="aura" class="tab-content">
+            <h2>💖 Digital Aura Board</h2>
+            <div class="bubbly-box">
+                <h3>Your Stamp Collection</h3>
+                <p class="small-text">Stamps earned from balanced days and logged routines.</p>
+                <div id="stamp-grid" class="stamp-container">
+                    </div>
+                <button class="action-btn" onclick="awardStamp()">+ Debug: Add Stamp</button>
             </div>
         </section>
 
