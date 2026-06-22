@@ -5,6 +5,7 @@ body {
     background-position: center; background-attachment: fixed;
     background-color: #ffccf2; font-family: 'Verdana', 'Tahoma', sans-serif;
     color: #553344; padding: 20px;
+    padding-bottom: 100px; /* Space for bottom nav */
 }
 
 #loading-screen {
@@ -27,15 +28,21 @@ body {
 
 .top-header { text-align: center; margin-bottom: 20px; }
 .top-header h1 { font-size: 2rem; color: #fff; text-shadow: 2px 2px 4px rgba(255, 102, 178, 0.8); margin-bottom: 15px; }
-.tab-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
-.tab-btn {
-    background: linear-gradient(180deg, #ffffff 0%, #ffe6f2 100%);
-    border: 3px solid #ff99cc; border-radius: 20px; padding: 10px 15px;
-    font-size: 0.95rem; font-weight: bold; color: #cc0066; cursor: pointer;
-    box-shadow: 0px 4px 0px #ff99cc; transition: all 0.1s;
+
+/* FIXED BOTTOM NAV */
+.bottom-nav {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: rgba(255, 204, 242, 0.95); border-top: 3px solid #ff99cc;
+    display: flex; justify-content: space-around; padding: 10px 5px;
+    box-shadow: 0px -4px 10px rgba(0,0,0,0.1); z-index: 10000;
 }
-.tab-btn:active { transform: translateY(4px); box-shadow: 0px 0px 0px #ff99cc; }
-.tab-btn.active { background: linear-gradient(180deg, #ff99cc 0%, #ff66b2 100%); color: white; border-color: #fff; }
+.nav-btn {
+    background: #fff; border: 2px solid #ff99cc; border-radius: 15px;
+    padding: 10px 8px; font-size: 0.85rem; font-weight: bold; color: #cc0066;
+    cursor: pointer; transition: all 0.1s; flex: 1; margin: 0 4px; text-align: center;
+}
+.nav-btn:active { transform: translateY(2px); }
+.nav-btn.active { background: #ff66b2; color: white; border-color: #fff; box-shadow: inset 0px 2px 5px rgba(0,0,0,0.2);}
 
 .content-area { max-width: 600px; margin: 0 auto; }
 .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
@@ -77,6 +84,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 }
 .action-btn:active { transform: translateY(3px); box-shadow: 0px 0px 0px #cc0066; }
 
+/* MAPS & NUMBERED DOTS */
 .map-container {
     position: relative; display: block; margin: 0 auto 15px auto;
     width: 100%; max-width: 500px; background: #fff; border: 2px dashed #ffb3d9; 
@@ -85,11 +93,22 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .interactive-map { width: 100%; display: block; pointer-events: none;}
 .target-dot {
     position: absolute; width: 22px; height: 22px;
-    background: rgba(255, 255, 255, 0.8); border: 3px dashed #ff66b2;
+    background: rgba(255, 255, 255, 0.9); border: 2px solid #ff66b2;
     border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 0.7rem; font-weight: bold; color: #cc0066;
     transition: all 0.2s; box-shadow: 0px 0px 5px rgba(255, 102, 178, 0.8); z-index: 10;
 }
-.target-dot:hover { transform: translate(-50%, -50%) scale(1.3); background: #ff99cc; border-style: solid; }
+.target-dot:hover { transform: translate(-50%, -50%) scale(1.3); background: #ff99cc; color: #fff;}
+
+/* NOTION PRODUCT CARD */
+.product-card {
+    background: #fff; border: 2px solid #ffb3d9; border-radius: 15px; padding: 15px;
+    display: flex; flex-direction: column; gap: 5px; font-size: 0.9rem;
+}
+.prod-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; color: #cc0066; border-bottom: 1px dashed #ffb3d9; padding-bottom: 5px; margin-bottom: 5px;}
+.prod-tag { display: inline-block; background: #e6ccff; color: #4b0082; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; margin-right: 5px;}
+.prod-del { background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 2px 8px; font-weight: bold; cursor: pointer; font-size: 0.75rem;}
 
 .log-list { list-style-type: none; margin-top: 15px; padding:0;}
 .log-list li { background: #fff; border: 2px solid #ffb3d9; padding: 15px; border-radius: 15px; margin-bottom: 12px; font-size: 0.9rem; }
@@ -97,7 +116,5 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .journal-data { font-size: 0.8rem; color: #555; background: #f9f9f9; padding: 8px; border-radius: 8px; margin-bottom: 8px;}
 
 .card-display { background: #ffe6f2; border: 2px dashed #ff99cc; border-radius: 15px; padding: 20px; text-align: center; }
-#card-name { font-size: 1.4rem; font-weight: bold; color: #cc0066; margin-bottom: 5px; }
-#card-suit { font-size: 0.9rem; font-weight: bold; color: #ff66b2; margin-bottom: 10px; text-transform: uppercase;}
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
