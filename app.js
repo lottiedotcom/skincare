@@ -1,122 +1,336 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
+// Global State
+let userProfile = { 
+    lat: '32.864', lon: '-108.222', routine: {}, 
+    skinType: 'combination', allergies: '', wakeTime: '', sleepTime: '' 
+};
+let loggedFaceZones = []; let loggedBodyZones = []; 
+let liveData = { dew: 0, uv: 0, aqi: 0, pressure: 0 };
+let currentDrawnCard = "None Drawn Today";
+let hasCompiledToday = false; 
+let breathingInterval;
 
-body {
-    background-image: url('background20.jpg'); background-size: cover;
-    background-position: center; background-attachment: fixed;
-    background-color: #ffccf2; font-family: 'Verdana', 'Tahoma', sans-serif;
-    color: #553344; padding: 20px; padding-bottom: 100px; 
-}
+const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const todayName = daysOfWeek[new Date().getDay()];
 
-.top-header { text-align: center; margin-bottom: 20px; }
-.top-header h1 { font-size: 2rem; color: #fff; text-shadow: 2px 2px 4px rgba(255, 102, 178, 0.8); margin-bottom: 15px; }
+// MAP ZONES
+const faceZones = [
+    { id: 1, name: 'Forehead Center', x: 50, y: 15 }, { id: 2, name: 'Forehead L', x: 30, y: 18 }, { id: 3, name: 'Forehead R', x: 70, y: 18 },
+    { id: 4, name: 'Temple L', x: 15, y: 35 }, { id: 5, name: 'Temple R', x: 85, y: 35 }, { id: 6, name: 'Nose Bridge', x: 50, y: 45 },
+    { id: 7, name: 'Nose Tip', x: 50, y: 65 }, { id: 8, name: 'Upper Cheek L', x: 30, y: 55 }, { id: 9, name: 'Upper Cheek R', x: 70, y: 55 },
+    { id: 10, name: 'Lower Cheek L', x: 25, y: 70 }, { id: 11, name: 'Lower Cheek R', x: 75, y: 70 }, { id: 12, name: 'Jaw L', x: 28, y: 85 },
+    { id: 13, name: 'Jaw R', x: 72, y: 85 }, { id: 14, name: 'Chin', x: 50, y: 92 }, { id: 15, name: 'Upper Lip', x: 50, y: 75 }
+];
 
-/* FIXED BOTTOM NAV */
-.bottom-nav {
-    position: fixed; bottom: 0; left: 0; width: 100%;
-    background: rgba(255, 204, 242, 0.95); border-top: 3px solid #ff99cc;
-    display: flex; justify-content: space-around; padding: 10px 5px;
-    box-shadow: 0px -4px 10px rgba(0,0,0,0.1); z-index: 10000;
-}
-.nav-btn {
-    background: #fff; border: 2px solid #ff99cc; border-radius: 15px;
-    padding: 10px 8px; font-size: 0.85rem; font-weight: bold; color: #cc0066;
-    cursor: pointer; transition: all 0.1s; flex: 1; margin: 0 4px; text-align: center;
-}
-.nav-btn:active { transform: translateY(2px); }
-.nav-btn.active { background: #ff66b2; color: white; border-color: #fff; box-shadow: inset 0px 2px 5px rgba(0,0,0,0.2);}
+const bodyZones = [
+    { id: 1, name: 'Neck', x: 30, y: 10 }, { id: 2, name: 'L Shoulder', x: 15, y: 22 }, { id: 3, name: 'R Shoulder', x: 45, y: 22 },
+    { id: 4, name: 'L Bicep', x: 10, y: 35 }, { id: 5, name: 'R Bicep', x: 50, y: 35 }, { id: 6, name: 'L Forearm', x: 5, y: 50 },
+    { id: 7, name: 'R Forearm', x: 55, y: 50 }, { id: 8, name: 'L Pec', x: 22, y: 25 }, { id: 9, name: 'R Pec', x: 38, y: 25 },
+    { id: 10, name: 'Abs', x: 30, y: 40 }, { id: 11, name: 'L Oblique', x: 20, y: 45 }, { id: 12, name: 'R Oblique', x: 40, y: 45 },
+    { id: 13, name: 'L Quad', x: 22, y: 65 }, { id: 14, name: 'R Quad', x: 38, y: 65 }, { id: 15, name: 'L Shin', x: 22, y: 85 }, { id: 16, name: 'R Shin', x: 38, y: 85 },
+    { id: 17, name: 'Traps', x: 70, y: 12 }, { id: 18, name: 'L Rear Delt', x: 60, y: 22 }, { id: 19, name: 'R Rear Delt', x: 80, y: 22 },
+    { id: 20, name: 'L Tricep', x: 55, y: 35 }, { id: 21, name: 'R Tricep', x: 85, y: 35 }, { id: 22, name: 'L Lat', x: 62, y: 35 }, { id: 23, name: 'R Lat', x: 78, y: 35 },
+    { id: 24, name: 'Lower Back', x: 70, y: 45 }, { id: 25, name: 'L Glute', x: 62, y: 55 }, { id: 26, name: 'R Glute', x: 78, y: 55 },
+    { id: 27, name: 'L Hamstring', x: 62, y: 70 }, { id: 28, name: 'R Hamstring', x: 78, y: 70 }, { id: 29, name: 'L Calf', x: 62, y: 85 }, { id: 30, name: 'R Calf', x: 78, y: 85 }
+];
 
-.content-area { max-width: 600px; margin: 0 auto; }
-.tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
-.tab-content.active { display: block; }
-.tab-content h2 { color: #fff; text-shadow: 1px 1px 3px #ff66b2; margin-bottom: 15px; text-align: center; }
-
-.bubbly-box {
-    background: rgba(255, 255, 255, 0.9); border: 3px solid #ffb3d9;
-    border-radius: 25px; padding: 20px; margin-bottom: 20px;
-    box-shadow: 0px 5px 15px rgba(255, 102, 178, 0.2);
-}
-.bubbly-box h3 { color: #cc0066; border-bottom: 2px dashed #ffb3d9; padding-bottom: 5px; margin-bottom: 10px; }
-.highlight-text { background-color: #ffe6f2; padding: 10px; border-radius: 10px; margin-top: 10px; font-weight: bold; color: #cc0066; }
-.small-text { font-size: 0.85rem; color: #885566; margin-bottom: 10px; display: block; }
-
-.data-pod { flex: 1; background: rgba(255,255,255,0.7); padding: 10px; border-radius: 10px; border: 1px solid #ffccf2; text-align: center; }
-
-input[type="text"], input[type="number"], input[type="time"], select, textarea {
-    width: 100%; padding: 12px; margin: 6px 0 12px 0;
-    border: 2px solid #ffb3d9; border-radius: 15px; font-family: inherit;
-    font-size: 0.95rem; background: rgba(255, 255, 255, 0.9);
-}
-textarea { resize: vertical; }
-input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2; }
-
-.tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-.check-tag {
-    background: #e6ccff; color: #4b0082; padding: 8px 12px; border-radius: 15px; font-size: 0.85rem; cursor: pointer;
-    border: 1px solid #cc99ff; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom:5px;
-}
-.routine-checklist { display: flex; flex-direction: column; gap: 8px; }
-.routine-checklist .check-tag { background: #ffe6f2; border-color: #ffb3d9; color: #cc0066; font-size: 1rem; justify-content: flex-start;}
-
-.action-btn {
-    background: #ff99cc; color: white; border: none; padding: 10px 20px;
-    border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 1rem;
-    margin-top: 10px; box-shadow: 0px 3px 0px #cc0066; width: 100%;
-}
-.action-btn:active { transform: translateY(3px); box-shadow: 0px 0px 0px #cc0066; }
-
-/* MAPS & NUMBERED DOTS */
-.map-container {
-    position: relative; display: block; margin: 0 auto 15px auto;
-    width: 100%; max-width: 500px; background: #fff; border: 2px dashed #ffb3d9; 
-    border-radius: 15px; overflow: hidden;
-}
-.interactive-map { width: 100%; display: block; pointer-events: none;}
-.target-dot {
-    position: absolute; width: 20px; height: 20px;
-    background: rgba(255, 255, 255, 0.9); border: 2px solid #ff66b2;
-    border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer;
-    display: flex; justify-content: center; align-items: center;
-    font-size: 0.65rem; font-weight: bold; color: #cc0066;
-    transition: all 0.2s; box-shadow: 0px 0px 5px rgba(255, 102, 178, 0.8); z-index: 10;
-}
-
-/* PASTEL PRODUCT GRID */
-.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-.product-card {
-    background: #fff; border: 2px dashed #ffb3d9; border-radius: 15px; padding: 12px;
-    display: flex; flex-direction: column; gap: 5px; font-size: 0.8rem; text-align: center;
-    box-shadow: 2px 2px 5px rgba(255, 102, 178, 0.1);
-}
-.prod-header { font-weight: bold; font-size: 1rem; color: #cc0066; margin-bottom: 5px;}
-.prod-tag { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold;}
-.tag-serum { background: #ffe6e6; color: #cc0000; }
-.tag-moisturizer { background: #e6f2ff; color: #0066cc; }
-.tag-cleanser { background: #e6ffe6; color: #008000; }
-.tag-spf { background: #fff2e6; color: #cc6600; }
-.tag-mask { background: #f2e6ff; color: #6600cc; }
-.tag-active { background: #ffe6f9; color: #cc0099; }
-.prod-del { background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 4px; font-weight: bold; cursor: pointer; margin-top: 5px;}
-
-/* SKILL TREE */
-.skill-tier { background: #fff; border: 2px solid #ff99cc; border-radius: 15px; padding: 15px; margin-bottom: 10px; transition: all 0.3s ease; }
-.skill-tier.locked { opacity: 0.5; filter: grayscale(100%); pointer-events: none; border-style: dashed; }
-.skill-tier h4 { color: #cc0066; margin-bottom: 5px; }
-
-/* SOMATIC BREATHING PACER */
-.breathing-circle {
-    width: 100px; height: 100px; background: #66cc99; border-radius: 50%;
-    margin: 20px auto; opacity: 0.8; box-shadow: 0px 0px 20px #99ffcc;
-    transition: transform 4s ease-in-out;
-}
-.breathe-in { transform: scale(1.8); }
-.breathe-out { transform: scale(1); }
-
-.log-list { list-style-type: none; margin-top: 15px; padding:0;}
-.log-list li { background: #fff; border: 2px solid #ffb3d9; padding: 15px; border-radius: 15px; margin-bottom: 12px; font-size: 0.9rem; }
-.journal-header { color: #cc0066; font-weight: bold; border-bottom: 1px dashed #ffb3d9; padding-bottom: 5px; margin-bottom: 8px; display: block; }
-.journal-data { font-size: 0.8rem; color: #555; background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ff99cc;}
-
-.card-display { background: #ffe6f2; border: 2px dashed #ff99cc; border-radius: 15px; padding: 20px; text-align: center; }
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+// Instantly run functions on load. No welcome screen.
+window.onload = () => {
+    loadData(); fetchRealData(); populateSelects();
+    renderTodayRoutine(); renderSettingsRoutine(); renderProducts(); renderJournals(); renderVault(); checkWeeklyAura(); checkSkillLocks();
     
+    let lastCompile = localStorage.getItem('lastCompileDate');
+    if(lastCompile === new Date().toLocaleDateString()) {
+        hasCompiledToday = true;
+        document.getElementById('journal-warning').style.display = 'block';
+        document.getElementById('journal-warning').innerText = "✅ Journal already compiled for today.";
+    }
+};
+
+function openTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    
+    let navId = tabId === 'skill-tree-tab' ? 'flexibility' : tabId;
+    let targetNav = document.querySelector(`.nav-btn[onclick="openTab('${navId}')"]`);
+    if(targetNav) targetNav.classList.add('active');
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function grabLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+            document.getElementById('lat-input').value = pos.coords.latitude.toFixed(4);
+            document.getElementById('lon-input').value = pos.coords.longitude.toFixed(4);
+            saveSettings(); fetchRealData(); alert("Location grabbed!");
+        });
+    }
+}
+
+function saveSettings() {
+    userProfile.lat = document.getElementById('lat-input').value; userProfile.lon = document.getElementById('lon-input').value;
+    userProfile.skinType = document.getElementById('skin-type-select').value; userProfile.allergies = document.getElementById('allergy-input').value;
+    userProfile.wakeTime = document.getElementById('wake-time').value; userProfile.sleepTime = document.getElementById('sleep-time').value;
+    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+}
+
+function loadData() {
+    const savedProf = localStorage.getItem('userProfile');
+    if (savedProf) {
+        userProfile = JSON.parse(savedProf);
+        if(!userProfile.routine || Array.isArray(userProfile.routine)) {
+            userProfile.routine = { "Monday":[], "Tuesday":[], "Wednesday":[], "Thursday":[], "Friday":[], "Saturday":[], "Sunday":[] };
+        }
+        document.getElementById('lat-input').value = userProfile.lat || ''; document.getElementById('lon-input').value = userProfile.lon || '';
+        document.getElementById('skin-type-select').value = userProfile.skinType || 'combination';
+        document.getElementById('allergy-input').value = userProfile.allergies || '';
+    } else {
+        userProfile.routine = { "Monday":[], "Tuesday":[], "Wednesday":[], "Thursday":[], "Friday":[], "Saturday":[], "Sunday":[] };
+    }
+    
+    loggedFaceZones = JSON.parse(localStorage.getItem('stagedFace')) || [];
+    loggedBodyZones = JSON.parse(localStorage.getItem('stagedBody')) || [];
+    
+    let pillowElem = document.getElementById('pillowcase-date');
+    if(pillowElem) pillowElem.innerText = localStorage.getItem('pillowDate') || "Not Logged";
+    
+    renderMapLogs('face'); renderMapLogs('body');
+}
+
+// ROUTINE BY DAY
+function addRoutineStep() {
+    let day = document.getElementById('routine-day-select').value;
+    let step = document.getElementById('new-routine-step').value;
+    if(!step) return;
+    if(!userProfile.routine[day]) userProfile.routine[day] = [];
+    userProfile.routine[day].push(step);
+    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    document.getElementById('new-routine-step').value = '';
+    renderSettingsRoutine(); renderTodayRoutine();
+}
+
+function removeRoutineStep(day, index) {
+    userProfile.routine[day].splice(index, 1);
+    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    renderSettingsRoutine(); renderTodayRoutine();
+}
+
+function renderSettingsRoutine() {
+    let day = document.getElementById('routine-day-select').value;
+    let list = document.getElementById('settings-routine-list'); list.innerHTML = '';
+    let dayRoutines = userProfile.routine[day] || [];
+    dayRoutines.forEach((step, idx) => {
+        list.innerHTML += `<li style="display:flex; justify-content:space-between;">${step} <button class="prod-del" onclick="removeRoutineStep('${day}', ${idx})">X</button></li>`;
+    });
+}
+
+function renderTodayRoutine() {
+    document.getElementById('today-routine-header').innerText = `✅ ${todayName}'s Routine`;
+    let list = document.getElementById('custom-routine-list'); list.innerHTML = '';
+    let dayRoutines = userProfile.routine[todayName] || [];
+    if(dayRoutines.length === 0) { list.innerHTML = "<p class='small-text'>No routines set for today. Go to Settings!</p>"; return; }
+    dayRoutines.forEach(step => {
+        list.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk" value="${step}"> ${step}</label>`;
+    });
+}
+
+// WEATHER
+async function fetchRealData() {
+    let lat = userProfile.lat || '32.864'; let lon = userProfile.lon || '-108.222';
+    try {
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=relative_humidity_2m,dewpoint_2m,surface_pressure,uv_index&temperature_unit=fahrenheit`);
+        const cur = (await weatherRes.json()).current;
+        const aqiRes = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm2_5`);
+        const pm25 = (await aqiRes.json()).current.pm2_5;
+
+        liveData.dew = cur.dewpoint_2m; liveData.uv = cur.uv_index; liveData.aqi = pm25; liveData.pressure = (cur.surface_pressure * 0.02953).toFixed(2);
+        
+        document.getElementById('live-dew').innerText = `${liveData.dew.toFixed(1)}°F`; document.getElementById('live-uv').innerText = liveData.uv;
+        document.getElementById('live-aqi').innerText = `${liveData.aqi} µg/m³`; document.getElementById('live-pressure').innerText = `${liveData.pressure} inHg`;
+        document.getElementById('action-dew').innerText = cur.relative_humidity_2m < 30 ? "Occlusive day. TEWL is high." : "Atmosphere balanced.";
+    } catch (error) { console.error("API Error"); }
+}
+
+// 2D MAPS
+function populateSelects() {
+    let fSel = document.getElementById('face-zone-select'); faceZones.forEach(z => fSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`);
+    let bSel = document.getElementById('body-zone-select'); bodyZones.forEach(z => bSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`);
+}
+
+function logFaceZone() {
+    let zone = document.getElementById('face-zone-select').value; let type = document.getElementById('face-acne-type').value;
+    let colorMap = {"Cystic":"#cc0000", "Whitehead":"#e6e6e6", "Blackhead":"#333333", "Pustule":"#ff9933", "Papule":"#ff66b2"};
+    loggedFaceZones.push({ zone, type, color: colorMap[type] });
+    localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones)); renderMapLogs('face');
+}
+
+function logBodyZone() {
+    let zone = document.getElementById('body-zone-select').value; let type = document.getElementById('body-tension-type').value;
+    let colorMap = {"DOMS (Soreness)":"#99ccff", "Muscle (Dull/Pull)":"#3399ff", "Fascia (Tight/Stuck)":"#ff99cc", "Joint (Pinching/Blocked)":"#cc0000", "Nerve (Sharp/Tingly)":"#ffcc00"};
+    loggedBodyZones.push({ zone, type, color: colorMap[type] });
+    localStorage.setItem('stagedBody', JSON.stringify(loggedBodyZones)); renderMapLogs('body');
+}
+
+function renderMapLogs(mapType) {
+    let list = document.getElementById(`${mapType}-log-list`); list.innerHTML = '';
+    let logs = mapType === 'face' ? loggedFaceZones : loggedBodyZones;
+    let container = document.getElementById(`${mapType}-map-container`);
+    container.querySelectorAll('.target-dot').forEach(el => el.remove());
+    const zones = mapType === 'face' ? faceZones : bodyZones;
+
+    zones.forEach(zone => {
+        let dot = document.createElement('div'); dot.className = 'target-dot'; dot.style.left = `${zone.x}%`; dot.style.top = `${zone.y}%`; 
+        dot.innerText = zone.id;
+        let match = logs.find(l => parseInt(l.zone.split(":")[0]) === zone.id);
+        if(match) { dot.style.backgroundColor = match.color; dot.style.color = '#fff'; }
+        container.appendChild(dot);
+    });
+
+    logs.forEach((log, idx) => {
+        list.innerHTML += `<li style="border-left: 5px solid ${log.color};"><strong>${log.zone}</strong>: ${log.type} <button class="prod-del" style="float:right;" onclick="removeMapLog('${mapType}', ${idx})">X</button></li>`;
+    });
+}
+
+function removeMapLog(mapType, idx) {
+    if(mapType === 'face') { loggedFaceZones.splice(idx, 1); localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones)); }
+    else { loggedBodyZones.splice(idx, 1); localStorage.setItem('stagedBody', JSON.stringify(loggedBodyZones)); }
+    renderMapLogs(mapType);
+}
+
+// PRODUCT DIARY
+function addProduct() {
+    let name = document.getElementById('prod-name').value; let brand = document.getElementById('prod-brand').value;
+    let type = document.getElementById('prod-type').value; let pao = parseInt(document.getElementById('prod-pao').value);
+    let price = document.getElementById('prod-price').value; let url = document.getElementById('prod-url').value;
+    let wish = document.getElementById('prod-wishlist').checked; let fav = document.getElementById('prod-fav').checked;
+    
+    if(!name) return; let exp = "N/A";
+    if(pao && !wish) { let d = new Date(); d.setMonth(d.getMonth() + pao); exp = d.toLocaleDateString(); }
+    
+    let prods = JSON.parse(localStorage.getItem('products')) || [];
+    prods.push({ name, brand, type, pao, price, url, wish, fav, exp });
+    localStorage.setItem('products', JSON.stringify(prods));
+    
+    document.querySelectorAll('#skincare input[type="text"], #skincare input[type="number"]').forEach(i => i.value = '');
+    renderProducts();
+}
+
+function removeProduct(idx) {
+    let prods = JSON.parse(localStorage.getItem('products')) || []; prods.splice(idx, 1); localStorage.setItem('products', JSON.stringify(prods)); renderProducts();
+}
+
+function renderProducts() {
+    let prods = JSON.parse(localStorage.getItem('products')) || []; 
+    let grid = document.getElementById('product-database-grid'); grid.innerHTML = '';
+    prods.forEach((p, idx) => {
+        let f = p.fav ? '❤️ ' : ''; let tagClass = `tag-${p.type.split('/')[0].toLowerCase()}`;
+        grid.innerHTML += `
+            <div class="product-card">
+                <div class="prod-header">${f}${p.name}</div>
+                <div><span class="prod-tag ${tagClass}">${p.type}</span></div>
+                <div style="font-size:0.75rem; color:#885566; margin-top:5px;">${p.brand} | ${p.price || "-"}</div>
+                ${p.exp !== "N/A" ? `<div style="font-size:0.75rem; margin-top:5px;">⏳ ${p.exp}</div>` : ''}
+                <button class="prod-del" onclick="removeProduct(${idx})">Remove</button>
+            </div>`;
+    });
+}
+
+function logHygiene(type) { let d = new Date().toLocaleDateString(); localStorage.setItem('pillowDate', d); document.getElementById('pillowcase-date').innerText = d; }
+
+// RECOVERY & REGULATION
+function toggleSomaticReset() {
+    const pacer = document.getElementById('somatic-pacer');
+    const circle = document.getElementById('breath-circle');
+    const text = document.getElementById('breath-text');
+    
+    if (pacer.style.display === 'none') {
+        pacer.style.display = 'block';
+        let phase = 0;
+        clearInterval(breathingInterval);
+        
+        breathingInterval = setInterval(() => {
+            if(phase === 0) { text.innerText = "Inhale..."; circle.classList.add('breathe-in'); circle.classList.remove('breathe-out'); }
+            else if(phase === 1) { text.innerText = "Hold..."; }
+            else if(phase === 2) { text.innerText = "Exhale..."; circle.classList.add('breathe-out'); circle.classList.remove('breathe-in'); }
+            else if(phase === 3) { text.innerText = "Hold..."; }
+            phase = (phase + 1) % 4;
+        }, 4000); // 4 second box breathing
+    } else {
+        pacer.style.display = 'none';
+        clearInterval(breathingInterval);
+    }
+}
+
+function generateLymphatic() {
+    const display = document.getElementById('lymphatic-sequence');
+    display.style.display = 'block';
+    display.innerHTML = `
+        <strong>Lymphatic Clearing Sequence:</strong><br><br>
+        1. <strong>Clavicle (Collarbone):</strong> Gently pump the hollows above your collarbone 15x.<br>
+        2. <strong>Axillary (Armpits):</strong> Pump deeply into the armpits 15x.<br>
+        3. <strong>Inguinal (Hips):</strong> Pump the creases of your hips 15x.<br>
+        4. <strong>Legs up the Wall:</strong> Rest inverted for 10 minutes to drain pooling fluid.
+    `;
+}
+
+// SMART COACH & VAULT
+function calculateFascia() {
+    let sleep = document.getElementById('sleep-hours').value; let water = document.getElementById('water-oz').value;
+    let res = document.getElementById('fascia-result'); res.style.display = 'block';
+    if(sleep < 5 && liveData.pressure < 29.8) res.innerText = "🚨 HIGH STIFFNESS. Extend warm-up."; else res.innerText = "✨ Fascia is primed!";
+}
+
+function addToVault() {
+    let title = document.getElementById('vault-title').value; let url = document.getElementById('vault-url').value;
+    let duration = document.getElementById('vault-duration').value; let focus = document.getElementById('vault-focus').value;
+    if(!title || !duration) return;
+    let vaults = JSON.parse(localStorage.getItem('vaults')) || [];
+    vaults.push({ title, url, duration, focus }); localStorage.setItem('vaults', JSON.stringify(vaults));
+    document.getElementById('vault-title').value = ''; document.getElementById('vault-url').value = ''; document.getElementById('vault-duration').value = '';
+    renderVault();
+}
+
+function removeVault(idx) {
+    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; vaults.splice(idx, 1); localStorage.setItem('vaults', JSON.stringify(vaults)); renderVault();
+}
+
+function renderVault() {
+    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; let list = document.getElementById('vault-list'); list.innerHTML = '';
+    vaults.forEach((v, idx) => {
+        let l = v.url ? `<a href="${v.url.startsWith('http') ? v.url : 'http://'+v.url}" target="_blank" style="color:#cc0066; font-weight:bold;">[Watch]</a>` : '';
+        list.innerHTML += `<li><strong>${v.title}</strong> (${v.duration}m) - <em>${v.focus}</em> ${l} <button class="prod-del" style="float:right;" onclick="removeVault(${idx})">X</button></li>`;
+    });
+}
+
+function smartSuggest() {
+    let focus = document.getElementById('focus-selector').value;
+    let res = document.getElementById('vault-suggestion'); res.style.display = 'block';
+    let nervePain = loggedBodyZones.some(log => log.type.includes("Nerve"));
+    if (nervePain) {
+        res.innerHTML = "🚨 <strong>COACH VETO:</strong> Nerve tension detected. <em>Mandatory: Somatic Reset & Nerve Flossing only.</em>";
+    } else if (focus === "Somatic Reset" || focus === "Lymphatic Drainage") {
+        res.innerHTML = `✅ <strong>RECOVERY:</strong> Great choice. Check the Recovery & Regulation box above.`;
+    } else {
+        res.innerHTML = `✅ <strong>CONDITION GREEN:</strong> Your system is primed for <strong>${focus}</strong>. Proceed with vault routines.`;
+    }
+}
+
+// SKILL TREE LOGIC
+function checkSkillLocks() {
+    let cs1 = document.getElementById('chk-cs-1').checked; let cs2 = document.getElementById('chk-cs-2'); let cs3 = document.getElementById('chk-cs-3'); let cs4 = document.getElementById('chk-cs-4');
+    if(cs1) { cs2.disabled = false; document.getElementById('tier-cs-2').classList.remove('locked'); } else { cs2.disabled = true; cs2.checked = false; document.getElementById('tier-cs-2').classList.add('locked'); }
+    if(cs2.checked) { cs3.disabled = false; document.getElementById('tier-cs-3').classList.remove('locked'); } else { cs3.disabled = true; cs3.checked = false; document.getElementById('tier-cs-3').classList.add('locked'); }
+    if(cs3.checked) { cs4.disabled = false; document.getElementById('tier-cs-4').classList.remove('locked'); } else { cs4.disabled = true; cs4.checked = false; document.getElementById('tier-cs-4').classList.add('locked'); }
+
+    let ms1 = document.getElementById('chk-ms-1').checked; let ms2 = document.getElementById('chk-ms-2'); let ms3 = document.getElementById('chk-ms-3');
+    if(ms1) { ms2.disabled = false; document.getElementById('tier-ms-2').classList.remove('locked'); } else { ms2.disabled = true; ms2.checked = false; document.getElementById('tier-ms-2').classList.add('locked'); }
+    if(ms2.checked) { ms3.disabled = false; document.getElementById('tier-ms-3').classList.remove('locked'); } else { ms3.disabled = true; ms3.checked = false; document.getElementById('tier-ms-3').classList.add('locked'); }
+
+    let skills = Array.from(document.querySelectorAll('.skill-chk:checked')).map(cb => cb.id);
+    localStorage.setItem('skillLocks', JSON.stringify(skills));
+}
+
+function loadSkillLocks() {
+    let skills = JSON.parse(localStorage.getItem('skillLocks')) || [];
+    skills.forEach(id => { let el = document.getElementById(id); if(el) el.checked =
