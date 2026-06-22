@@ -14,9 +14,8 @@
             <button class="tab-btn active" onclick="openTab('profile')">📋 Profile</button>
             <button class="tab-btn" onclick="openTab('skincare')">🧴 Skincare</button>
             <button class="tab-btn" onclick="openTab('flexibility')">🧘 Flexibility</button>
-            <button class="tab-btn" onclick="openTab('logs')">📝 Daily Logs</button>
-            <button class="tab-btn" onclick="openTab('oracle')">🎴 Oracle</button>
-            <button class="tab-btn" onclick="openTab('aura')">💖 Aura Board</button>
+            <button class="tab-btn" onclick="openTab('logs')">📝 Logs</button>
+            <button class="tab-btn" onclick="openTab('oracle-aura')">🔮 Oracle & Aura</button>
         </nav>
     </header>
 
@@ -32,34 +31,49 @@
                     <option value="congested">Congestion Prone</option>
                 </select>
                 
-                <h3 style="margin-top: 15px;">Circadian Rhythm</h3>
-                <label>
-                    <input type="checkbox" id="night-owl-toggle" onchange="saveProfile()"> 
-                    Shifted Schedule (Accommodates night shifts & biphasic sleep)
-                </label>
-                <p class="small-text">Shifts weather warnings and morning-after checks to fit your actual waking hours.</p>
+                <h3 style="margin-top: 15px;">Biphasic Clock Tracker</h3>
+                <p class="small-text">What time do you usually wake up and go to sleep?</p>
+                <input type="time" id="wake-time" onchange="saveProfile()">
+                <input type="time" id="sleep-time" onchange="saveProfile()">
             </div>
         </section>
 
         <section id="skincare" class="tab-content">
             <h2>🌸 Skincare & Barrier Health</h2>
+            
             <div class="bubbly-box">
                 <h3>Today's Atmosphere</h3>
-                <p>Dew Point: <strong id="live-dew">Loading...</strong> | Wind: <strong id="live-wind">Loading...</strong></p>
+                <p>Dew Point: <strong id="live-dew">Loading...</strong></p>
                 <p class="highlight-text" id="live-skin-action">Analyzing atmosphere...</p>
             </div>
 
             <div class="bubbly-box">
-                <h3>Deep Ingredient Scanner</h3>
-                <p class="small-text">Paste a full ingredient list (e.g., Good Molecules Niacinamide Serum ingredients) to check for biological clashes.</p>
-                <textarea id="ingredient-input" rows="4" placeholder="Paste ingredients here..."></textarea>
-                <button class="action-btn" onclick="scanIngredients()">Run Deep Scan</button>
-                <div id="scanner-result" class="scanner-box" style="display:none;"></div>
+                <h3>2D Face Map (Purge vs. Reaction)</h3>
+                <p class="small-text">Click the target dots on the zones to log a blemish. Green = Purge, Red = Reaction.</p>
+                <div class="map-container" id="face-map-container">
+                    <img src="face2d.jpg" alt="Face Map" class="interactive-map">
+                    </div>
+                <button class="action-btn" onclick="clearMarkers('face')">Clear Face Markers</button>
+            </div>
+
+            <div class="bubbly-box">
+                <h3>Product PAO (Shelf-Life) Tracker</h3>
+                <input type="text" id="pao-product" placeholder="Product Name (e.g., Vitamin C)">
+                <input type="number" id="pao-months" placeholder="Months good for (e.g., 6)">
+                <button class="action-btn" onclick="logPAO()">Track Product</button>
+                <ul id="pao-list" class="log-list"></ul>
+            </div>
+            
+            <div class="bubbly-box">
+                <h3>Hygiene Trackers</h3>
+                <p>Last Pillowcase Change: <strong id="pillowcase-date">Not Logged</strong></p>
+                <button class="action-btn" onclick="logHygiene('pillow')">I Changed My Pillowcase Today</button>
             </div>
         </section>
 
         <section id="flexibility" class="tab-content">
-            <h2>🎀 Active Flexibility</h2>
+            <h2>🎀 Contortion & Body Work</h2>
+
             <div class="bubbly-box">
                 <h3>Atmospheric Resistance</h3>
                 <p>Barometric Pressure: <strong id="live-pressure">Loading...</strong></p>
@@ -67,75 +81,71 @@
             </div>
 
             <div class="bubbly-box">
-                <h3>Hold Timer & Tension Map</h3>
-                <select id="pose-select">
-                    <option value="oversplits">Active Oversplits</option>
-                    <option value="chest-stand">Chest Stand</option>
-                    <option value="needles">Needles</option>
-                </select>
-                <button class="action-btn" id="timer-btn" onclick="startTimer()">Start 60s Hold</button>
-                <p id="timer-display">01:00</p>
+                <h3>2D Body Map (Nerve vs. Muscle)</h3>
+                <p class="small-text">Click the target dots to log tension. Blue = Muscle (dull), Yellow = Nerve (sharp).</p>
+                <div class="map-container" id="body-map-container">
+                    <img src="body2d.jpg" alt="Body Map" class="interactive-map">
+                    </div>
+                <button class="action-btn" onclick="clearMarkers('body')">Clear Body Markers</button>
             </div>
 
             <div class="bubbly-box">
-                <h3>Propagating Habits</h3>
-                <input type="text" id="plant-name" placeholder="Plant Cutting (e.g., Tetrasperma)">
-                <input type="text" id="flex-goal" placeholder="Linked Goal (e.g., Flat splits)">
-                <button class="action-btn" onclick="logHabit()">Sync Goal</button>
-                <ul id="habit-list" class="log-list"></ul>
+                <h3>Fascia Glide & Preparation</h3>
+                <input type="number" id="sleep-hours" placeholder="Hours slept just now?">
+                <input type="number" id="water-oz" placeholder="Ounces of water drank today?">
+                <button class="action-btn" onclick="calculateFascia()">Calculate Fascia State</button>
+                <p id="fascia-result" class="highlight-text" style="display:none;"></p>
+            </div>
+            
+            <div class="bubbly-box">
+                <h3>Asymmetry Balancer</h3>
+                <p class="small-text">Rate your left vs right fluidity (1-10).</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="left-side" placeholder="Left (1-10)">
+                    <input type="number" id="right-side" placeholder="Right (1-10)">
+                </div>
+                <button class="action-btn" onclick="checkAsymmetry()">Check Balance</button>
+                <p id="asymmetry-result" class="highlight-text" style="display:none;"></p>
             </div>
         </section>
 
         <section id="logs" class="tab-content">
-            <h2>📝 Comprehensive Daily Log</h2>
+            <h2>📝 Master Daily Log</h2>
             <div class="bubbly-box">
-                <h3>Sleep & Recovery</h3>
-                <p class="small-text">Log your rest blocks to track against environmental strain.</p>
-                <input type="text" id="sleep-block-1" placeholder="Sleep Block 1 (e.g., 3:00 AM - 7:00 AM)">
-                <input type="text" id="sleep-block-2" placeholder="Sleep Block 2 (e.g., 11:00 AM - 2:00 PM)">
-                
-                <h3 style="margin-top: 15px;">Skin Metrics</h3>
-                <p class="small-text">Rate your barrier health (1 = severe damage, 10 = perfectly plump).</p>
-                <input type="number" id="barrier-rating" min="1" max="10" placeholder="Barrier Rating (1-10)">
-                <textarea id="routine-notes" rows="2" placeholder="AM/PM Routine Notes & Actives Used..."></textarea>
-
-                <h3 style="margin-top: 15px;">Contortion Metrics</h3>
-                <p class="small-text">Rate your session ease (1 = extreme resistance, 10 = totally fluid).</p>
-                <input type="number" id="flex-rating" min="1" max="10" placeholder="Flexibility Fluidity (1-10)">
-                <textarea id="contortion-notes" rows="2" placeholder="Tension spots mapped, breakthroughs, oversplit depths..."></textarea>
-
-                <button class="action-btn" onclick="saveComprehensiveLog()" style="width: 100%; margin-top: 15px;">💾 Save Master Log</button>
+                <p class="small-text">Rate your barrier health (1-10) and contortion fluidity (1-10).</p>
+                <input type="number" id="barrier-rating" min="1" max="10" placeholder="Barrier Rating (1=Damaged, 10=Perfect)">
+                <input type="number" id="flex-rating" min="1" max="10" placeholder="Flexibility Rating (1=Stiff, 10=Fluid)">
+                <textarea id="master-notes" rows="3" placeholder="Notes on routine, products, depth..."></textarea>
+                <button class="action-btn" onclick="saveMasterLog()" style="width:100%;">💾 Save Master Log</button>
             </div>
-
             <div class="bubbly-box">
-                <h3>Master Log History</h3>
+                <h3>Log History</h3>
                 <ul id="master-log-list" class="log-list"></ul>
             </div>
         </section>
 
-        <section id="oracle" class="tab-content">
-            <h2>🔮 Digital Oracle</h2>
+        <section id="oracle-aura" class="tab-content">
+            <h2>🔮 Intuitive Oracle & Aura Synthesis</h2>
+            
             <div class="bubbly-box">
-                <h3>Current Lunar Phase: Waning Crescent</h3>
-                <p>Draw a card to set your daily intention. The deck adapts to your logs.</p>
-                <div class="oracle-draw-area">
-                    <button class="action-btn draw-btn" onclick="drawCard()">Draw a Card</button>
-                    <div id="card-result" class="card-display">
-                        <p id="card-name">--</p>
-                        <p id="card-meaning">Waiting for draw...</p>
-                    </div>
+                <h3>The 4-Suit Deck</h3>
+                <p class="small-text">Draw a card based purely on intuition and luck.</p>
+                <button class="action-btn draw-btn" onclick="drawCard()">Draw a Card</button>
+                <div id="card-result" class="card-display">
+                    <p id="card-name">--</p>
+                    <p id="card-suit">--</p>
+                    <p id="card-meaning">Waiting for draw...</p>
                 </div>
             </div>
-        </section>
 
-        <section id="aura" class="tab-content">
-            <h2>💖 Digital Aura Board</h2>
             <div class="bubbly-box">
-                <h3>Your Stamp Collection</h3>
-                <p class="small-text">Stamps earned from balanced days and logged routines.</p>
-                <div id="stamp-grid" class="stamp-container">
-                    </div>
-                <button class="action-btn" onclick="awardStamp()">+ Debug: Add Stamp</button>
+                <h3>Weekly Aura Stamp</h3>
+                <p class="small-text">Auto-generates every Sunday at 12:00 PM based on your 7-day logs.</p>
+                <button class="action-btn" onclick="forceAuraGeneration()">+ Debug: Force Aura Check</button>
+                <div id="weekly-aura-display" class="card-display" style="margin-top:15px; background:#e6f9ff; border-color:#66ccff;">
+                    <p id="aura-name" style="font-size:1.5rem; font-weight:bold; color:#007799;">Waiting for Sunday...</p>
+                    <p id="aura-advice">Keep logging your data.</p>
+                </div>
             </div>
         </section>
 
