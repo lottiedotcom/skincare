@@ -8,13 +8,6 @@
 </head>
 <body>
 
-    <div id="loading-screen">
-        <div class="loader-box">
-            <h1 style="color: #cc0066; text-shadow: 1px 1px 3px #ffb3d9; margin-bottom: 25px; font-size: 2.5rem;">✨ Welcome! ✨</h1>
-            <button class="action-btn" onclick="enterApp()" style="font-size: 1.2rem; padding: 15px;">ENTER</button>
-        </div>
-    </div>
-
     <header class="top-header">
         <h1>✨ Daily Wellness & Aura ✨</h1>
     </header>
@@ -41,7 +34,8 @@
             <div class="bubbly-box">
                 <h3 id="today-routine-header">✅ Today's Custom Routine</h3>
                 <p class="small-text">Your specific checklist for today. (Edit in Settings!)</p>
-                <div class="routine-checklist" id="custom-routine-list"></div>
+                <div class="routine-checklist" id="custom-routine-list">
+                    </div>
             </div>
 
             <div class="bubbly-box">
@@ -88,6 +82,7 @@
                     <label class="check-tag" style="background:#ffe6f2; color:#cc0066;"><input type="checkbox" id="prod-fav"> ❤️ Favorite</label>
                 </div>
                 <button class="action-btn" onclick="addProduct()">+ Add to Diary</button>
+                
                 <div id="product-database-grid" class="product-grid"></div>
             </div>
 
@@ -318,4 +313,9 @@
             <div class="bubbly-box">
                 <h3>📋 Clinical Skin Profile</h3>
                 <select id="skin-type-select" onchange="saveSettings()">
+                    <option value="combination">Combination</option>
+                    <option value="dry">Dry</option>
+                    <option value="oily">Oily</option>
+                    <option value="normal">Normal</option>
+                    <option value="sensitive">Sensitive</option>
              
