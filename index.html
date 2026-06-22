@@ -15,7 +15,7 @@
             <button class="tab-btn" onclick="openTab('flexibility')">🧘 Flex</button>
             <button class="tab-btn" onclick="openTab('oracle-aura')">🔮 Aura</button>
             <button class="tab-btn" onclick="openTab('logs')">📝 Logs</button>
-            <button class="tab-btn" onclick="openTab('settings')">⚙️ Settings</button>
+            <button class="tab-btn" onclick="openTab('settings')">⚙️ Set</button>
         </nav>
     </header>
 
@@ -41,8 +41,7 @@
             <div class="bubbly-box">
                 <h3 id="today-routine-header">✅ Today's Custom Routine</h3>
                 <p class="small-text">Your specific checklist for today. (Edit in Settings!)</p>
-                <div class="routine-checklist" id="custom-routine-list">
-                    </div>
+                <div class="routine-checklist" id="custom-routine-list"></div>
             </div>
 
             <div class="bubbly-box">
@@ -90,7 +89,7 @@
                 </div>
                 <button class="action-btn" onclick="addProduct()">+ Add to Diary</button>
                 
-                <div id="product-database-grid" class="product-grid"></div>
+                <div id="product-database-grid" class="product-grid" style="margin-top: 15px;"></div>
             </div>
 
             <div class="bubbly-box">
@@ -216,22 +215,22 @@
                 <div class="skill-tier" id="tier-cs-1">
                     <h4>Tier 1: Foundation</h4>
                     <p class="small-text">Routine: Cervical/Thoracic Mobility & Cat-Cows.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-cs-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-cs-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
                 </div>
                 <div class="skill-tier locked" id="tier-cs-2">
                     <h4>Tier 2: Activation</h4>
                     <p class="small-text">Routine: Scapular Retractions & Glute Bridges.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-cs-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-cs-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
                 </div>
                 <div class="skill-tier locked" id="tier-cs-3">
                     <h4>Tier 3: Sub-Shape</h4>
                     <p class="small-text">Routine: Active Cobra Liftoffs & Sphinx holds.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-cs-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-cs-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
                 </div>
                 <div class="skill-tier locked" id="tier-cs-4">
                     <h4>Tier 4: Peak</h4>
                     <p class="small-text">Routine: Unassisted Chest Stand Hold.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-cs-4" onchange="checkSkillLocks()" disabled> Mastered Peak</label>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-cs-4" onchange="checkSkillLocks()" disabled> Mastered Peak</label>
                 </div>
             </div>
 
@@ -240,17 +239,17 @@
                 <div class="skill-tier" id="tier-ms-1">
                     <h4>Tier 1: Isolation</h4>
                     <p class="small-text">Routine: Hip Capsule Rotations & Frog Pose.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-ms-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-ms-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
                 </div>
                 <div class="skill-tier locked" id="tier-ms-2">
                     <h4>Tier 2: Lengthening</h4>
                     <p class="small-text">Routine: PNF Adductor Contractions & Pancake.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-ms-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-ms-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
                 </div>
                 <div class="skill-tier locked" id="tier-ms-3">
                     <h4>Tier 3: Active Strength</h4>
                     <p class="small-text">Routine: Isometric Straddle Lifts.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-ms-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
+                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-ms-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
                 </div>
             </div>
             
@@ -311,8 +310,4 @@
                 <h3>🕰️ Biphasic Clock</h3>
                 <div style="display: flex; gap: 10px;">
                     <input type="time" id="wake-time" onchange="saveSettings()">
-                    <input type="time" id="sleep-time" onchange="saveSettings()">
-                </div>
-            </div>
-
-            <
+            
