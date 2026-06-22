@@ -19,61 +19,10 @@
 
     <header class="top-header">
         <h1>✨ Daily Wellness & Aura ✨</h1>
-        <nav class="tab-container">
-            <button class="tab-btn active" onclick="openTab('skincare')">🧴 Skincare</button>
-            <button class="tab-btn" onclick="openTab('flexibility')">🧘 Flexibility</button>
-            <button class="tab-btn" onclick="openTab('oracle-aura')">🔮 Oracle & Aura</button>
-            <button class="tab-btn" onclick="openTab('logs')">📝 Journal</button>
-            <button class="tab-btn" onclick="openTab('settings')" style="background: #e6ccff; border-color: #cc99ff; color: #4b0082;">⚙️ Settings</button>
-        </nav>
     </header>
 
     <main class="content-area">
         
-        <section id="settings" class="tab-content">
-            <h2>⚙️ System Settings & Profile</h2>
-            
-            <div class="bubbly-box">
-                <h3>📍 Location Accuracy (Auto-Grab)</h3>
-                <p class="small-text">Allow location access to get hyper-accurate atmospheric pressure for your specific elevation and micro-climate.</p>
-                <button class="action-btn" onclick="grabLocation()" style="background: #99ccff; box-shadow: 0px 3px 0px #0066cc;">📍 Auto-Grab My Location</button>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <input type="text" id="lat-input" placeholder="Latitude" onchange="saveSettings()">
-                    <input type="text" id="lon-input" placeholder="Longitude" onchange="saveSettings()">
-                </div>
-            </div>
-
-            <div class="bubbly-box">
-                <h3>🕰️ Biphasic Clock Tracker</h3>
-                <p class="small-text">What time do you usually wake up and go to sleep? This calibrates your routine warnings.</p>
-                <div style="display: flex; gap: 10px;">
-                    <input type="time" id="wake-time" onchange="saveSettings()">
-                    <input type="time" id="sleep-time" onchange="saveSettings()">
-                </div>
-            </div>
-
-            <div class="bubbly-box">
-                <h3>📋 Clinical Skin Profile</h3>
-                <select id="skin-type-select" onchange="saveSettings()">
-                    <option value="combination">Combination</option>
-                    <option value="dry">Dry</option>
-                    <option value="oily">Oily</option>
-                    <option value="normal">Normal</option>
-                    <option value="sensitive">Sensitive</option>
-                </select>
-                <h3 style="margin-top: 15px;">Allergies</h3>
-                <input type="text" id="allergy-input" placeholder="e.g., Niacinamide, Fragrance" onchange="saveSettings()">
-                
-                <h3 style="margin-top: 15px;">Concerns & Goals</h3>
-                <div class="tag-group" id="profile-tags">
-                    <label class="check-tag"><input type="checkbox" value="Aging" onchange="saveSettings()"> Aging</label>
-                    <label class="check-tag"><input type="checkbox" value="Dryness" onchange="saveSettings()"> Dryness</label>
-                    <label class="check-tag"><input type="checkbox" value="Acne" onchange="saveSettings()"> Acne</label>
-                    <label class="check-tag"><input type="checkbox" value="Barrier Repair" onchange="saveSettings()"> Barrier Repair</label>
-                </div>
-            </div>
-        </section>
-
         <section id="skincare" class="tab-content active">
             <h2>🌸 Skincare & Barrier Health</h2>
             
@@ -101,24 +50,50 @@
             </div>
 
             <div class="bubbly-box">
-                <h3>✅ Daily Routine Tracker</h3>
-                <p class="small-text">Check off steps to log them in your synthesis journal.</p>
-                <div class="routine-checklist">
-                    <label class="check-tag"><input type="checkbox" id="step-am-cleanse"> AM Water Rinse / Cleanse</label>
-                    <label class="check-tag"><input type="checkbox" id="step-vitc"> Antioxidant / Vitamin C</label>
-                    <label class="check-tag"><input type="checkbox" id="step-spf"> SPF Applied</label>
-                    <label class="check-tag"><input type="checkbox" id="step-pm-cleanse"> PM Double Cleanse</label>
-                    <label class="check-tag"><input type="checkbox" id="step-actives"> Actives / Serums</label>
-                    <label class="check-tag"><input type="checkbox" id="step-barrier"> Barrier Cream / Occlusive</label>
-                </div>
+                <h3>✅ Custom Daily Routine</h3>
+                <p class="small-text">Check off your routine steps. (Edit these in Settings!)</p>
+                <div class="routine-checklist" id="custom-routine-list">
+                    </div>
             </div>
 
             <div class="bubbly-box">
-                <h3>2D Face Map (Purge vs. Reaction)</h3>
+                <h3>2D Face Map (Acne Tracker)</h3>
+                <p class="small-text">Click the numbered zones to log specific breakout types.</p>
                 <div class="map-container" id="face-map-container">
                     <img src="Face2d.jpg" alt="Face Map" class="interactive-map">
+                    </div>
+                <button class="action-btn" onclick="saveMapToJournal('face')" style="background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Save Map to Journal</button>
+            </div>
+
+            <div class="bubbly-box">
+                <h3>🧴 Notion-Style Product Database</h3>
+                <p class="small-text">Log new products below to track PAO and repurchases.</p>
+                <input type="text" id="prod-name" placeholder="Product Name (e.g., Glycolic Acid 5%)">
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="prod-brand" placeholder="Brand">
+                    <select id="prod-type">
+                        <option value="Serum">Serum</option>
+                        <option value="Cleanser">Cleanser</option>
+                        <option value="Moisturizer">Moisturizer</option>
+                        <option value="Active">Active/Treatment</option>
+                        <option value="SPF">SPF</option>
+                    </select>
                 </div>
-                <button class="action-btn" onclick="clearMarkers('face')">Clear Face Markers</button>
+                <div style="display: flex; gap: 8px;">
+                    <input type="number" id="prod-pao" placeholder="PAO (Months open)">
+                    <input type="text" id="prod-price" placeholder="Price (e.g., $15.00)">
+                </div>
+                <input type="text" id="prod-url" placeholder="Product URL (e.g., amazon.com/...)">
+                
+                <div style="display: flex; gap: 15px; margin-top: 10px; align-items: center;">
+                    <label class="check-tag"><input type="checkbox" id="prod-wishlist"> Wishlist Item</label>
+                    <label class="check-tag" style="background:#ffe6f2; color:#cc0066;"><input type="checkbox" id="prod-fav"> ❤️ Favorite</label>
+                </div>
+                
+                <button class="action-btn" onclick="addProduct()">+ Add to Database</button>
+                
+                <div id="product-database-list" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+                    </div>
             </div>
             
             <div class="bubbly-box">
@@ -139,10 +114,11 @@
 
             <div class="bubbly-box">
                 <h3>2D Body Map (Nerve vs. Muscle)</h3>
+                <p class="small-text">Click numbered zones to log tension. Blue = Muscle, Yellow = Nerve.</p>
                 <div class="map-container" id="body-map-container">
                     <img src="body2d.jpg" alt="Body Map" class="interactive-map">
                 </div>
-                <button class="action-btn" onclick="clearMarkers('body')">Clear Body Markers</button>
+                <button class="action-btn" onclick="saveMapToJournal('body')" style="background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Save Map to Journal</button>
             </div>
 
             <div class="bubbly-box">
@@ -161,7 +137,7 @@
                 <h3>The 50-Card Deck</h3>
                 <button class="action-btn draw-btn" onclick="drawCard()">Draw Daily Card</button>
                 <div id="card-result" class="card-display">
-                    <p id="card-name">--</p>
+                    <p id="card-name" style="font-size: 1.8rem;">--</p>
                     <p id="card-suit">--</p>
                     <p id="card-meaning">Waiting for draw...</p>
                 </div>
@@ -169,7 +145,8 @@
 
             <div class="bubbly-box">
                 <h3>Weekly Aura Stamp</h3>
-                <button class="action-btn" onclick="forceAuraGeneration()">Generate Weekly Aura</button>
+                <p class="small-text">Auto-generates every Sunday at 12:00 PM MST based on your 7-day logs.</p>
+                <button class="action-btn" onclick="forceAuraGeneration()">+ Debug: Force Aura Check</button>
                 <div id="weekly-aura-display" class="card-display" style="margin-top:15px; background:#e6f9ff; border-color:#66ccff;">
                     <p id="aura-name" style="font-size:1.5rem; font-weight:bold; color:#007799;">Waiting...</p>
                     <p id="aura-advice">Keep logging data.</p>
@@ -181,7 +158,7 @@
             <h2>📝 Auto-Synthesis Journal</h2>
             <div class="bubbly-box">
                 <h3>Daily Brain Dump</h3>
-                <p class="small-text">Type out routine adjustments, pain levels, or random thoughts. The system will compile the rest of your data automatically.</p>
+                <p class="small-text">Type out routine adjustments or random thoughts. The system grabs your weather, routine, and oracle automatically.</p>
                 <textarea id="brain-dump" rows="4" placeholder="How did today feel?"></textarea>
                 <button class="action-btn" onclick="compileJournal()" style="width:100%; background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Compile Today's Journal</button>
                 <p id="journal-warning" style="color: red; font-size: 0.85rem; font-weight: bold; margin-top: 10px; display: none;"></p>
@@ -192,7 +169,68 @@
             </div>
         </section>
 
+        <section id="settings" class="tab-content">
+            <h2>⚙️ System Settings & Profile</h2>
+            
+            <div class="bubbly-box">
+                <h3>📍 Location Accuracy (Auto-Grab)</h3>
+                <button class="action-btn" onclick="grabLocation()" style="background: #99ccff; box-shadow: 0px 3px 0px #0066cc;">📍 Auto-Grab My Location</button>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="text" id="lat-input" placeholder="Latitude" onchange="saveSettings()">
+                    <input type="text" id="lon-input" placeholder="Longitude" onchange="saveSettings()">
+                </div>
+            </div>
+
+            <div class="bubbly-box">
+                <h3>🕰️ Biphasic Clock Tracker</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="time" id="wake-time" onchange="saveSettings()">
+                    <input type="time" id="sleep-time" onchange="saveSettings()">
+                </div>
+            </div>
+
+            <div class="bubbly-box">
+                <h3>📋 Clinical Skin Profile</h3>
+                <select id="skin-type-select" onchange="saveSettings()">
+                    <option value="combination">Combination</option>
+                    <option value="dry">Dry</option>
+                    <option value="oily">Oily</option>
+                    <option value="normal">Normal</option>
+                    <option value="sensitive">Sensitive</option>
+                </select>
+                <h3 style="margin-top: 15px;">Allergies</h3>
+                <input type="text" id="allergy-input" placeholder="e.g., Niacinamide" onchange="saveSettings()">
+                
+                <h3 style="margin-top: 15px;">Concerns & Goals</h3>
+                <div class="tag-group" id="profile-tags">
+                    <label class="check-tag"><input type="checkbox" value="Aging" onchange="saveSettings()"> Aging</label>
+                    <label class="check-tag"><input type="checkbox" value="Dryness" onchange="saveSettings()"> Dryness</label>
+                    <label class="check-tag"><input type="checkbox" value="Acne" onchange="saveSettings()"> Acne</label>
+                    <label class="check-tag"><input type="checkbox" value="Barrier Repair" onchange="saveSettings()"> Barrier Repair</label>
+                </div>
+            </div>
+
+            <div class="bubbly-box">
+                <h3>✅ Custom Routine Builder</h3>
+                <p class="small-text">Add steps to your daily routine checklist.</p>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="new-routine-step" placeholder="e.g., Snail Mucin">
+                    <button class="action-btn" onclick="addRoutineStep()" style="margin-top:0;">Add</button>
+                </div>
+                <ul id="settings-routine-list" class="log-list" style="margin-top: 15px;">
+                    </ul>
+            </div>
+        </section>
+
     </main>
+
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="openTab('skincare')">🧴 Skin</button>
+        <button class="nav-btn" onclick="openTab('flexibility')">🧘 Flex</button>
+        <button class="nav-btn" onclick="openTab('oracle-aura')">🔮 Aura</button>
+        <button class="nav-btn" onclick="openTab('logs')">📝 Logs</button>
+        <button class="nav-btn" onclick="openTab('settings')">⚙️ Set</button>
+    </nav>
 
     <script src="app.js"></script>
 </body>
