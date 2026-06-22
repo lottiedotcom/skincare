@@ -14,6 +14,7 @@
             <button class="tab-btn active" onclick="openTab('profile')">📋 Profile</button>
             <button class="tab-btn" onclick="openTab('skincare')">🧴 Skincare</button>
             <button class="tab-btn" onclick="openTab('flexibility')">🧘 Flexibility</button>
+            <button class="tab-btn" onclick="openTab('logs')">📝 Daily Logs</button>
             <button class="tab-btn" onclick="openTab('oracle')">🎴 Oracle</button>
             <button class="tab-btn" onclick="openTab('aura')">💖 Aura Board</button>
         </nav>
@@ -34,7 +35,7 @@
                 <h3 style="margin-top: 15px;">Circadian Rhythm</h3>
                 <label>
                     <input type="checkbox" id="night-owl-toggle" onchange="saveProfile()"> 
-                    Night Owl Mode (10 PM - 7 AM shift)
+                    Shifted Schedule (Accommodates night shifts & biphasic sleep)
                 </label>
                 <p class="small-text">Shifts weather warnings and morning-after checks to fit your actual waking hours.</p>
             </div>
@@ -49,11 +50,11 @@
             </div>
 
             <div class="bubbly-box">
-                <h3>Ingredient Scanner</h3>
-                <p class="small-text">Paste an ingredient list below to check for clashes with your current Skin Profile.</p>
-                <textarea id="ingredient-input" rows="4" placeholder="Paste ingredients here (e.g., Water, Glycerin, Alcohol Denat...)"></textarea>
-                <button class="action-btn" onclick="scanIngredients()">Scan Ingredients</button>
-                <p id="scanner-result" class="highlight-text" style="display:none;"></p>
+                <h3>Deep Ingredient Scanner</h3>
+                <p class="small-text">Paste a full ingredient list (e.g., Good Molecules Niacinamide Serum ingredients) to check for biological clashes.</p>
+                <textarea id="ingredient-input" rows="4" placeholder="Paste ingredients here..."></textarea>
+                <button class="action-btn" onclick="scanIngredients()">Run Deep Scan</button>
+                <div id="scanner-result" class="scanner-box" style="display:none;"></div>
             </div>
         </section>
 
@@ -82,6 +83,33 @@
                 <input type="text" id="flex-goal" placeholder="Linked Goal (e.g., Flat splits)">
                 <button class="action-btn" onclick="logHabit()">Sync Goal</button>
                 <ul id="habit-list" class="log-list"></ul>
+            </div>
+        </section>
+
+        <section id="logs" class="tab-content">
+            <h2>📝 Comprehensive Daily Log</h2>
+            <div class="bubbly-box">
+                <h3>Sleep & Recovery</h3>
+                <p class="small-text">Log your rest blocks to track against environmental strain.</p>
+                <input type="text" id="sleep-block-1" placeholder="Sleep Block 1 (e.g., 3:00 AM - 7:00 AM)">
+                <input type="text" id="sleep-block-2" placeholder="Sleep Block 2 (e.g., 11:00 AM - 2:00 PM)">
+                
+                <h3 style="margin-top: 15px;">Skin Metrics</h3>
+                <p class="small-text">Rate your barrier health (1 = severe damage, 10 = perfectly plump).</p>
+                <input type="number" id="barrier-rating" min="1" max="10" placeholder="Barrier Rating (1-10)">
+                <textarea id="routine-notes" rows="2" placeholder="AM/PM Routine Notes & Actives Used..."></textarea>
+
+                <h3 style="margin-top: 15px;">Contortion Metrics</h3>
+                <p class="small-text">Rate your session ease (1 = extreme resistance, 10 = totally fluid).</p>
+                <input type="number" id="flex-rating" min="1" max="10" placeholder="Flexibility Fluidity (1-10)">
+                <textarea id="contortion-notes" rows="2" placeholder="Tension spots mapped, breakthroughs, oversplit depths..."></textarea>
+
+                <button class="action-btn" onclick="saveComprehensiveLog()" style="width: 100%; margin-top: 15px;">💾 Save Master Log</button>
+            </div>
+
+            <div class="bubbly-box">
+                <h3>Master Log History</h3>
+                <ul id="master-log-list" class="log-list"></ul>
             </div>
         </section>
 
