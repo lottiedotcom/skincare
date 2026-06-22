@@ -92,6 +92,12 @@
                 
                 <div id="product-database-grid" class="product-grid"></div>
             </div>
+
+            <div class="bubbly-box">
+                <h3>🛏️ Hygiene Tracker</h3>
+                <p>Last Pillowcase Change: <strong id="pillowcase-date">Not Logged</strong></p>
+                <button class="action-btn" onclick="logHygiene('pillow')">I Changed My Pillowcase Today</button>
+            </div>
         </section>
 
         <section id="flexibility" class="tab-content">
@@ -238,8 +244,8 @@
                 <h3>The 50-Card Deck</h3>
                 <button class="action-btn draw-btn" onclick="drawCard()">Draw Daily Card</button>
                 <div id="card-result" class="card-display">
-                    <p id="card-name" style="font-size: 1.8rem;">--</p>
-                    <p id="card-suit">--</p>
+                    <p id="card-name" style="font-size: 1.6rem;">--</p>
+                    <p id="card-suit" style="color: #ff66b2; font-weight: bold; text-transform: uppercase;">--</p>
                     <p id="card-meaning">Waiting for draw...</p>
                 </div>
             </div>
@@ -325,11 +331,4 @@
     </main>
 
     <nav class="bottom-nav">
-        <button class="nav-btn active" onclick="openTab('skincare')">🧴 Skin</button>
-        <button class="nav-btn" onclick="openTab('flexibility')">🧘 Flex</button>
-        <button class="nav-btn" onclick="openTab('oracle-aura')">🔮 Aura</button>
-        <button class="nav-btn" onclick="openTab('logs')">📝 Logs</button>
-        <button class="nav-btn" onclick="openTab('settings')">⚙️ Set</button>
-    </nav>
-
-    <s
+        <button class="nav-btn active" o
