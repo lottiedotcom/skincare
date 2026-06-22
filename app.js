@@ -33,7 +33,7 @@ const bodyZones = [
     { id: 27, name: 'L Hamstring', x: 62, y: 70 }, { id: 28, name: 'R Hamstring', x: 78, y: 70 }, { id: 29, name: 'L Calf', x: 62, y: 85 }, { id: 30, name: 'R Calf', x: 78, y: 85 }
 ];
 
-// Execute immediately without wait
+// No enter screen logic here. Just pure initialization.
 window.onload = () => {
     try {
         loadData(); fetchRealData(); populateSelects();
@@ -48,7 +48,7 @@ window.onload = () => {
                 warning.innerText = "✅ Journal already compiled for today.";
             }
         }
-    } catch(e) { console.error("Load Error: ", e); }
+    } catch(e) { console.error("Initialization Error: ", e); }
 };
 
 function openTab(tabId) {
@@ -62,22 +62,29 @@ function openTab(tabId) {
     let navId = tabId === 'skill-tree-tab' ? 'flexibility' : tabId;
     let targetNav = document.querySelector(`.tab-btn[onclick="openTab('${navId}')"]`);
     if(targetNav) targetNav.classList.add('active');
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function grabLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((pos) => {
-            document.getElementById('lat-input').value = pos.coords.latitude.toFixed(4);
-            document.getElementById('lon-input').value = pos.coords.longitude.toFixed(4);
+            let latEl = document.getElementById('lat-input');
+            let lonEl = document.getElementById('lon-input');
+            if(latEl) latEl.value = pos.coords.latitude.toFixed(4);
+            if(lonEl) lonEl.value = pos.coords.longitude.toFixed(4);
             saveSettings(); fetchRealData(); alert("Location grabbed!");
         });
     }
 }
 
 function saveSettings() {
-    userProfile.lat = document.getElementById('lat-input').value; userProfile.lon = document.getElementById('lon-input').value;
-    userProfile.skinType = document.getElementById('skin-type-select').value; userProfile.allergies = document.getElementById('allergy-input').value;
-    userProfile.wakeTime = document.getElementById('wake-time').value; userProfile.sleepTime = document.getElementById('sleep-time').value;
+    userProfile.lat = document.getElementById('lat-input') ? document.getElementById('lat-input').value : ''; 
+    userProfile.lon = document.getElementById('lon-input') ? document.getElementById('lon-input').value : '';
+    userProfile.skinType = document.getElementById('skin-type-select') ? document.getElementById('skin-type-select').value : ''; 
+    userProfile.allergies = document.getElementById('allergy-input') ? document.getElementById('allergy-input').value : '';
+    userProfile.wakeTime = document.getElementById('wake-time') ? document.getElementById('wake-time').value : ''; 
+    userProfile.sleepTime = document.getElementById('sleep-time') ? document.getElementById('sleep-time').value : '';
     localStorage.setItem('userProfile', JSON.stringify(userProfile));
 }
 
@@ -121,9 +128,11 @@ function addRoutineStep() {
 }
 
 function removeRoutineStep(day, index) {
-    userProfile.routine[day].splice(index, 1);
-    localStorage.setItem('userProfile', JSON.stringify(userProfile));
-    renderSettingsRoutine(); renderTodayRoutine();
+    if(userProfile.routine[day]) {
+        userProfile.routine[day].splice(index, 1);
+        localStorage.setItem('userProfile', JSON.stringify(userProfile));
+        renderSettingsRoutine(); renderTodayRoutine();
+    }
 }
 
 function renderSettingsRoutine() {
@@ -169,16 +178,22 @@ async function fetchRealData() {
         let aqiEl = document.getElementById('live-aqi'); if(aqiEl) aqiEl.innerText = `${liveData.aqi} µg/m³`; 
         let presEl = document.getElementById('live-pressure'); if(presEl) presEl.innerText = `${liveData.pressure} inHg`;
         let actEl = document.getElementById('action-dew'); if(actEl) actEl.innerText = cur.relative_humidity_2m < 30 ? "Occlusive day. TEWL is high." : "Atmosphere balanced.";
-    } catch (error) { console.error("API Error"); }
+    } catch (error) { console.error("API Error", error); }
 }
 
 // 2D MAPS
 function populateSelects() {
     let fSel = document.getElementById('face-zone-select'); 
-    if(fSel) faceZones.forEach(z => fSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`);
+    if(fSel) {
+        fSel.innerHTML = '';
+        faceZones.forEach(z => fSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`);
+    }
     
     let bSel = document.getElementById('body-zone-select'); 
-    if(bSel) bodyZones.forEach(z => bSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`);
+    if(bSel) {
+        bSel.innerHTML = '';
+        bodyZones.forEach(z => bSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`);
+    }
 }
 
 function logFaceZone() {
@@ -204,6 +219,7 @@ function renderMapLogs(mapType) {
     list.innerHTML = '';
     let logs = mapType === 'face' ? loggedFaceZones : loggedBodyZones;
     let container = document.getElementById(`${mapType}-map-container`);
+    
     if(container) {
         container.querySelectorAll('.target-dot').forEach(el => el.remove());
         const zones = mapType === 'face' ? faceZones : bodyZones;
@@ -231,10 +247,14 @@ function removeMapLog(mapType, idx) {
 // PRODUCT DIARY
 function addProduct() {
     let nameEl = document.getElementById('prod-name'); if(!nameEl) return;
-    let name = nameEl.value; let brand = document.getElementById('prod-brand').value;
-    let type = document.getElementById('prod-type').value; let pao = parseInt(document.getElementById('prod-pao').value);
-    let price = document.getElementById('prod-price').value; let url = document.getElementById('prod-url').value;
-    let wish = document.getElementById('prod-wishlist').checked; let fav = document.getElementById('prod-fav').checked;
+    let name = nameEl.value; 
+    let brand = document.getElementById('prod-brand') ? document.getElementById('prod-brand').value : '';
+    let type = document.getElementById('prod-type') ? document.getElementById('prod-type').value : ''; 
+    let paoEl = document.getElementById('prod-pao'); let pao = paoEl ? parseInt(paoEl.value) : 0;
+    let price = document.getElementById('prod-price') ? document.getElementById('prod-price').value : ''; 
+    let url = document.getElementById('prod-url') ? document.getElementById('prod-url').value : '';
+    let wish = document.getElementById('prod-wishlist') ? document.getElementById('prod-wishlist').checked : false; 
+    let fav = document.getElementById('prod-fav') ? document.getElementById('prod-fav').checked : false;
     
     if(!name) return; let exp = "N/A";
     if(pao && !wish) { let d = new Date(); d.setMonth(d.getMonth() + pao); exp = d.toLocaleDateString(); }
@@ -256,7 +276,7 @@ function renderProducts() {
     let grid = document.getElementById('product-database-grid'); if(!grid) return;
     grid.innerHTML = '';
     prods.forEach((p, idx) => {
-        let f = p.fav ? '❤️ ' : ''; let tagClass = `tag-${p.type.split('/')[0].toLowerCase()}`;
+        let f = p.fav ? '❤️ ' : ''; let tagClass = `tag-${(p.type || "serum").split('/')[0].toLowerCase()}`;
         grid.innerHTML += `
             <div class="product-card">
                 <div class="prod-header">${f}${p.name}</div>
@@ -279,7 +299,7 @@ function toggleSomaticReset() {
     const pacer = document.getElementById('somatic-pacer');
     const circle = document.getElementById('breath-circle');
     const text = document.getElementById('breath-text');
-    if(!pacer) return;
+    if(!pacer || !circle || !text) return;
     
     if (pacer.style.display === 'none') {
         pacer.style.display = 'block';
@@ -314,12 +334,16 @@ function generateLymphatic() {
 // SMART COACH & VAULT
 function addToVault() {
     let titleEl = document.getElementById('vault-title'); if(!titleEl) return;
-    let title = titleEl.value; let url = document.getElementById('vault-url').value;
-    let duration = document.getElementById('vault-duration').value; let focus = document.getElementById('vault-focus').value;
+    let title = titleEl.value; 
+    let url = document.getElementById('vault-url') ? document.getElementById('vault-url').value : '';
+    let duration = document.getElementById('vault-duration') ? document.getElementById('vault-duration').value : ''; 
+    let focus = document.getElementById('vault-focus') ? document.getElementById('vault-focus').value : '';
     if(!title || !duration) return;
     let vaults = JSON.parse(localStorage.getItem('vaults')) || [];
     vaults.push({ title, url, duration, focus }); localStorage.setItem('vaults', JSON.stringify(vaults));
-    titleEl.value = ''; document.getElementById('vault-url').value = ''; document.getElementById('vault-duration').value = '';
+    titleEl.value = ''; 
+    if(document.getElementById('vault-url')) document.getElementById('vault-url').value = ''; 
+    if(document.getElementById('vault-duration')) document.getElementById('vault-duration').value = '';
     renderVault();
 }
 
@@ -339,24 +363,12 @@ function renderVault() {
 function smartSuggest() {
     let focusEl = document.getElementById('focus-selector'); if(!focusEl) return;
     let focus = focusEl.value;
-    let res = document.getElementById('vault-suggestion'); res.style.display = 'block';
+    let res = document.getElementById('vault-suggestion'); if(!res) return;
+    res.style.display = 'block';
     let nervePain = loggedBodyZones.some(log => log.type.includes("Nerve"));
     if (nervePain) {
         res.innerHTML = "🚨 <strong>COACH VETO:</strong> Nerve tension detected. <em>Mandatory: Somatic Reset & Nerve Flossing only.</em>";
     } else if (focus === "Somatic Reset" || focus === "Lymphatic Drainage") {
         res.innerHTML = `✅ <strong>RECOVERY:</strong> Great choice. Check the Recovery & Regulation box above.`;
     } else {
-        res.innerHTML = `✅ <strong>CONDITION GREEN:</strong> Your system is primed for <strong>${focus}</strong>. Proceed with vault routines.`;
-    }
-}
-
-// SKILL TREE LOGIC
-function checkSkillLocks() {
-    let cs1 = document.getElementById('chk-cs-1'); if(!cs1) return;
-    let cs2 = document.getElementById('chk-cs-2'); let cs3 = document.getElementById('chk-cs-3'); let cs4 = document.getElementById('chk-cs-4');
-    if(cs1.checked) { cs2.disabled = false; document.getElementById('tier-cs-2').classList.remove('locked'); } else { cs2.disabled = true; cs2.checked = false; document.getElementById('tier-cs-2').classList.add('locked'); }
-    if(cs2.checked) { cs3.disabled = false; document.getElementById('tier-cs-3').classList.remove('locked'); } else { cs3.disabled = true; cs3.checked = false; document.getElementById('tier-cs-3').classList.add('locked'); }
-    if(cs3.checked) { cs4.disabled = false; document.getElementById('tier-cs-4').classList.remove('locked'); } else { cs4.disabled = true; cs4.checked = false; document.getElementById('tier-cs-4').classList.add('locked'); }
-
-    let ms1 = document.getElementById('chk-ms-1'); let ms2 = document.getElementById('chk-ms-2'); let ms3 = document.getElementById('chk-ms-3');
-    if(ms1.checked) { ms2.disabl
+        res.innerHTML = 
