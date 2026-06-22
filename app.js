@@ -7,6 +7,7 @@ let loggedFaceZones = []; let loggedBodyZones = [];
 let liveData = { dew: 0, uv: 0, aqi: 0, pressure: 0 };
 let currentDrawnCard = "None Drawn Today";
 let hasCompiledToday = false; 
+let breathingInterval;
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todayName = daysOfWeek[new Date().getDay()];
@@ -30,60 +31,6 @@ const bodyZones = [
     { id: 20, name: 'L Tricep', x: 55, y: 35 }, { id: 21, name: 'R Tricep', x: 85, y: 35 }, { id: 22, name: 'L Lat', x: 62, y: 35 }, { id: 23, name: 'R Lat', x: 78, y: 35 },
     { id: 24, name: 'Lower Back', x: 70, y: 45 }, { id: 25, name: 'L Glute', x: 62, y: 55 }, { id: 26, name: 'R Glute', x: 78, y: 55 },
     { id: 27, name: 'L Hamstring', x: 62, y: 70 }, { id: 28, name: 'R Hamstring', x: 78, y: 70 }, { id: 29, name: 'L Calf', x: 62, y: 85 }, { id: 30, name: 'R Calf', x: 78, y: 85 }
-];
-
-// FULL 50 CARD ORACLE DECK
-const deck = [
-    { suit: "Lunar", name: "🌑 The Void Moon", meaning: "Rest completely. No active holds." },
-    { suit: "Lunar", name: "🌓 The Waxing Pull", meaning: "Building energy. Prep and hydrate." },
-    { suit: "Lunar", name: "🌕 The Full Pull", meaning: "Maximum intensity. Push your peaks." },
-    { suit: "Lunar", name: "🌗 The Waning Crescent", meaning: "Declutter. Change pillowcases, stretch passively." },
-    { suit: "Lunar", name: "🩸 The Blood Moon", meaning: "Harsh internal shift. Expect unusual tension." },
-    { suit: "Lunar", name: "🌔 The Gibbous", meaning: "Hold poses a few seconds longer." },
-    { suit: "Lunar", name: "🌒 The Sliver", meaning: "Fragile state. Treat joints delicately." },
-    { suit: "Lunar", name: "💫 The Halo", meaning: "Protection. Maintain your routine." },
-    { suit: "Lunar", name: "🌊 The High Tide", meaning: "Fluidity. Fascia will glide beautifully." },
-    { suit: "Lunar", name: "🏜️ The Neap Tide", meaning: "Stagnation. Stiff and dry. Double hydration." },
-    { suit: "Lunar", name: "☄️ The Meteor", meaning: "Sudden spark. Try a new technique." },
-    { suit: "Lunar", name: "🌌 The Deep Sky", meaning: "Introspection. Focus on physical sensation." },
-    { suit: "Lunar", name: "☀️ The Solstice", meaning: "Peak heat. Primed for deep conditioning." },
-    { suit: "Botanical", name: "🌿 The Node", meaning: "Cut dead weight from your life or routine." },
-    { suit: "Botanical", name: "🍂 Root Rot", meaning: "Suffocation. Strip routine back to the minimum." },
-    { suit: "Botanical", name: "🧬 The Variegation", meaning: "Mutation. Introduce a new active or goal." },
-    { suit: "Botanical", name: "🪢 The Aerial Root", meaning: "Reaching for support. Use props today." },
-    { suit: "Botanical", name: "🍄 The Spore", meaning: "Hidden growth beneath the surface." },
-    { suit: "Botanical", name: "🥀 The Blight", meaning: "Environmental stress is compromising your system." },
-    { suit: "Botanical", name: "🌲 The Taproot", meaning: "Deep grounding. Focus on foundation." },
-    { suit: "Botanical", name: "🌱 The Sapling", meaning: "Fragile new beginnings. Protect progress." },
-    { suit: "Botanical", name: "🌳 The Canopy", meaning: "Over-extension. Stop spreading energy too thin." },
-    { suit: "Botanical", name: "🪨 Dormancy", meaning: "A natural biological pause. Wait it out." },
-    { suit: "Botanical", name: "✂️ The Graft", meaning: "Forced integration. Combine routines carefully." },
-    { suit: "Botanical", name: "🌻 Phototropism", meaning: "Chasing light. Follow what brings joy today." },
-    { suit: "Botanical", name: "🪴 The Rhizome", meaning: "Lateral movement. Becoming more stable." },
-    { suit: "Barrier", name: "🛡️ The Occlusive", meaning: "Seal it in. Protect your energy and moisture." },
-    { suit: "Barrier", name: "🧪 The Acid", meaning: "Burn it away. Deep cleanses and harsh truths." },
-    { suit: "Barrier", name: "💧 The Humectant", meaning: "Draw it in. Absorb positive energy." },
-    { suit: "Barrier", name: "🧈 The Lipid", meaning: "Structural repair. Thick moisturizers." },
-    { suit: "Barrier", name: "🌋 The Purge", meaning: "Push through the breakout or emotional block." },
-    { suit: "Barrier", name: "🧼 The Cleanse", meaning: "Wash the slate clean. Forgive yourself." },
-    { suit: "Barrier", name: "🧱 The Matrix", meaning: "Foundation cracked. Halt intense actives." },
-    { suit: "Barrier", name: "🧫 The Microbiome", meaning: "Delicate balance. Highly reactive today." },
-    { suit: "Barrier", name: "🫧 The Ferment", meaning: "Slow progress. Trust daily habits." },
-    { suit: "Barrier", name: "🧴 The Emollient", meaning: "Smoothing things over. Diplomacy and massage." },
-    { suit: "Barrier", name: "☀️ The Shield", meaning: "Absolute defense. Impenetrable boundaries." },
-    { suit: "Barrier", name: "🩹 The Patch", meaning: "Spot treatment. Fix the one specific thing bothering you." },
-    { suit: "Vessel", name: "🕸️ The Fascia", meaning: "Everything is connected. Look at the whole chain." },
-    { suit: "Vessel", name: "⚡ The Nerve", meaning: "Danger. Back away from what causes stress." },
-    { suit: "Vessel", name: "⚓ The Resistance", meaning: "Heavy gravity. Today will feel harder." },
-    { suit: "Vessel", name: "〰️ Fluidity", meaning: "Zero friction. Push limits and enjoy the glide." },
-    { suit: "Vessel", name: "🌬️ The Breath", meaning: "Oxygen deficit. Inhale, reset, down-regulate." },
-    { suit: "Vessel", name: "🦴 The Joint", meaning: "Structural limits. Do not force past the wall." },
-    { suit: "Vessel", name: "🧠 The Synapse", meaning: "Mental block. Regulate before stretching." },
-    { suit: "Vessel", name: "🩸 The Marrow", meaning: "Cellular exhaustion. Cancel active conditioning." },
-    { suit: "Vessel", name: "🩰 Alignment", meaning: "Symmetry. Left and right are in harmony." },
-    { suit: "Vessel", name: "🫀 The Pulse", meaning: "High heart rate required. Do cardio prep." },
-    { suit: "Vessel", name: "🌊 The Lymph", meaning: "Stagnant fluid. Do inversions or massage." },
-    { suit: "Vessel", name: "⚖️ The Anchor", meaning: "Stability over flexibility. Work muscle engagement." }
 ];
 
 window.onload = () => {
@@ -149,7 +96,6 @@ function loadData() {
     loggedFaceZones = JSON.parse(localStorage.getItem('stagedFace')) || [];
     loggedBodyZones = JSON.parse(localStorage.getItem('stagedBody')) || [];
     
-    // Safety check for hygiene element before setting
     let pillowElem = document.getElementById('pillowcase-date');
     if(pillowElem) pillowElem.innerText = localStorage.getItem('pillowDate') || "Not Logged";
     
@@ -296,6 +242,42 @@ function renderProducts() {
 
 function logHygiene(type) { let d = new Date().toLocaleDateString(); localStorage.setItem('pillowDate', d); document.getElementById('pillowcase-date').innerText = d; }
 
+// RECOVERY & REGULATION
+function toggleSomaticReset() {
+    const pacer = document.getElementById('somatic-pacer');
+    const circle = document.getElementById('breath-circle');
+    const text = document.getElementById('breath-text');
+    
+    if (pacer.style.display === 'none') {
+        pacer.style.display = 'block';
+        let phase = 0;
+        clearInterval(breathingInterval);
+        
+        breathingInterval = setInterval(() => {
+            if(phase === 0) { text.innerText = "Inhale..."; circle.classList.add('breathe-in'); circle.classList.remove('breathe-out'); }
+            else if(phase === 1) { text.innerText = "Hold..."; }
+            else if(phase === 2) { text.innerText = "Exhale..."; circle.classList.add('breathe-out'); circle.classList.remove('breathe-in'); }
+            else if(phase === 3) { text.innerText = "Hold..."; }
+            phase = (phase + 1) % 4;
+        }, 4000); // 4 second box breathing
+    } else {
+        pacer.style.display = 'none';
+        clearInterval(breathingInterval);
+    }
+}
+
+function generateLymphatic() {
+    const display = document.getElementById('lymphatic-sequence');
+    display.style.display = 'block';
+    display.innerHTML = `
+        <strong>Lymphatic Clearing Sequence:</strong><br><br>
+        1. <strong>Clavicle (Collarbone):</strong> Gently pump the hollows above your collarbone 15x.<br>
+        2. <strong>Axillary (Armpits):</strong> Pump deeply into the armpits 15x.<br>
+        3. <strong>Inguinal (Hips):</strong> Pump the creases of your hips 15x.<br>
+        4. <strong>Legs up the Wall:</strong> Rest inverted for 10 minutes to drain pooling fluid.
+    `;
+}
+
 // SMART COACH & VAULT
 function calculateFascia() {
     let sleep = document.getElementById('sleep-hours').value; let water = document.getElementById('water-oz').value;
@@ -307,3 +289,51 @@ function addToVault() {
     let title = document.getElementById('vault-title').value; let url = document.getElementById('vault-url').value;
     let duration = document.getElementById('vault-duration').value; let focus = document.getElementById('vault-focus').value;
     if(!title || !duration) return;
+    let vaults = JSON.parse(localStorage.getItem('vaults')) || [];
+    vaults.push({ title, url, duration, focus }); localStorage.setItem('vaults', JSON.stringify(vaults));
+    document.getElementById('vault-title').value = ''; document.getElementById('vault-url').value = ''; document.getElementById('vault-duration').value = '';
+    renderVault();
+}
+
+function removeVault(idx) {
+    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; vaults.splice(idx, 1); localStorage.setItem('vaults', JSON.stringify(vaults)); renderVault();
+}
+
+function renderVault() {
+    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; let list = document.getElementById('vault-list'); list.innerHTML = '';
+    vaults.forEach((v, idx) => {
+        let l = v.url ? `<a href="${v.url.startsWith('http') ? v.url : 'http://'+v.url}" target="_blank" style="color:#cc0066; font-weight:bold;">[Watch]</a>` : '';
+        list.innerHTML += `<li><strong>${v.title}</strong> (${v.duration}m) - <em>${v.focus}</em> ${l} <button class="prod-del" style="float:right;" onclick="removeVault(${idx})">X</button></li>`;
+    });
+}
+
+function smartSuggest() {
+    let focus = document.getElementById('focus-selector').value;
+    let res = document.getElementById('vault-suggestion'); res.style.display = 'block';
+    let nervePain = loggedBodyZones.some(log => log.type.includes("Nerve"));
+    if (nervePain) {
+        res.innerHTML = "🚨 <strong>COACH VETO:</strong> Nerve tension detected. <em>Mandatory: Somatic Reset & Nerve Flossing only.</em>";
+    } else if (focus === "Somatic Reset" || focus === "Lymphatic Drainage") {
+        res.innerHTML = `✅ <strong>RECOVERY:</strong> Great choice. Check the Recovery & Regulation box above.`;
+    } else {
+        res.innerHTML = `✅ <strong>CONDITION GREEN:</strong> Your system is primed for <strong>${focus}</strong>. Proceed with vault routines.`;
+    }
+}
+
+// SKILL TREE LOGIC
+function checkSkillLocks() {
+    let cs1 = document.getElementById('chk-cs-1').checked; let cs2 = document.getElementById('chk-cs-2'); let cs3 = document.getElementById('chk-cs-3'); let cs4 = document.getElementById('chk-cs-4');
+    if(cs1) { cs2.disabled = false; document.getElementById('tier-cs-2').classList.remove('locked'); } else { cs2.disabled = true; cs2.checked = false; document.getElementById('tier-cs-2').classList.add('locked'); }
+    if(cs2.checked) { cs3.disabled = false; document.getElementById('tier-cs-3').classList.remove('locked'); } else { cs3.disabled = true; cs3.checked = false; document.getElementById('tier-cs-3').classList.add('locked'); }
+    if(cs3.checked) { cs4.disabled = false; document.getElementById('tier-cs-4').classList.remove('locked'); } else { cs4.disabled = true; cs4.checked = false; document.getElementById('tier-cs-4').classList.add('locked'); }
+
+    let ms1 = document.getElementById('chk-ms-1').checked; let ms2 = document.getElementById('chk-ms-2'); let ms3 = document.getElementById('chk-ms-3');
+    if(ms1) { ms2.disabled = false; document.getElementById('tier-ms-2').classList.remove('locked'); } else { ms2.disabled = true; ms2.checked = false; document.getElementById('tier-ms-2').classList.add('locked'); }
+    if(ms2.checked) { ms3.disabled = false; document.getElementById('tier-ms-3').classList.remove('locked'); } else { ms3.disabled = true; ms3.checked = false; document.getElementById('tier-ms-3').classList.add('locked'); }
+
+    let skills = Array.from(document.querySelectorAll('.skill-chk:checked')).map(cb => cb.id);
+    localStorage.setItem('skillLocks', JSON.stringify(skills));
+}
+
+function loadSkillLocks() {
+    let skills 
