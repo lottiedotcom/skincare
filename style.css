@@ -18,12 +18,6 @@ body {
     padding: 40px; border-radius: 20px; text-align: center;
     box-shadow: 0px 0px 20px rgba(255, 102, 178, 0.8); width: 90%; max-width: 400px;
 }
-.blink { animation: blinker 1.5s linear infinite; color: #cc0066; margin-bottom: 15px;}
-.progress-bar { width: 100%; height: 20px; border: 2px solid #ffb3d9; border-radius: 10px; margin-top: 20px; overflow: hidden;}
-.progress-fill { width: 0%; height: 100%; background: #ff66b2; animation: loadBar 1.5s ease forwards;}
-
-@keyframes blinker { 50% { opacity: 0; } }
-@keyframes loadBar { 100% { width: 100%; } }
 
 .top-header { text-align: center; margin-bottom: 20px; }
 .top-header h1 { font-size: 2rem; color: #fff; text-shadow: 2px 2px 4px rgba(255, 102, 178, 0.8); margin-bottom: 15px; }
@@ -70,7 +64,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .check-tag {
     background: #e6ccff; color: #4b0082; padding: 8px 12px; border-radius: 15px; font-size: 0.85rem; cursor: pointer;
-    border: 1px solid #cc99ff; font-weight: bold; display: flex; align-items: center; justify-content: center;
+    border: 1px solid #cc99ff; font-weight: bold; display: flex; align-items: center; justify-content: center; margin-bottom:5px;
 }
 .routine-checklist { display: flex; flex-direction: column; gap: 8px; }
 .routine-checklist .check-tag { background: #ffe6f2; border-color: #ffb3d9; color: #cc0066; font-size: 1rem; justify-content: flex-start;}
@@ -129,4 +123,3 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .card-display { background: #ffe6f2; border: 2px dashed #ff99cc; border-radius: 15px; padding: 20px; text-align: center; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-               
