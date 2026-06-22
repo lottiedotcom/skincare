@@ -16,170 +16,96 @@ body {
 }
 
 /* Header & Tabs */
-.top-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
+.top-header { text-align: center; margin-bottom: 20px; }
 .top-header h1 {
-    font-size: 2rem;
-    color: #fff;
+    font-size: 2rem; color: #fff;
     text-shadow: 2px 2px 4px rgba(255, 102, 178, 0.8);
-    margin-bottom: 15px;
-    letter-spacing: 1px;
+    margin-bottom: 15px; letter-spacing: 1px;
 }
 
 .tab-container {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
+    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
 }
 
 .tab-btn {
     background: linear-gradient(180deg, #ffffff 0%, #ffe6f2 100%);
-    border: 3px solid #ff99cc;
-    border-radius: 20px;
-    padding: 10px 20px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #cc0066;
-    cursor: pointer;
-    box-shadow: 0px 4px 0px #ff99cc;
+    border: 3px solid #ff99cc; border-radius: 20px;
+    padding: 10px 15px; font-size: 1rem; font-weight: bold;
+    color: #cc0066; cursor: pointer; box-shadow: 0px 4px 0px #ff99cc;
     transition: all 0.1s;
 }
 
-.tab-btn:active {
-    transform: translateY(4px);
-    box-shadow: 0px 0px 0px #ff99cc;
-}
-
-.tab-btn.active {
-    background: linear-gradient(180deg, #ff99cc 0%, #ff66b2 100%);
-    color: white;
-    border-color: #fff;
-}
+.tab-btn:active { transform: translateY(4px); box-shadow: 0px 0px 0px #ff99cc; }
+.tab-btn.active { background: linear-gradient(180deg, #ff99cc 0%, #ff66b2 100%); color: white; border-color: #fff; }
 
 /* Page Content */
-.content-area {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.tab-content {
-    display: none; 
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-.tab-content.active {
-    display: block; 
-}
-
-.tab-content h2 {
-    color: #fff;
-    text-shadow: 1px 1px 3px #ff66b2;
-    margin-bottom: 15px;
-    text-align: center;
-}
+.content-area { max-width: 800px; margin: 0 auto; }
+.tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+.tab-content.active { display: block; }
+.tab-content h2 { color: #fff; text-shadow: 1px 1px 3px #ff66b2; margin-bottom: 15px; text-align: center; }
 
 /* Bubbly Containers */
 .bubbly-box {
     background: rgba(255, 255, 255, 0.85);
-    border: 3px solid #ffb3d9;
-    border-radius: 25px;
-    padding: 20px;
-    margin-bottom: 20px;
+    border: 3px solid #ffb3d9; border-radius: 25px;
+    padding: 20px; margin-bottom: 20px;
     box-shadow: 0px 5px 15px rgba(255, 102, 178, 0.2);
 }
 
 .bubbly-box h3 {
-    color: #cc0066;
-    border-bottom: 2px dashed #ffb3d9;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
+    color: #cc0066; border-bottom: 2px dashed #ffb3d9;
+    padding-bottom: 5px; margin-bottom: 10px;
 }
 
 .highlight-text {
-    background-color: #ffe6f2;
-    padding: 10px;
-    border-radius: 10px;
-    margin-top: 10px;
-    font-weight: bold;
-    color: #cc0066;
+    background-color: #ffe6f2; padding: 10px;
+    border-radius: 10px; margin-top: 10px; font-weight: bold; color: #cc0066;
 }
 
-/* Inputs & Buttons */
-input[type="text"] {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border: 2px solid #ffb3d9;
-    border-radius: 15px;
-    font-family: inherit;
-    font-size: 0.95rem;
+.small-text { font-size: 0.85rem; color: #885566; margin-bottom: 10px; }
+
+/* Inputs, Selects & Buttons */
+input[type="text"], select, textarea {
+    width: 100%; padding: 12px; margin: 8px 0;
+    border: 2px solid #ffb3d9; border-radius: 15px;
+    font-family: inherit; font-size: 0.95rem;
     background: rgba(255, 255, 255, 0.9);
 }
 
-input[type="text"]:focus {
-    outline: none;
-    border-color: #ff66b2;
-    background: #fff;
-}
+textarea { resize: vertical; }
+
+input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2; background: #fff; }
 
 .action-btn {
-    background: #ff99cc;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 1rem;
-    margin-top: 10px;
+    background: #ff99cc; color: white; border: none;
+    padding: 10px 20px; border-radius: 15px; font-weight: bold;
+    cursor: pointer; font-size: 1rem; margin-top: 10px;
     box-shadow: 0px 3px 0px #cc0066;
 }
 
-.action-btn:active {
-    transform: translateY(3px);
-    box-shadow: 0px 0px 0px #cc0066;
+.action-btn:active { transform: translateY(3px); box-shadow: 0px 0px 0px #cc0066; }
+
+/* Timer Display */
+#timer-display {
+    font-size: 2.5rem; font-weight: bold; color: #cc0066;
+    text-align: center; margin-top: 15px; text-shadow: 1px 1px 2px #ffb3d9;
 }
 
-.draw-btn {
-    display: block;
-    width: 100%;
-    font-size: 1.2rem;
-    padding: 15px;
-    margin-bottom: 15px;
+/* Aura Board - 99x99 Square Grid */
+.stamp-container {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    background: rgba(255, 204, 242, 0.5); padding: 15px;
+    border-radius: 15px; border: 2px dashed #ff99cc;
+    min-height: 150px; align-items: flex-start;
 }
 
-/* Logs and Oracle Display */
-.log-list {
-    list-style-type: none;
-    margin-top: 15px;
-}
-
-.log-list li {
-    background: #fff;
-    border: 1px solid #ffb3d9;
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-}
-
-.card-display {
-    background: #ffe6f2;
-    border: 2px dashed #ff99cc;
-    border-radius: 15px;
-    padding: 20px;
-    text-align: center;
-}
-
-#card-name {
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: #cc0066;
-    margin-bottom: 10px;
+.pixel-stamp {
+    width: 99px; height: 99px;
+    background-color: #fff; border: 2px solid #ff66b2;
+    border-radius: 5px; box-shadow: 2px 2px 0px #cc0066;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 0.8rem; text-align: center; color: #cc0066; font-weight: bold;
+    overflow: hidden;
 }
 
 @keyframes fadeIn {
