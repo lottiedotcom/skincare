@@ -8,10 +8,13 @@
 </head>
 <body>
 
+    <!-- STICKY TOP HEADER -->
     <header class="top-header">
         <h1>✨ Daily Wellness & Aura ✨</h1>
+        <!-- Always-Visible 14 Heart Slots -->
         <div id="top-hearts-container" class="hearts-row">
-            </div>
+            <!-- Populated by JS -->
+        </div>
         <nav class="tab-container">
             <button class="tab-btn active" onclick="openTab('skincare')">🧴 Skin</button>
             <button class="tab-btn" onclick="openTab('flexibility')">🧘 Flex</button>
@@ -23,6 +26,7 @@
 
     <main class="content-area">
         
+        <!-- SKINCARE PAGE -->
         <section id="skincare" class="tab-content active">
             <h2>🌸 Skincare & Barrier Health</h2>
             
@@ -143,6 +147,7 @@
             </div>
         </section>
 
+        <!-- FLEXIBILITY PAGE -->
         <section id="flexibility" class="tab-content">
             <h2>🎀 Contortion & Body Work</h2>
 
@@ -200,6 +205,7 @@
                 <ul id="body-log-list" class="log-list"></ul>
             </div>
 
+            <!-- EXPANDED RECOVERY & REGULATION -->
             <div class="bubbly-box" style="background: #e6ffe6; border-color: #99ff99;">
                 <h3 style="color: #006600; border-bottom-color: #99ff99;">🌬️ Recovery & Regulation</h3>
                 <p class="small-text" style="color: #004d00;">Nervous system resets, flossing, and sensory intervention.</p>
@@ -213,6 +219,7 @@
                     <button class="action-btn" onclick="toggleRecoveryPanel('spinal-decompression')" style="background: #6699ff; box-shadow: 0px 3px 0px #0033cc; margin-top: 0;">Decompression</button>
                 </div>
                 
+                <!-- Panels -->
                 <div id="somatic-pacer" class="recovery-panel" style="display: none; text-align: center; margin-top: 20px; background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed #99ff99;">
                     <select id="breathing-mode" style="margin-bottom: 10px;" onchange="updateBreathingMode()">
                         <option value="box">Box Breathing (4-4-4-4)</option>
@@ -328,6 +335,7 @@
             </div>
         </section>
 
+        <!-- EDUCATION TAB -->
         <section id="skill-tree-tab" class="tab-content">
             <h2>🎓 5x5 Contortion Academy</h2>
             
@@ -341,11 +349,13 @@
                 </ul>
             </div>
 
+            <!-- Dynamic Courses populated by JS -->
             <div id="academy-courses-container"></div>
             
             <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; margin-bottom: 20px;">⬅ Back to Flexibility</button>
         </section>
 
+        <!-- ORACLE TAB -->
         <section id="oracle-aura" class="tab-content">
             <h2>🔮 Intuitive Oracle & Aura Synthesis</h2>
             
@@ -369,6 +379,7 @@
             </div>
         </section>
 
+        <!-- LOGS PAGE -->
         <section id="logs" class="tab-content">
             <h2>📝 Auto-Synthesis Archive</h2>
             
@@ -391,6 +402,7 @@
             </div>
         </section>
 
+        <!-- SETTINGS PAGE -->
         <section id="settings" class="tab-content">
             <h2>⚙️ System Settings & Profile</h2>
             
@@ -458,9 +470,10 @@
                 <input type="text" id="allergy-input" placeholder="e.g., Niacinamide" onchange="saveSettings()">
             </div>
 
+            <!-- REWRITTEN LINKED ROUTINE BUILDER BOX -->
             <div class="bubbly-box">
                 <h3>✅ Daily Routine Builder</h3>
-                <p class="small-text">Build specific AM and PM routines for each day.</p>
+                <p class="small-text">Select a saved product from your database to chain to this step.</p>
                 <select id="routine-day-select" onchange="renderSettingsRoutine()">
                     <option value="Monday">Monday</option>
                     <option value="Tuesday">Tuesday</option>
@@ -471,13 +484,20 @@
                     <option value="Sunday">Sunday</option>
                 </select>
                 
-                <div style="display: flex; gap: 8px; margin-top:10px;">
-                    <select id="routine-time-select" style="flex: 1; margin:0;">
-                        <option value="am">AM ☀️</option>
-                        <option value="pm">PM 🌙</option>
-                    </select>
-                    <input type="text" id="new-routine-step" placeholder="e.g., Exfoliating Mask" style="flex: 2; margin:0;">
-                    <button class="action-btn" onclick="addRoutineStep()" style="margin:0; flex: 1;">Add</button>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top:10px;">
+                    <div style="display: flex; gap: 8px;">
+                        <select id="routine-time-select" style="flex: 1; margin:0;">
+                            <option value="am">AM ☀️</option>
+                            <option value="pm">PM 🌙</option>
+                        </select>
+                        <select id="routine-product-link" style="flex: 2; margin:0;">
+                            <!-- Populated with Vanity products dynamically -->
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="new-routine-step-note" placeholder="Application Note (e.g., Apply 3 drops, smooth gently)" style="flex: 2; margin:0;">
+                        <button class="action-btn" onclick="addRoutineStep()" style="margin:0; flex: 1;">Add Step</button>
+                    </div>
                 </div>
                 
                 <h4 style="margin-top: 15px; color: #cc0066; font-size: 0.9rem;">AM Routine</h4>
@@ -490,6 +510,37 @@
 
     </main>
 
+    <!-- NEW: MODAL OVERLAY FOR EDITING PRODUCTS -->
+    <div id="edit-product-modal" class="modal-overlay">
+        <div class="quiz-box" style="border-color: #9966ff; width: 95%; max-width: 450px;">
+            <h3 style="color: #6633cc; border-bottom: 2px dashed #cc99ff;">📝 Edit Product Details</h3>
+            <input type="hidden" id="edit-prod-index">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; text-align: left; margin-top: 10px;">
+                <input type="text" id="edit-prod-name" placeholder="Product Name" style="grid-column: span 2;">
+                <input type="text" id="edit-prod-brand" placeholder="Brand">
+                <select id="edit-prod-type">
+                    <option value="Serum">Serum</option>
+                    <option value="Cleanser">Cleanser</option>
+                    <option value="Moisturizer">Moisturizer</option>
+                    <option value="Active">Active/Treatment</option>
+                    <option value="SPF">SPF</option>
+                    <option value="Mask">Mask</option>
+                </select>
+                <textarea id="edit-prod-ingredients" rows="4" placeholder="Ingredients..." style="grid-column: span 2; font-size: 0.75rem;"></textarea>
+                <input type="number" id="edit-prod-pao" placeholder="PAO (Months)">
+                <div>
+                    <span style="font-size:0.7rem; font-weight:bold; color:#6633cc;">Date Opened:</span>
+                    <input type="date" id="edit-prod-open-date" style="margin:0;">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="action-btn" onclick="saveProductEdits()" style="background: #9966ff; margin:0;">Save Changes</button>
+                <button class="action-btn" onclick="closeEditModal()" style="background: #999; margin:0;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
     <div id="quiz-modal" class="modal-overlay">
         <div class="quiz-box">
             <h3 id="quiz-title">Form Check Quiz</h3>
