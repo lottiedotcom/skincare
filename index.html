@@ -43,10 +43,26 @@
                 </div>
             </div>
 
+            <!-- REWRITTEN: ADVANCED FORMULATION FOCUS POD -->
             <div class="bubbly-box" style="background: #fff9e6; border-color: #ffcc66;">
                 <h3 style="color: #cc8800; border-bottom-color: #ffcc66;">🎯 Formulation Focus: <span id="display-primary-focus">Hydration</span></h3>
-                <p class="small-text" style="color: #996600;">Tracking your routine against your primary goal.</p>
-                <p id="target-tracking-status" class="highlight-text" style="background: #fff; color: #cc8800; border: 1px dashed #ffcc66; font-size: 0.85rem;">Status: Awaiting analysis...</p>
+                <p class="small-text" style="color: #996600;">Strategic ingredient pathway analysis based on your primary goal.</p>
+                
+                <!-- Day vs Night Splits -->
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                    <div id="focus-am-status" class="highlight-text" style="margin-top:0; background: #fff; color: #cc8800; border: 1px dashed #ffcc66; font-size: 0.85rem;">☀️ AM Status: Awaiting routine data...</div>
+                    <div id="focus-pm-status" class="highlight-text" style="margin-top:0; background: #f2e6ff; color: #4b0082; border: 1px dashed #cc99ff; font-size: 0.85rem;">🌙 PM Status: Awaiting routine data...</div>
+                </div>
+
+                <!-- Star Player Highlight -->
+                <div id="focus-star-player" class="highlight-text" style="display: none; background: #e6ffe6; color: #006600; border: 1px solid #99ff99; font-size: 0.85rem;">
+                    🌟 <strong>Star Player:</strong> <span id="star-player-name">--</span>
+                </div>
+
+                <!-- Vanity Matchmaker -->
+                <div id="focus-matchmaker" class="highlight-text" style="display: none; background: #ffe6e6; color: #cc0000; border: 1px solid #ff9999; font-size: 0.85rem;">
+                    💡 <strong>Matchmaker:</strong> <span id="matchmaker-suggestion">--</span>
+                </div>
             </div>
 
             <div class="bubbly-box">
