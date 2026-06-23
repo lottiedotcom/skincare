@@ -153,15 +153,23 @@
 
             <div class="bubbly-box">
                 <h3>🔮 The Smart Coach</h3>
-                <p class="small-text">Input your recovery metrics below. Coach will calculate hydration, rest, weather, and the Oracle card to clear your training safely.</p>
+                <p class="small-text">Log your cumulative rest and hydration metrics. Coach will clear your training safely.</p>
                 
                 <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
-                    <input type="number" id="sleep-hours" placeholder="Hours Slept" style="flex:1; margin:0;">
-                    <input type="number" id="water-oz" placeholder="Total Water (oz)" style="flex:1; margin:0;" readonly>
-                    <button class="action-btn" onclick="addWater(16)" style="flex:1; margin:0; background:#66ccff; box-shadow:0px 3px 0px #0066cc;">💧 +16 oz</button>
+                    <div style="flex:1; display:flex; flex-direction:column; min-width: 120px;">
+                        <span style="font-size:0.75rem; color:#cc0066; font-weight:bold; margin-bottom: 4px;">Total Sleep: <span id="display-sleep">0</span> hrs</span>
+                        <div style="display:flex; gap:4px;">
+                            <input type="number" id="sleep-input" placeholder="+ Hrs" style="margin:0; flex:1;">
+                            <button class="action-btn" onclick="addSleep()" style="margin:0; flex:1; background:#99ccff; box-shadow:0px 3px 0px #0066cc; padding: 5px;">💤 Add</button>
+                        </div>
+                    </div>
+                    <div style="flex:1; display:flex; flex-direction:column; min-width: 120px;">
+                        <span style="font-size:0.75rem; color:#cc0066; font-weight:bold; margin-bottom: 4px;">Total Water: <span id="display-water">0</span> oz</span>
+                        <button class="action-btn" onclick="addWater(16)" style="margin:0; background:#66ccff; box-shadow:0px 3px 0px #0066cc; height: 100%;">💧 +16 oz</button>
+                    </div>
                 </div>
                 
-                <button class="action-btn" onclick="saveCoachMetrics()" style="background:#cc99ff; width:100%; box-shadow: 0px 3px 0px #9933cc; margin-bottom: 10px;">💾 Save Metrics</button>
+                <button class="action-btn" onclick="clearCoachMetrics()" style="background:#ffccf2; color:#cc0066; width:100%; box-shadow: 0px 3px 0px #ff99cc; margin-bottom: 10px; font-size: 0.8rem; padding: 8px;">Reset Mistake / Clear Metrics</button>
                 
                 <button class="action-btn" onclick="smartSuggest()" style="background:#cc0066; width:100%;">🔮 Ask Smart Coach</button>
                 
@@ -200,8 +208,10 @@
                         <option value="9">Severity: 9</option>
                         <option value="10">Severity: 10</option>
                     </select>
-                    <button class="action-btn" onclick="logBodyZone()" style="grid-column: span 2; margin: 0;">Stage</button>
+                    <button class="action-btn" onclick="logBodyZone()" style="grid-column: span 2; margin: 0;">Stage & Diagnose</button>
                 </div>
+                
+                <div id="body-map-analysis-box" class="highlight-text" style="display:none; background:#e6f9ff; color:#006699; margin-top: 15px; font-size: 0.9rem;"></div>
                 <ul id="body-log-list" class="log-list"></ul>
             </div>
 
@@ -349,7 +359,6 @@
                 </ul>
             </div>
 
-            <!-- Dynamic Courses populated by JS -->
             <div id="academy-courses-container"></div>
             
             <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; margin-bottom: 20px;">⬅ Back to Flexibility</button>
