@@ -13,14 +13,13 @@ let currentDrawnCard = "None Drawn Today";
 let hasCompiledToday = false; 
 
 // Timers
-let breathingTimer;
-let breathingPhaseTimeout;
-let lymphTimerInterval;
+let breathingTimer; let breathingPhaseTimeout;
+let lymphTimerInterval; let vagusTimerInterval; let tapInterval;
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todayName = daysOfWeek[new Date().getDay()];
 
-// Body Map Coordinates (Face map no longer uses dots, so coordinates are removed)
+// Body Map Coordinates (Face map is purely dropdown diagnostics now)
 const bodyZones = [
     { id: 1, name: 'Neck', x: 30, y: 10 }, { id: 2, name: 'L Shoulder', x: 15, y: 22 }, { id: 3, name: 'R Shoulder', x: 45, y: 22 },
     { id: 4, name: 'L Bicep', x: 10, y: 35 }, { id: 5, name: 'R Bicep', x: 50, y: 35 }, { id: 6, name: 'L Forearm', x: 5, y: 50 },
@@ -37,7 +36,11 @@ window.onload = () => {
     try {
         loadData(); fetchRealData(); renderAcademy();
         renderTodayRoutine(); renderSettingsRoutine(); renderProducts(); renderJournals(); renderVault(); 
-        renderConsistencyBanner(); checkSkillLocks(); 
+        checkSkillLocks(); 
+        
+        // Check 7:00 AM MST Reset Engine BEFORE rendering the hearts
+        check7AMResetEngine();
+        renderConsistencyBanner(); 
         
         let lastCompile = localStorage.getItem('lastCompileDate');
         if(lastCompile === new Date().toLocaleDateString()) {
@@ -48,11 +51,56 @@ window.onload = () => {
     } catch(e) { console.error("Safe Load Error: ", e); }
 };
 
+// ==========================================
+// 7:00 AM MST AUTO-RESET ENGINE
+// ==========================================
+function check7AMResetEngine() {
+    // Determine current time in MST
+    let now = new Date();
+    let mstTimeString = now.toLocaleString("en-US", {timeZone: "America/Phoenix"});
+    let mstTime = new Date(mstTimeString);
+    
+    let currentMstDateStr = mstTime.toLocaleDateString();
+    let currentMstHour = mstTime.getHours();
+    
+    let lastResetStr = localStorage.getItem('lastAutoResetDate');
+    
+    // If it's past 7:00 AM MST, and we haven't reset TODAY yet...
+    if (currentMstHour >= 7 && lastResetStr !== currentMstDateStr) {
+        
+        // 1. Force Compile the Journal to save yesterday's data before wiping
+        compileJournal(true); 
+        
+        // 2. Wipe the daily inputs cleanly
+        document.querySelectorAll('.routine-chk-am, .routine-chk-pm').forEach(cb => cb.checked = false);
+        let sleepEl = document.getElementById('sleep-hours'); if(sleepEl) sleepEl.value = '';
+        let waterEl = document.getElementById('water-oz'); if(waterEl) waterEl.value = '';
+        let dumpEl = document.getElementById('brain-dump'); if(dumpEl) dumpEl.value = '';
+        
+        loggedFaceZones = []; localStorage.setItem('stagedFace', JSON.stringify([]));
+        loggedBodyZones = []; localStorage.setItem('stagedBody', JSON.stringify([]));
+        document.getElementById('face-map-analysis-box').style.display = 'none';
+        
+        // 3. Reset the 14 Weekly Hearts if today is MONDAY
+        if (mstTime.getDay() === 1) { 
+            let emptyHearts = { "Monday":{am:false,pm:false}, "Tuesday":{am:false,pm:false}, "Wednesday":{am:false,pm:false}, "Thursday":{am:false,pm:false}, "Friday":{am:false,pm:false}, "Saturday":{am:false,pm:false}, "Sunday":{am:false,pm:false} };
+            localStorage.setItem('weeklyHearts', JSON.stringify(emptyHearts));
+        }
+        
+        // 4. Update the lock so it doesn't trigger again today
+        localStorage.setItem('lastAutoResetDate', currentMstDateStr);
+        hasCompiledToday = false; 
+        
+        // 5. Re-render the fresh UI
+        renderMapLogs('face'); renderMapLogs('body'); 
+        console.log("7:00 AM MST Engine Fired: Log saved, slate wiped.");
+    }
+}
+
 function openTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     let targetSection = document.getElementById(tabId); if(targetSection) targetSection.classList.add('active');
-    
     let navId = tabId === 'skill-tree-tab' ? 'flexibility' : tabId;
     let targetNav = document.querySelector(`.tab-btn[onclick="openTab('${navId}')"]`);
     if(targetNav) targetNav.classList.add('active');
@@ -163,24 +211,46 @@ function updateSkinAnalysis() {
     }
 }
 
-// 2D MAP LOGIC
+// 2D FACE MAP LOGIC (Smart Diagnostic)
 function logFaceZone() {
-    let zoneEl = document.getElementById('face-zone-select'); let typeEl = document.getElementById('face-acne-type');
-    if(!zoneEl || !typeEl) return;
-    let zone = zoneEl.value; let type = typeEl.value;
-    let colorMap = {"Cystic":"#cc0000", "Whitehead":"#e6e6e6", "Blackhead":"#333333", "Pustule":"#ff9933", "Papule":"#ff66b2"};
+    let zoneEl = document.getElementById('face-zone-select'); 
+    let typeEl = document.getElementById('face-acne-type');
+    let sevEl = document.getElementById('face-severity');
+    let sensEl = document.getElementById('face-sensation');
+    if(!zoneEl || !typeEl || !sevEl || !sensEl) return;
     
-    loggedFaceZones.push({ zone, type, color: colorMap[type] });
+    let zone = zoneEl.value; let type = typeEl.value; 
+    let severity = sevEl.value; let sensation = sensEl.value;
+    
+    let colorMap = {"Cystic":"#cc0000", "Whitehead":"#e6e6e6", "Blackhead":"#333333", "Pustule":"#ff9933", "Papule":"#ff66b2"};
+    loggedFaceZones.push({ zone, type, severity, sensation, color: colorMap[type] });
     localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones)); 
     renderMapLogs('face');
     
-    // Dynamic Face Map Analysis (Softer Language)
-    let faceAnalysis = document.getElementById('face-map-analysis');
-    if(faceAnalysis && zone.includes("Jawline") && userProfile.hormonePhase === 'Luteal') {
-        faceAnalysis.style.display = 'block';
-        faceAnalysis.innerText = "Possible hormonal inflammation on the jawline 🌸 Skip manual exfoliation there today, apply ice, and stick to your spot treatments!";
-    } else if (faceAnalysis) {
-        faceAnalysis.style.display = 'none';
+    // Dynamic Clinical Diagnosis
+    let box = document.getElementById('face-map-analysis-box');
+    if(box) {
+        box.style.display = 'block';
+        let diag = "🩺 <strong>Diagnostic:</strong> ";
+        
+        if (sensation === "Itchy" || sensation === "Tight") {
+            diag += "Barrier compromise detected. Sensation indicates dehydration or acid damage. Mandate ceramides. ";
+        }
+        if ((zone.includes("Jawline") || zone.includes("Chin")) && type === "Cystic") {
+            diag += "Hormonal flare detected on the lower face. Ice and spot treat; avoid harsh scrubbing. ";
+        }
+        if (zone.includes("Nose") && type === "Blackhead") {
+            diag += "Sebum oxidation on the T-Zone. Suggest integrating a BHA. ";
+        }
+        if (zone.includes("Forehead") && type === "Whitehead") {
+            diag += "Forehead congestion often links to sweat or hair products. Ensure thorough double-cleansing. ";
+        }
+        if (severity === "Severe") {
+            diag += "<strong>High severity alert.</strong> Coach mandates scaling back all actives to focus strictly on soothing inflammation.";
+        }
+        
+        if(diag === "🩺 <strong>Diagnostic:</strong> ") diag += "Standard spot treatment advised.";
+        box.innerHTML = diag;
     }
 }
 
@@ -211,9 +281,10 @@ function renderMapLogs(mapType) {
             });
         }
     }
-    // No dots rendered for face map; it just lists them neatly below.
+    
     logs.forEach((log, idx) => {
-        list.innerHTML += `<li style="border-left: 5px solid ${log.color};"><strong>${log.zone}</strong>: ${log.type} <button class="prod-del" style="float:right;" onclick="removeMapLog('${mapType}', ${idx})">X</button></li>`;
+        let extra = mapType === 'face' ? ` <em>(${log.severity}, ${log.sensation})</em>` : '';
+        list.innerHTML += `<li style="border-left: 5px solid ${log.color};"><strong>${log.zone}</strong>: ${log.type}${extra} <button class="prod-del" style="float:right;" onclick="removeMapLog('${mapType}', ${idx})">X</button></li>`;
     });
 }
 
@@ -223,7 +294,7 @@ function removeMapLog(mapType, idx) {
     renderMapLogs(mapType);
 }
 
-// DIGITAL VANITY (PAO tracker using Date Opened)
+// DIGITAL VANITY
 function addProduct() {
     let nameEl = document.getElementById('prod-name'); if(!nameEl) return;
     let name = nameEl.value; 
@@ -261,7 +332,6 @@ function renderProducts() {
     let prods = JSON.parse(localStorage.getItem('products')) || []; 
     let grid = document.getElementById('product-database-grid'); if(!grid) return;
     grid.innerHTML = '';
-    
     let now = new Date().getTime();
     
     prods.forEach((p, idx) => {
@@ -291,7 +361,7 @@ function renderProducts() {
 // ==========================================
 // ROUTINE BUILDER & WEEKLY HEARTS
 // ==========================================
-let currentCheckType = ""; // Tracks if we are checking AM or PM
+let currentCheckType = ""; 
 
 function addRoutineStep() {
     let dayEl = document.getElementById('routine-day-select'); let timeEl = document.getElementById('routine-time-select'); let stepEl = document.getElementById('new-routine-step');
@@ -350,57 +420,41 @@ function confirmRoutineStamp() {
 }
 
 function renderConsistencyBanner() {
-    let container = document.getElementById('weekly-hearts-container'); if(!container) return;
+    let container = document.getElementById('top-hearts-container'); if(!container) return;
     container.innerHTML = '';
     let heartsData = JSON.parse(localStorage.getItem('weeklyHearts')) || { "Monday":{am:false,pm:false}, "Tuesday":{am:false,pm:false}, "Wednesday":{am:false,pm:false}, "Thursday":{am:false,pm:false}, "Friday":{am:false,pm:false}, "Saturday":{am:false,pm:false}, "Sunday":{am:false,pm:false} };
     
-    let totalHearts = 0;
-    const shortDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     const fullDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     
-    fullDays.forEach((day, i) => {
-        let amImg = heartsData[day].am ? `<img src="Heart.png" style="width: 15px; height: 15px;">` : `<span style="opacity:0.3;">🤍</span>`;
-        let pmImg = heartsData[day].pm ? `<img src="Heart.png" style="width: 15px; height: 15px;">` : `<span style="opacity:0.3;">🤍</span>`;
-        if(heartsData[day].am) totalHearts++;
-        if(heartsData[day].pm) totalHearts++;
-        
-        container.innerHTML += `
-        <div style="display:flex; flex-direction:column; align-items:center; background:#fff; padding:5px; border-radius:10px; border:1px solid #ffccf2;">
-            <span style="font-size:0.7rem; font-weight:bold; color:#cc0066;">${shortDays[i]}</span>
-            <div style="display:flex; gap:2px;">${amImg} ${pmImg}</div>
-        </div>`;
+    // Draw 14 slots in the sticky top header
+    fullDays.forEach((day) => {
+        let amSlot = heartsData[day].am ? `<div class="heart-slot"><img src="Heart.png"></div>` : `<div class="heart-slot"></div>`;
+        let pmSlot = heartsData[day].pm ? `<div class="heart-slot"><img src="Heart.png"></div>` : `<div class="heart-slot"></div>`;
+        container.innerHTML += amSlot + pmSlot;
     });
-    
-    let text = document.getElementById('heart-status-text');
-    if(text) {
-        if(totalHearts === 14) text.innerText = "✨ BARRIER THRIVING! Flawless Consistency! ✨";
-        else text.innerText = `Collect 14 hearts for Barrier Thriving status! (${totalHearts}/14)`;
-    }
 }
 
 // ==========================================
-// RECOVERY & COACH
+// RECOVERY PANELS (Tapping & Vagus)
 // ==========================================
 function toggleRecoveryPanel(panelId) {
     let panel = document.getElementById(panelId); if(!panel) return;
     panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    if (panelId === 'somatic-pacer' && panel.style.display === 'none') {
-        clearTimeout(breathingPhaseTimeout); clearInterval(breathingTimer);
-    }
-    if (panelId === 'lymphatic-sequence' && panel.style.display === 'none') {
-        clearInterval(lymphTimerInterval);
-    }
+    
+    if (panelId === 'somatic-pacer' && panel.style.display === 'none') { clearTimeout(breathingPhaseTimeout); clearInterval(breathingTimer); }
+    if (panelId === 'lymphatic-sequence' && panel.style.display === 'none') { clearInterval(lymphTimerInterval); }
+    if (panelId === 'vagus-dive' && panel.style.display === 'none') { clearInterval(vagusTimerInterval); }
+    if (panelId === 'bilateral-tapping' && panel.style.display === 'none') { clearInterval(tapInterval); }
 }
 
 function toggleInfo(infoId) {
-    let el = document.getElementById(infoId);
-    if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    let el = document.getElementById(infoId); if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
 function updateBreathingMode() {
     clearTimeout(breathingPhaseTimeout); clearInterval(breathingTimer);
-    document.getElementById('breath-text').innerText = "Ready...";
-    document.getElementById('breath-circle').style.transform = "scale(1)";
+    let text = document.getElementById('breath-text'); if(text) text.innerText = "Ready...";
+    let circle = document.getElementById('breath-circle'); if(circle) circle.style.transform = "scale(1)";
 }
 
 function startBreathing() {
@@ -430,18 +484,11 @@ function runBreathingCycle(circle, text, phases) {
 
 function startLymphTimer() {
     clearInterval(lymphTimerInterval);
-    let display = document.getElementById('lymph-timer-display');
-    let text = document.getElementById('lymph-step-text');
-    let steps = [
-        { name: "1. Pump Clavicle (Collarbone)", time: 30 },
-        { name: "2. Pump Axillary (Armpits)", time: 30 },
-        { name: "3. Pump Inguinal (Hip Creases)", time: 30 },
-        { name: "4. Legs up the Wall (Rest)", time: 600 }
-    ];
+    let display = document.getElementById('lymph-timer-display'); let text = document.getElementById('lymph-step-text');
+    let steps = [ { name: "1. Pump Clavicle (Collarbone)", time: 30 }, { name: "2. Pump Axillary (Armpits)", time: 30 }, { name: "3. Pump Inguinal (Hip Creases)", time: 30 }, { name: "4. Legs up the Wall (Rest)", time: 600 } ];
     let currentStep = 0; let timeLeft = steps[0].time;
     
-    text.innerText = steps[0].name;
-    display.innerText = `00:${timeLeft}`;
+    text.innerText = steps[0].name; display.innerText = `00:${timeLeft}`;
     
     lymphTimerInterval = setInterval(() => {
         timeLeft--;
@@ -451,45 +498,52 @@ function startLymphTimer() {
         if(timeLeft <= 0) {
             currentStep++;
             if(currentStep >= steps.length) {
-                clearInterval(lymphTimerInterval);
-                text.innerText = "Sequence Complete! ✨";
-                display.innerText = "00:00";
+                clearInterval(lymphTimerInterval); text.innerText = "Sequence Complete! ✨"; display.innerText = "00:00";
             } else {
-                timeLeft = steps[currentStep].time;
-                text.innerText = steps[currentStep].name;
-                // Play a cute chime noise if possible, otherwise just update text
+                timeLeft = steps[currentStep].time; text.innerText = steps[currentStep].name;
             }
         }
     }, 1000);
 }
 
+function startVagusTimer() {
+    clearInterval(vagusTimerInterval);
+    let display = document.getElementById('vagus-timer-display');
+    let timeLeft = 30;
+    display.innerText = timeLeft;
+    vagusTimerInterval = setInterval(() => {
+        timeLeft--; display.innerText = timeLeft;
+        if(timeLeft <= 0) { clearInterval(vagusTimerInterval); display.innerText = "Breathe!"; }
+    }, 1000);
+}
+
+function toggleTapping() {
+    let dot = document.getElementById('tap-dot'); let btn = document.getElementById('tap-btn');
+    if(!dot || !btn) return;
+    if(tapInterval) {
+        clearInterval(tapInterval); tapInterval = null; btn.innerText = "Start Metronome"; dot.style.left = "0";
+    } else {
+        btn.innerText = "Stop Metronome";
+        let isLeft = true;
+        tapInterval = setInterval(() => {
+            dot.style.left = isLeft ? "calc(100% - 30px)" : "0";
+            isLeft = !isLeft;
+        }, 1000);
+    }
+}
+
+// ==========================================
 // SMART COACH
-function addToVault() {
-    let titleEl = document.getElementById('vault-title'); if(!titleEl) return;
-    let title = titleEl.value; let url = document.getElementById('vault-url') ? document.getElementById('vault-url').value : "";
-    let duration = document.getElementById('vault-duration') ? document.getElementById('vault-duration').value : ""; let focus = document.getElementById('vault-focus') ? document.getElementById('vault-focus').value : "";
-    if(!title || !duration) return;
-    let vaults = JSON.parse(localStorage.getItem('vaults')) || [];
-    vaults.push({ title, url, duration, focus }); localStorage.setItem('vaults', JSON.stringify(vaults));
-    titleEl.value = ''; document.getElementById('vault-url').value = ''; document.getElementById('vault-duration').value = ''; renderVault();
-}
-
-function removeVault(idx) {
-    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; vaults.splice(idx, 1); localStorage.setItem('vaults', JSON.stringify(vaults)); renderVault();
-}
-
-function renderVault() {
-    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; let list = document.getElementById('vault-list'); if(!list) return;
-    list.innerHTML = '';
-    vaults.forEach((v, idx) => {
-        let l = v.url ? `<a href="${v.url.startsWith('http') ? v.url : 'http://'+v.url}" target="_blank" style="color:#cc0066; font-weight:bold;">[Watch]</a>` : '';
-        list.innerHTML += `<li><strong>${v.title}</strong> (${v.duration}m) - <em>${v.focus}</em> ${l} <button class="prod-del" style="float:right;" onclick="removeVault(${idx})">X</button></li>`;
-    });
+// ==========================================
+function addWater(amount) {
+    let waterEl = document.getElementById('water-oz');
+    if(waterEl) {
+        let current = parseInt(waterEl.value) || 0;
+        waterEl.value = current + amount;
+    }
 }
 
 function smartSuggest() {
-    let focusEl = document.getElementById('focus-selector'); if(!focusEl) return;
-    let focus = focusEl.value; 
     let res = document.getElementById('vault-suggestion'); if(!res) return;
     let sleepEl = document.getElementById('sleep-hours'); let waterEl = document.getElementById('water-oz');
     let sleep = sleepEl ? parseFloat(sleepEl.value) : 0; let water = waterEl ? parseFloat(waterEl.value) : 0;
@@ -501,19 +555,41 @@ function smartSuggest() {
         res.innerHTML = "🚨 <strong>COACH VETO:</strong> Nerve tension detected. <em>Mandatory: Somatic Reset & Nerve Flossing only.</em>"; 
     } 
     else if (sleep < 6 || water < 30) {
-        res.innerHTML = `⚠️ <strong>COACH WARNING:</strong> You only logged ${sleep}hrs sleep and ${water}oz water. Your fascia is dehydrated. Deep peak poses are highly dangerous. The Oracle also drew [${currentDrawnCard}]. It is highly recommended to shift focus to Lymphatic Drainage, but if you proceed with ${focus}, mandate a long warm-up.`;
+        res.innerHTML = `⚠️ <strong>COACH WARNING:</strong> You only logged ${sleep}hrs sleep and ${water}oz water. Your fascia is dehydrated. Deep peak poses are highly dangerous. The Oracle also drew [${currentDrawnCard}]. It is highly recommended to shift focus to Lymphatic Drainage, but if you proceed with training, mandate a long warm-up.`;
     }
-    else if (focus === "Somatic Reset" || focus === "Lymphatic Drainage") { 
-        res.innerHTML = `✅ <strong>RECOVERY:</strong> Great choice. Use the Recovery tools above.`; 
-    } 
     else { 
-        res.innerHTML = `✅ <strong>CONDITION GREEN:</strong> System hydrated and primed for <strong>${focus}</strong>. Proceed.`; 
+        res.innerHTML = `✅ <strong>CONDITION GREEN:</strong> System hydrated and primed. Atmospheric pressure is ${liveData.pressure}. Listen to your body and proceed safely.`; 
     }
 }
 
 // ==========================================
 // 5x5 ACADEMY
 // ==========================================
+const academyData = [
+    {
+        title: "Chest Stand",
+        tiers: [
+            { level: 1, name: "Foundation & Spinal Hygiene", drills: ["Cat-Cow x15", "Thoracic Rotations x10", "Puppy Pose 1m", "Neck Rolls x10", "Scapular Shrugs x15"], quiz: { q: "When holding Puppy Pose, where should you feel the engagement?", a: "In my lower back, pushing a deep pinch.", b: "In my upper back, with core slightly tucked.", ans: "b", fail: "Oops! 🛑 If you dump the bend into your lumbar, your thoracic spine won't open. Tuck your pelvis and try again tomorrow! 💕" } },
+            { level: 2, name: "Activation & Posterior Chain", drills: ["Prone Cobra Lifts x10", "Y-T-W Raises x15", "Posterior Pelvic Tilts", "Glute Bridges x20", "Sphinx Hold 2m"], quiz: { q: "During Cobra Lifts, what muscle group should be doing the hardest work?", a: "The glutes and upper back.", b: "My arms pushing the floor.", ans: "a", fail: "Ah! 🛑 Cobra liftoffs are AROM (Active Range of Motion). Your back muscles must do the lifting, not your arms pushing! 💕" } },
+            { level: 3, name: "Isometric Endurance", drills: ["Bow Pose Hold 30s", "Locust Hold 45s", "Bridge Push-ups x5", "Camel Pose 1m", "Scapular Retraction Holds"], quiz: { q: "How should you breathe while holding a deep bridge?", a: "Hold my breath to keep my core tight.", b: "Deep, slow breathing into my belly.", ans: "b", fail: "Oh no! 🛑 Holding your breath traps your nervous system in 'fight or flight', locking the fascia. Breathe through the tension! 💕" } },
+            { level: 4, name: "Neural Gliding & Deep Prep", drills: ["Sciatic Flossing x15/leg", "Brachial Flossing x15/arm", "Wall Pectoral Stretch", "Camel Drops x5", "Forearm Bridge Prep"], quiz: { q: "If you feel a sharp, electrical tingling in your arm during pectoral stretches, what do you do?", a: "Push through it; it's a deep stretch.", b: "Stop immediately and do nerve flossing.", ans: "b", fail: "Wait! 🛑 Tingling is nerve tension. Nerves do NOT stretch; they tear. Back off and floss instead. 💕" } },
+            { level: 5, name: "Sub-shape Mastery", drills: ["Supported Chest Stand (Blocks)", "Chin Stand", "Hollow Back Prep", "Scorpion Drills", "Wall Chest Stand"], quiz: { q: "What is the safest way to exit a chest stand?", a: "Roll out sideways.", b: "Tuck the chin and roll forward smoothly.", ans: "a", fail: "Careful! 🛑 Rolling forward compresses the cervical spine dangerously under load. Always roll out sideways. 💕" } }
+        ]
+    },
+    {
+        title: "Middle Splits",
+        tiers: [
+            { level: 1, name: "Capsule Isolation", drills: ["Frog Pose 2m", "Hip Circles x10", "90/90 Switches x10", "Kneeling Adductor Stretch", "Butterfly 2m"], quiz: { q: "If your knees hurt in Frog Pose, what should you do?", a: "Put padding under my knees and adjust hip angle.", b: "Squeeze my knees into the floor harder.", ans: "a", fail: "No! 🛑 Joint pain means structural pinching. Pad the joints and alter the angle to find the muscle belly! 💕" } },
+            { level: 2, name: "Lengthening (PNF)", drills: ["PNF Pancake 2m", "Supine Wall Straddle 3m", "Tailor Pose", "Cossack Squats x10", "Wide Leg Fold"], quiz: { q: "What is the key to a safe pancake fold?", a: "Rounding my back to get my head down.", b: "Anterior pelvic tilt (sticking glutes out).", ans: "b", fail: "Oops! 🛑 Rounding the back just stretches the spine. Tilt the pelvis to target the adductors! 💕" } },
+            { level: 3, name: "Active Strength", drills: ["Straddle Leg Lifts x10", "Side Lunges x15", "Isometric Skaters", "Glute Medius Clamshells", "Adductor Slides"], quiz: { q: "Why do we do leg lifts in a straddle?", a: "To build End-Range Strength.", b: "To warm up the knees.", ans: "a", fail: "Not quite! 🛑 Active liftoffs build the crucial strength needed to protect the joint when you are in the deepest part of the split. 💕" } },
+            { level: 4, name: "Neural Gliding", drills: ["Supine Sciatic Glides x15", "Hamstring Flossing", "Flossing in Pike", "Active Point/Flex", "Hip Flexor Glides"], quiz: { q: "True or False: Neural gliding should feel like a deep, painful burn.", a: "True.", b: "False.", ans: "b", fail: "False! 🛑 Gliding should feel like gentle movement, not a burn. Pain means inflammation. 💕" } },
+            { level: 5, name: "Peak Mastery", drills: ["Oversplit Prep (Blocks)", "PNF Middle Split", "Wall Middle Split", "Active Straddle Hold", "Peak Middle Split"], quiz: { q: "Where should your toes point in a true middle split?", a: "Forward or slightly up.", b: "Straight down behind me.", ans: "a", fail: "Watch out! 🛑 Pointing them down internally rotates the femur and grinds the hip joint. Keep them up or forward! 💕" } }
+        ]
+    }
+];
+
+let activeQuizTier = null;
+
 function renderAcademy() {
     const container = document.getElementById('academy-courses-container'); if(!container) return;
     container.innerHTML = '';
@@ -550,7 +626,6 @@ function triggerQuiz(pathIdx, tierIdx) {
     let tierId = `tier-${pathIdx}-${tierIdx}`;
     let checkboxes = document.querySelectorAll(`.drill-chk-${tierId}`);
     let allChecked = Array.from(checkboxes).every(cb => cb.checked);
-    
     if(!allChecked) { alert("You must check off all 5 drills before taking the Form Quiz!"); return; }
     
     activeQuizTier = { pathIdx, tierIdx, tierId };
@@ -653,13 +728,18 @@ function drawCard() {
     let cMean = document.getElementById('card-meaning'); if(cMean) cMean.innerText = card.meaning;
 }
 
-function compileJournal() {
-    if(hasCompiledToday) { alert("You have already compiled today's Daily Map!"); return; }
+function compileJournal(isAutoReset = false) {
+    if(!isAutoReset && hasCompiledToday) { alert("You have already compiled today's Daily Map!"); return; }
     
     let dumpEl = document.getElementById('brain-dump'); let dump = dumpEl ? dumpEl.value : "";
     let routineAmChecked = Array.from(document.querySelectorAll('.routine-chk-am:checked')).map(cb => cb.value);
     let routinePmChecked = Array.from(document.querySelectorAll('.routine-chk-pm:checked')).map(cb => cb.value);
     let allRoutines = routineAmChecked.concat(routinePmChecked);
+    
+    // Only compile if there is actually data to save
+    if (isAutoReset && allRoutines.length === 0 && loggedFaceZones.length === 0 && loggedBodyZones.length === 0 && dump === "") {
+        return; // Skip silent compile if the day was entirely empty
+    }
     
     let faceData = loggedFaceZones.map(l => `${l.zone} (${l.type})`).join(", ") || "None";
     let bodyData = loggedBodyZones.map(l => `${l.zone} (${l.type})`).join(", ") || "None";
@@ -673,15 +753,15 @@ function compileJournal() {
     };
 
     let journals = JSON.parse(localStorage.getItem('journals')) || []; journals.unshift(j); localStorage.setItem('journals', JSON.stringify(journals));
-    localStorage.setItem('lastCompileDate', new Date().toLocaleDateString()); hasCompiledToday = true; 
     
-    let warnEl = document.getElementById('journal-warning'); if(warnEl) { warnEl.style.display = 'block'; warnEl.innerText = "✅ Daily Map compiled for today."; }
-
-    loggedFaceZones = []; localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones));
-    loggedBodyZones = []; localStorage.setItem('stagedBody', JSON.stringify(loggedBodyZones));
-    document.querySelectorAll('.routine-chk-am, .routine-chk-pm').forEach(cb => cb.checked = false); if(dumpEl) dumpEl.value = '';
-    
-    renderMapLogs('face'); renderMapLogs('body'); renderJournals();
+    if(!isAutoReset) {
+        localStorage.setItem('lastCompileDate', new Date().toLocaleDateString()); hasCompiledToday = true; 
+        let warnEl = document.getElementById('journal-warning'); if(warnEl) { warnEl.style.display = 'block'; warnEl.innerText = "✅ Daily Map compiled for today."; }
+        loggedFaceZones = []; localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones));
+        loggedBodyZones = []; localStorage.setItem('stagedBody', JSON.stringify(loggedBodyZones));
+        document.querySelectorAll('.routine-chk-am, .routine-chk-pm').forEach(cb => cb.checked = false); if(dumpEl) dumpEl.value = '';
+        renderMapLogs('face'); renderMapLogs('body'); renderJournals();
+    }
 }
 
 function renderJournals() {
@@ -701,19 +781,4 @@ function renderJournals() {
             <em>"${j.thoughts}"</em>
         </li>`;
     });
-}
-
-function logHygiene(type) { 
-    let d = new Date().toLocaleDateString(); 
-    localStorage.setItem('pillowDate', d); 
-    let pEl = document.getElementById('pillowcase-date'); if(pEl) pEl.innerText = d; 
-}
-
-function forceAuraGeneration() {
-    let journals = JSON.parse(localStorage.getItem('journals')) || [];
-    let name = "The Blank Slate Stamp"; let advice = "Not enough journal synthesis this week to form an Aura!";
-    if (journals.length > 0) { name = "✨ The Synthesis Stamp ✨"; advice = "You successfully compiled journals this week. Keep tracking."; }
-    localStorage.setItem('currentAura', JSON.stringify({ name, advice })); localStorage.setItem('lastAuraStampDate', new Date().getTime().toString()); 
-    let nEl = document.getElementById('aura-name'); if(nEl) nEl.innerText = name; 
-    let aEl = document.getElementById('aura-advice'); if(aEl) aEl.innerText = advice; 
 }
