@@ -83,7 +83,6 @@ function check7AMResetEngine() {
         
         document.querySelectorAll('.routine-chk-am, .routine-chk-pm').forEach(cb => cb.checked = false);
         
-        // Reset Cumulative Metrics
         liveMetrics = { sleep: 0, water: 0 };
         localStorage.setItem('liveMetrics', JSON.stringify(liveMetrics));
         updateMetricsDisplay();
@@ -186,7 +185,7 @@ function loadData() {
 }
 
 // ==========================================
-// 4. WEATHER, SKIN ANALYST & TARGET POD
+// 4. WEATHER, SKIN ANALYST & ADVANCED TARGET POD
 // ==========================================
 async function fetchRealData() {
     let lat = userProfile.lat || '32.864'; let lon = userProfile.lon || '-108.222';
@@ -219,10 +218,17 @@ function updateSkinAnalysis() {
     let sa = document.getElementById('smart-skin-analysis'); 
     let dpBox = document.getElementById('dew-point-synergy');
     let fBox = document.getElementById('display-primary-focus');
-    let tsBox = document.getElementById('target-tracking-status');
+    
+    let amStatus = document.getElementById('focus-am-status');
+    let pmStatus = document.getElementById('focus-pm-status');
+    let starBox = document.getElementById('focus-star-player');
+    let starName = document.getElementById('star-player-name');
+    let matchBox = document.getElementById('focus-matchmaker');
+    let matchName = document.getElementById('matchmaker-suggestion');
     
     let b = userProfile.barrierState; let h = userProfile.hormonePhase; let a = liveData.aqi || 0; let st = userProfile.skinType; let dew = liveData.dew;
     
+    // Matrix Warnings
     if(sa) {
         if (b === 'Compromised' && a > 20) { sa.innerText = `🚨 System Alert: PM2.5 pollution is high (${a}) and your barrier is Compromised. Skip exfoliants today; mandate heavy occlusives!`; } 
         else if (b === 'Healing' || b === 'OverExfoliated') { sa.innerText = `✨ Gentle Phase: Barrier is fragile. Stick to hydration, ceramide repair, and skip the harsh acids.`; } 
@@ -230,6 +236,7 @@ function updateSkinAnalysis() {
         else { sa.innerText = `🌸 Atmosphere and barrier are balanced! Proceed optimally with your ${userProfile.primaryFocus} routine.`; }
     }
 
+    // Dew Point Synergy
     if(dpBox && dew !== 0) {
         dpBox.style.display = 'block';
         if ((st === 'oily' || st === 'combination') && dew > 65) { dpBox.innerText = `💧 High humidity detected (Dew: ${dew.toFixed(1)}°F). Skip heavy moisturizers today; your hydrating SPF will be enough.`; } 
@@ -237,31 +244,79 @@ function updateSkinAnalysis() {
         else { dpBox.innerText = `🌡️ Dew point is balanced for your skin type. Normal hydration protocols apply.`; }
     }
 
-    // Target Tracking Pod
-    if(fBox && tsBox) {
-        fBox.innerText = userProfile.primaryFocus;
-        let dayRoutines = userProfile.routine[todayName] || {am:[], pm:[]};
-        let prods = JSON.parse(localStorage.getItem('products')) || [];
-        
-        let fullRoutineText = "";
-        dayRoutines.am.concat(dayRoutines.pm).forEach(step => {
-            fullRoutineText += step.toLowerCase() + " ";
-            prods.forEach(p => {
-                if(step.includes(p.name) && p.ingredients) fullRoutineText += p.ingredients.toLowerCase() + " ";
-            });
-        });
-        
-        if(userProfile.primaryFocus === "Hyperpigmentation") {
-            if(fullRoutineText.includes("vitamin c") || fullRoutineText.includes("arbutin") || fullRoutineText.includes("tranexamic") || fullRoutineText.includes("niacinamide") || fullRoutineText.includes("kojic") || fullRoutineText.includes("licorice")) { tsBox.innerText = `✅ Tyrosinase inhibitors detected in today's routine. Keep it up!`; } 
-            else { tsBox.innerText = `⚠️ No Brightening actives (Vitamin C, Alpha Arbutin, Tranexamic Acid) detected in today's routine. Consider swapping a product in your vanity.`; }
-        } else if (userProfile.primaryFocus === "Acne Control") {
-            if(fullRoutineText.includes("bha") || fullRoutineText.includes("salicylic") || fullRoutineText.includes("benzoyl") || fullRoutineText.includes("retinol") || fullRoutineText.includes("adapalene") || fullRoutineText.includes("retinal")) { tsBox.innerText = `✅ Congestion-clearing actives detected.`; } 
-            else { tsBox.innerText = `⚠️ No BHA or cell-turnover actives found in today's routine.`; }
-        } else if (userProfile.primaryFocus === "Hydration") {
-            if(fullRoutineText.includes("hyaluronic") || fullRoutineText.includes("ceramide") || fullRoutineText.includes("snail") || fullRoutineText.includes("glycerin")) { tsBox.innerText = `✅ Optimal humectants/lipids detected for hydration.`; } 
-            else { tsBox.innerText = `⚠️ Consider adding a dedicated Hydrating serum or essence.`; }
+    // ADVANCED DAY/NIGHT FORMULATION CHEMIST
+    if(!fBox) return;
+    fBox.innerText = userProfile.primaryFocus;
+    let dayRoutines = userProfile.routine[todayName] || {am:[], pm:[]};
+    let allProds = JSON.parse(localStorage.getItem('products')) || [];
+    
+    let amProds = []; let pmProds = []; let unusedProds = [...allProds];
+    let amText = ""; let pmText = "";
+
+    dayRoutines.am.forEach(step => {
+        amText += step.toLowerCase() + " ";
+        let match = allProds.find(p => step.includes(p.name));
+        if(match) { amProds.push(match); amText += (match.ingredients || "").toLowerCase() + " "; unusedProds = unusedProds.filter(up => up.name !== match.name); }
+    });
+    dayRoutines.pm.forEach(step => {
+        pmText += step.toLowerCase() + " ";
+        let match = allProds.find(p => step.includes(p.name));
+        if(match) { pmProds.push(match); pmText += (match.ingredients || "").toLowerCase() + " "; unusedProds = unusedProds.filter(up => up.name !== match.name); }
+    });
+
+    const activeMaps = {
+        "Hyperpigmentation": ["vitamin c", "arbutin", "tranexamic", "niacinamide", "kojic", "licorice", "azelaic"],
+        "Acne Control": ["bha", "salicylic", "benzoyl", "retinol", "adapalene", "retinal", "sulfur", "tea tree"],
+        "Hydration": ["hyaluronic", "ceramide", "snail", "glycerin", "squalane", "panthenol", "polyglutamic"],
+        "Fine Lines": ["retinol", "retinal", "tretinoin", "peptide", "egf", "glycolic", "lactic", "bakuchiol"],
+        "Anti-Aging": ["retinol", "retinal", "tretinoin", "peptide", "vitamin c", "bakuchiol"]
+    };
+
+    let targetActives = activeMaps[userProfile.primaryFocus] || activeMaps["Hydration"];
+    let amHasActive = targetActives.some(a => amText.includes(a));
+    let pmHasActive = targetActives.some(a => pmText.includes(a));
+    
+    let spfDetected = amText.includes("spf") || amText.includes("sunscreen") || amText.includes("zinc") || amText.includes("titanium");
+
+    // Reset displays
+    starBox.style.display = 'none'; matchBox.style.display = 'none';
+    
+    // Dynamic Split Logic
+    if (userProfile.primaryFocus === "Fine Lines" || userProfile.primaryFocus === "Anti-Aging") {
+        amStatus.innerText = amHasActive ? "☀️ AM Status: ✅ Day actives supporting cellular structure." : "☀️ AM Status: ➖ Focus on hydration & protection.";
+        if (amHasActive && !spfDetected) amStatus.innerText = "☀️ AM Status: ⚠️ Actives detected without SPF! Accelerated aging risk.";
+        pmStatus.innerText = pmHasActive ? "🌙 PM Status: ✅ Repair actives (Retinoids/Peptides) detected." : "🌙 PM Status: ⚠️ Missing heavy repair actives for cell turnover.";
+    } 
+    else if (userProfile.primaryFocus === "Hyperpigmentation") {
+        amStatus.innerText = amHasActive ? "☀️ AM Status: ✅ Tyrosinase inhibitors active." : "☀️ AM Status: ⚠️ Missing Vitamin C / Brightening agents.";
+        pmStatus.innerText = pmHasActive ? "🌙 PM Status: ✅ Pigment suppression active." : "🌙 PM Status: ➖ Focus on barrier repair tonight.";
+    }
+    else if (userProfile.primaryFocus === "Acne Control") {
+        amStatus.innerText = amHasActive ? "☀️ AM Status: ✅ Congestion control active." : "☀️ AM Status: ➖ Missing daytime BHA/Treatment.";
+        pmStatus.innerText = pmHasActive ? "🌙 PM Status: ✅ Cell turnover/BHA detected." : "🌙 PM Status: ⚠️ Missing primary acne treatment step.";
+    }
+    else { // Hydration
+        amStatus.innerText = amHasActive ? "☀️ AM Status: ✅ Humectants optimizing hydration." : "☀️ AM Status: ⚠️ Lacking targeted hydrators.";
+        pmStatus.innerText = pmHasActive ? "🌙 PM Status: ✅ Lipids/Ceramides restoring barrier." : "🌙 PM Status: ⚠️ Missing heavy hydration lock.";
+    }
+
+    // Star Player Determination
+    let activeRoster = amProds.concat(pmProds);
+    let starProduct = activeRoster.find(p => targetActives.some(a => (p.ingredients||"").toLowerCase().includes(a) || p.name.toLowerCase().includes(a)));
+    if (starProduct) {
+        starBox.style.display = 'block';
+        starName.innerText = `${starProduct.name} (${starProduct.brand})`;
+    }
+
+    // Matchmaker / Suggestion Logic
+    if (!amHasActive && !pmHasActive) {
+        let suggestedSwap = unusedProds.find(p => targetActives.some(a => (p.ingredients||"").toLowerCase().includes(a) || p.name.toLowerCase().includes(a)));
+        if (suggestedSwap) {
+            matchBox.style.display = 'block';
+            matchName.innerText = `Move [${suggestedSwap.name}] from Vanity into your routine to hit your goal!`;
         } else {
-            tsBox.innerText = `✅ Routine active and tracking perfectly.`;
+            matchBox.style.display = 'block';
+            matchName.innerText = `You don't have any products in your Vanity targeting ${userProfile.primaryFocus}. Consider acquiring one!`;
         }
     }
 }
@@ -293,8 +348,8 @@ function analyzeRoutineLayering() {
     let warnings = 0;
 
     // CYTOTOXIC / SEVERE BARRIER DESTROYERS
-    if(pmStr.includes("hydrogen peroxide") || amStr.includes("hydrogen peroxide")) {
-        out.innerHTML += `<span style="color:#cc0000; font-weight:bold;">🚨 CYTOTOXIC ALERT: Hydrogen Peroxide detected in your vanity formulation! This destroys healthy skin cells and obliterates the barrier. Do NOT use this on your face!</span><br>`; warnings++;
+    if(pmStr.includes("hydrogen peroxide") || amStr.includes("hydrogen peroxide") || pmStr.includes("denatured alcohol") || amStr.includes("denatured alcohol") || pmStr.includes("isopropyl alcohol") || amStr.includes("isopropyl alcohol")) {
+        out.innerHTML += `<span style="color:#cc0000; font-weight:bold;">🚨 CYTOTOXIC ALERT: Severe stripping agents (Peroxide/Harsh Alcohol) detected in your formulation! This destroys healthy skin cells and obliterates the barrier. Do NOT use this on your face!</span><br>`; warnings++;
     }
     
     if((pmStr.includes("retinol") || pmStr.includes("tretinoin") || pmStr.includes("adapalene") || pmStr.includes("retinal")) && (pmStr.includes("aha") || pmStr.includes("glycolic") || pmStr.includes("lactic") || pmStr.includes("bha") || pmStr.includes("salicylic"))) {
@@ -804,7 +859,7 @@ function smartSuggest() {
     let sleep = liveMetrics.sleep; 
     let water = liveMetrics.water;
     let weight = userProfile.weight || 130;
-    let waterGoal = Math.floor(weight / 2); // Core baseline rule
+    let waterGoal = Math.floor(weight / 2); 
     
     res.style.display = 'block';
     let nervePain = loggedBodyZones.some(log => log.type.includes("Nerve"));
