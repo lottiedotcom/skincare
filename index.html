@@ -8,6 +8,7 @@
 </head>
 <body>
 
+    <!-- TOP NAVIGATION -->
     <header class="top-header">
         <h1>✨ Daily Wellness & Aura ✨</h1>
         <nav class="tab-container">
@@ -21,6 +22,7 @@
 
     <main class="content-area">
         
+        <!-- SKINCARE PAGE -->
         <section id="skincare" class="tab-content active">
             <h2>🌸 Skincare & Barrier Health</h2>
             
@@ -32,9 +34,8 @@
                     <div class="data-pod"><p class="small-text">AQI</p><p><strong id="live-aqi">--</strong></p></div>
                 </div>
                 <div id="bio-impact-warnings" style="margin-top: 10px;">
-                    <p class="highlight-text" id="action-dew">Analyzing atmosphere...</p>
+                    <p class="highlight-text" id="smart-skin-analysis" style="background:#e6f2ff; color:#0066cc;">Analyzing skin profile and atmosphere...</p>
                     <p class="highlight-text" id="action-uv" style="background:#fff0b3; color:#cc8800; display:none;"></p>
-                    <p class="highlight-text" id="action-aqi" style="background:#ffcccc; color:#cc0000; display:none;"></p>
                 </div>
             </div>
 
@@ -46,9 +47,10 @@
 
             <div class="bubbly-box">
                 <h3>2D Face Map (Acne Tracker)</h3>
-                <p class="small-text">Reference the numbered zones on the map, then select the zone and acne type below.</p>
-                <div class="map-container" id="face-map-container">
-                    <img src="Face2d.jpg" alt="Face Map" class="interactive-map">
+                <p class="small-text">Reference the 7 zones on your map, then stage the breakout below.</p>
+                <!-- Aspect Ratio Container locks dots to image -->
+                <div class="map-container" id="face-map-container" style="aspect-ratio: 1 / 1;">
+                    <img src="Face2d.png" alt="Face Map" class="interactive-map">
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <select id="face-zone-select" style="flex: 2; margin: 0;"></select>
@@ -65,8 +67,8 @@
             </div>
 
             <div class="bubbly-box">
-                <h3>🧴 Product Tracking Diary</h3>
-                <p class="small-text">Track your arsenal, PAO, and repurchases.</p>
+                <h3>🧴 The Digital Vanity</h3>
+                <p class="small-text">Track your arsenal, PAO, and repurchases. Watch the progress bars to avoid expired actives!</p>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <input type="text" id="prod-name" placeholder="Product Name" style="grid-column: span 2;">
                     <input type="text" id="prod-brand" placeholder="Brand">
@@ -87,31 +89,26 @@
                     <label class="check-tag"><input type="checkbox" id="prod-wishlist"> Wishlist</label>
                     <label class="check-tag" style="background:#ffe6f2; color:#cc0066;"><input type="checkbox" id="prod-fav"> ❤️ Favorite</label>
                 </div>
-                <button class="action-btn" onclick="addProduct()">+ Add to Diary</button>
+                <button class="action-btn" onclick="addProduct()">+ Add to Vanity</button>
                 
                 <div id="product-database-grid" class="product-grid" style="margin-top: 15px;"></div>
             </div>
-
-            <div class="bubbly-box">
-                <h3>🛏️ Hygiene Tracker</h3>
-                <p>Last Pillowcase Change: <strong id="pillowcase-date">Not Logged</strong></p>
-                <button class="action-btn" onclick="logHygiene('pillow')">I Changed My Pillowcase Today</button>
-            </div>
         </section>
 
+        <!-- FLEXIBILITY PAGE -->
         <section id="flexibility" class="tab-content">
             <h2>🎀 Contortion & Body Work</h2>
 
             <div class="bubbly-box">
                 <h3>Atmospheric Resistance</h3>
-                <p>Barometric Pressure: <strong id="live-pressure">--</strong></p>
-                <p class="highlight-text" id="live-flex-action">Analyzing pressure drops...</p>
+                <p>Live Pressure: <strong id="live-pressure">--</strong></p>
+                <p class="highlight-text" id="live-flex-action" style="background: #ffe6f2; color: #cc0066; font-size: 0.9rem;">Checking the skies...</p>
             </div>
 
             <div class="bubbly-box">
                 <h3>2D Body Map (Tension Tracker)</h3>
                 <p class="small-text">Select the specific muscle zone and log the tension type.</p>
-                <div class="map-container" id="body-map-container">
+                <div class="map-container" id="body-map-container" style="aspect-ratio: 1 / 1;">
                     <img src="body2d.jpg" alt="Body Map" class="interactive-map">
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -130,7 +127,7 @@
 
             <div class="bubbly-box" style="background: #e6e6ff; border-color: #ccccff;">
                 <h3 style="color: #4b0082; border-bottom-color: #ccccff;">🎓 Contortion Academy</h3>
-                <p class="small-text">Enter the clinical research, skill tree, and goal tracker portal.</p>
+                <p class="small-text">Enter the 5x5 clinical curriculums and Form-Check Quizzes.</p>
                 <button class="action-btn" onclick="openTab('skill-tree-tab')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; width: 100%;">Enter Education & Skill Tree ➔</button>
             </div>
 
@@ -141,7 +138,6 @@
                     <button class="action-btn" onclick="toggleSomaticReset()" style="background: #33cc33; box-shadow: 0px 3px 0px #009900; flex: 1;">Somatic Reset</button>
                     <button class="action-btn" onclick="generateLymphatic()" style="background: #00cc99; box-shadow: 0px 3px 0px #006644; flex: 1;">Lymph Clearing</button>
                 </div>
-                
                 <div id="somatic-pacer" style="display: none; text-align: center; margin-top: 20px;">
                     <p class="highlight-text" style="background: #ccffcc; color: #006600;">Box Breathing: Inhale (4s) - Hold (4s) - Exhale (4s) - Hold (4s)</p>
                     <div class="breathing-circle" id="breath-circle"></div>
@@ -192,68 +188,27 @@
             </div>
         </section>
 
+        <!-- EDUCATION & SKILL TREE TAB -->
         <section id="skill-tree-tab" class="tab-content">
-            <h2>🎓 Education & Skill Tree</h2>
+            <h2>🎓 5x5 Contortion Academy</h2>
             
             <div class="bubbly-box" style="background:#fff9e6; border-color:#ffcc66;">
-                <h3 style="color:#cc8800; border-bottom-color:#ffcc66;">🧠 Science of Flexibility</h3>
-                <p class="small-text" style="color:#996600;">Research dictates that passive flexibility without active strength leads to joint subluxation. <strong>End-Range Strength</strong> is mandatory.</p>
+                <h3 style="color:#cc8800; border-bottom-color:#ffcc66;">🧠 The Biomechanics Library</h3>
+                <p class="small-text" style="color:#996600;">End-Range Strength is mandatory. Passive flexibility without active muscle engagement causes subluxation.</p>
                 <ul style="font-size:0.85rem; color:#664400; padding-left:20px; margin-top:10px;">
-                    <li><strong>AROM (Active Range of Motion):</strong> How far your muscles can lift your limb without gravity/assistance.</li>
-                    <li><strong>Neural Gliding:</strong> Nerves don't stretch; they glide. If you feel sharp/tingling pain, stretching it causes inflammation.</li>
-                    <li><strong>Thixotropy:</strong> Fascia becomes fluid with heat. Cold stretching risks micro-tears.</li>
+                    <li><strong>Synovial Fluid:</strong> The joint lubricant. Cold stretching rips tissues; thixotropic heat melts the fascia.</li>
+                    <li><strong>Neural Gliding:</strong> Nerves do not stretch. If you feel sharp, electrical pain, STOP and floss.</li>
+                    <li><strong>AROM:</strong> Your active range of motion is how far you can lift a limb using *only* muscle, no gravity.</li>
                 </ul>
-                <h4 style="margin-top:15px; color:#cc8800;">Mini-Quiz</h4>
-                <p class="small-text" style="color:#996600;">What sensation indicates you should immediately stop static stretching?</p>
-                <button class="check-tag" onclick="alert('Incorrect. Dull aches usually indicate muscle stretching.')">Dull Ache</button>
-                <button class="check-tag" onclick="alert('Correct! Sharp or tingling pain is the nervous system. Switch to nerve flossing.')" style="margin-top:5px;">Sharp / Tingling</button>
             </div>
 
-            <div class="bubbly-box">
-                <h3>🌳 Chest Stand Skill Path</h3>
-                <p class="small-text">Complete a tier's routine to unlock the next level.</p>
-                <div class="skill-tier" id="tier-cs-1">
-                    <h4>Tier 1: Foundation</h4>
-                    <p class="small-text">Routine: Cervical/Thoracic Mobility & Cat-Cows.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-cs-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
-                </div>
-                <div class="skill-tier locked" id="tier-cs-2">
-                    <h4>Tier 2: Activation</h4>
-                    <p class="small-text">Routine: Scapular Retractions & Glute Bridges.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-cs-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
-                </div>
-                <div class="skill-tier locked" id="tier-cs-3">
-                    <h4>Tier 3: Sub-Shape</h4>
-                    <p class="small-text">Routine: Active Cobra Liftoffs & Sphinx holds.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-cs-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
-                </div>
-                <div class="skill-tier locked" id="tier-cs-4">
-                    <h4>Tier 4: Peak</h4>
-                    <p class="small-text">Routine: Unassisted Chest Stand Hold.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-cs-4" onchange="checkSkillLocks()" disabled> Mastered Peak</label>
-                </div>
-            </div>
-
-            <div class="bubbly-box">
-                <h3>🌳 Middle Splits Skill Path</h3>
-                <div class="skill-tier" id="tier-ms-1">
-                    <h4>Tier 1: Isolation</h4>
-                    <p class="small-text">Routine: Hip Capsule Rotations & Frog Pose.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-ms-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
-                </div>
-                <div class="skill-tier locked" id="tier-ms-2">
-                    <h4>Tier 2: Lengthening</h4>
-                    <p class="small-text">Routine: PNF Adductor Contractions & Pancake.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-ms-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
-                </div>
-                <div class="skill-tier locked" id="tier-ms-3">
-                    <h4>Tier 3: Active Strength</h4>
-                    <p class="small-text">Routine: Isometric Straddle Lifts.</p>
-                    <label class="check-tag"><input type="checkbox" id="chk-ms-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
-                </div>
-            </div>
+            <!-- Dynamic 5x5 Courses Rendered Here via JS -->
+            <div id="academy-courses-container"></div>
+            
+            <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff;">⬅ Back to Flexibility</button>
         </section>
 
+        <!-- ORACLE & AURA PAGE -->
         <section id="oracle-aura" class="tab-content">
             <h2>🔮 Intuitive Oracle & Aura Synthesis</h2>
             
@@ -277,11 +232,20 @@
             </div>
         </section>
 
+        <!-- LOGS PAGE -->
         <section id="logs" class="tab-content">
             <h2>📝 Auto-Synthesis Journal</h2>
+            
+            <div class="bubbly-box">
+                <h3>🛏️ Hygiene Tracker</h3>
+                <p class="small-text">Kept out of the clinical skin tab for a cleaner vanity.</p>
+                <p>Last Pillowcase Change: <strong id="pillowcase-date">Not Logged</strong></p>
+                <button class="action-btn" onclick="logHygiene('pillow')" style="background: #99ccff; box-shadow: 0px 3px 0px #0066cc;">I Changed My Pillowcase Today</button>
+            </div>
+
             <div class="bubbly-box">
                 <h3>The Vacuum Compiler</h3>
-                <p class="small-text">Type your brain dump, then hit Compile. The system will grab your staged Face Map, Body Map, checked Routine, Weather, and Oracle card, fusing it into one daily receipt. (Logs can only be compiled once per day).</p>
+                <p class="small-text">Type your brain dump, then hit Compile. The system will grab your staged Face Map, Body Map, checked Routine, Weather, and Oracle card, fusing it into one daily receipt. (Compiled once per day).</p>
                 <textarea id="brain-dump" rows="4" placeholder="How did today feel?"></textarea>
                 <button class="action-btn" onclick="compileJournal()" style="width:100%; background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Compile Today's Master Journal</button>
                 <p id="journal-warning" style="color: red; font-size: 0.85rem; font-weight: bold; margin-top: 10px; display: none;"></p>
@@ -292,6 +256,7 @@
             </div>
         </section>
 
+        <!-- SETTINGS PAGE -->
         <section id="settings" class="tab-content">
             <h2>⚙️ System Settings & Profile</h2>
             
@@ -313,7 +278,8 @@
             </div>
 
             <div class="bubbly-box">
-                <h3>📋 Clinical Skin Profile</h3>
+                <h3>📋 Smart Clinical Skin Profile</h3>
+                <p class="small-text">This data feeds directly into the Skincare Tab's AI analyst.</p>
                 <select id="skin-type-select" onchange="saveSettings()">
                     <option value="combination">Combination</option>
                     <option value="dry">Dry</option>
@@ -321,7 +287,30 @@
                     <option value="normal">Normal</option>
                     <option value="sensitive">Sensitive</option>
                 </select>
-                <h3 style="margin-top: 15px;">Allergies</h3>
+                
+                <h3 style="margin-top: 15px; font-size: 1rem;">Current Barrier State</h3>
+                <select id="barrier-state" onchange="saveSettings()">
+                    <option value="Healthy">Healthy (Intact)</option>
+                    <option value="Healing">Healing (Fragile)</option>
+                    <option value="Compromised">Compromised (Red/Stinging)</option>
+                </select>
+
+                <h3 style="margin-top: 15px; font-size: 1rem;">Hormonal Phase</h3>
+                <select id="hormone-phase" onchange="saveSettings()">
+                    <option value="Menstrual">Menstrual (Days 1-5)</option>
+                    <option value="Follicular">Follicular (Days 6-13)</option>
+                    <option value="Ovulatory">Ovulatory (Days 14-16)</option>
+                    <option value="Luteal">Luteal (Days 17-28)</option>
+                </select>
+
+                <h3 style="margin-top: 15px; font-size: 1rem;">Primary Focus</h3>
+                <select id="primary-focus" onchange="saveSettings()">
+                    <option value="Hydration">Hydration & Plumping</option>
+                    <option value="Acne Control">Acne & Congestion Control</option>
+                    <option value="Hyperpigmentation">Hyperpigmentation / Tyrosinase Inhibition</option>
+                </select>
+
+                <h3 style="margin-top: 15px; font-size: 1rem;">Allergies</h3>
                 <input type="text" id="allergy-input" placeholder="e.g., Niacinamide" onchange="saveSettings()">
             </div>
 
@@ -346,6 +335,18 @@
         </section>
 
     </main>
+
+    <!-- QUIZ MODAL -->
+    <div id="quiz-modal" class="modal-overlay">
+        <div class="quiz-box">
+            <h3 id="quiz-title">Form Check Quiz</h3>
+            <p id="quiz-question" style="margin: 15px 0; font-weight: bold;"></p>
+            <button class="action-btn quiz-btn" id="quiz-opt-a" onclick="submitQuiz('a')" style="background: #fff; color: #cc0066; border: 2px solid #ff99cc; box-shadow: none;">A</button>
+            <button class="action-btn quiz-btn" id="quiz-opt-b" onclick="submitQuiz('b')" style="background: #fff; color: #cc0066; border: 2px solid #ff99cc; box-shadow: none;">B</button>
+            <p id="quiz-feedback" class="highlight-text" style="display:none;"></p>
+            <button class="action-btn" onclick="closeQuiz()" style="margin-top: 20px; background: #999;">Cancel</button>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
