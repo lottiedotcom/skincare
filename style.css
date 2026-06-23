@@ -116,7 +116,12 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .tag-spf { background: #fff2e6; color: #cc6600; }
 .tag-mask { background: #f2e6ff; color: #6600cc; }
 .tag-active { background: #ffe6f9; color: #cc0099; }
-.prod-del { background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 4px; font-weight: bold; cursor: pointer; margin-top: 5px;}
+
+/* Product Action Buttons (Edit & Remove) */
+.prod-actions { display: flex; gap: 5px; margin-top: 5px; }
+.prod-edit { background: #9966ff; color: white; border: none; border-radius: 5px; padding: 4px; font-weight: bold; cursor: pointer; flex: 1; }
+.prod-del { background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 4px; font-weight: bold; cursor: pointer; flex: 1; }
+
 .pao-bar-container { height: 8px; width: 100%; background: #eee; border-radius: 4px; margin-top: 5px; overflow: hidden; border: 1px solid #ddd;}
 .pao-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
 
