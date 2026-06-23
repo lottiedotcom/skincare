@@ -24,7 +24,7 @@ let decompTimerInterval;
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todayName = daysOfWeek[new Date().getDay()];
 
-// Exact Muscle List from 47066.jpg
+// Exact Muscle List from Diagram
 const bodyMuscles = [
     "Abdominals", "Abductors", "Biceps", "Brachioradialis", "Deltoid", "External oblique", 
     "Finger extensors", "Finger flexors", "Gastrocnemius", "Gluteus maximus", "Gluteus medius", 
@@ -46,7 +46,6 @@ window.onload = () => {
         renderVault(); 
         checkSkillLocks(); 
         
-        // Check 7:00 AM MST Reset Engine before rendering the hearts
         check7AMResetEngine();
         renderConsistencyBanner(); 
         
@@ -64,7 +63,6 @@ window.onload = () => {
 // ==========================================
 function check7AMResetEngine() {
     let now = new Date();
-    // Convert current time to MST strictly
     let mstTimeString = now.toLocaleString("en-US", {timeZone: "America/Phoenix"});
     let mstTime = new Date(mstTimeString);
     
@@ -73,9 +71,7 @@ function check7AMResetEngine() {
     
     let lastResetStr = localStorage.getItem('lastAutoResetDate');
     
-    // If it's past 7:00 AM MST, and we haven't reset TODAY yet
     if (currentMstHour >= 7 && lastResetStr !== currentMstDateStr) {
-        
         compileJournal(true); 
         
         document.querySelectorAll('.routine-chk-am, .routine-chk-pm').forEach(cb => cb.checked = false);
@@ -87,7 +83,6 @@ function check7AMResetEngine() {
         loggedBodyZones = []; localStorage.setItem('stagedBody', JSON.stringify([]));
         let faceBox = document.getElementById('face-map-analysis-box'); if(faceBox) faceBox.style.display = 'none';
         
-        // Reset the 14 Weekly Hearts ONLY if today is MONDAY
         if (mstTime.getDay() === 1) { 
             let emptyHearts = { "Monday":{am:false,pm:false}, "Tuesday":{am:false,pm:false}, "Wednesday":{am:false,pm:false}, "Thursday":{am:false,pm:false}, "Friday":{am:false,pm:false}, "Saturday":{am:false,pm:false}, "Sunday":{am:false,pm:false} };
             localStorage.setItem('weeklyHearts', JSON.stringify(emptyHearts));
@@ -171,7 +166,7 @@ function loadData() {
 }
 
 // ==========================================
-// 4. WEATHER & SKIN ANALYST
+// 4. WEATHER, SKIN ANALYST & TARGET POD
 // ==========================================
 async function fetchRealData() {
     let lat = userProfile.lat || '32.864'; let lon = userProfile.lon || '-108.222';
@@ -201,22 +196,82 @@ async function fetchRealData() {
 }
 
 function updateSkinAnalysis() {
-    let sa = document.getElementById('smart-skin-analysis'); if(!sa) return;
-    let b = userProfile.barrierState; let h = userProfile.hormonePhase; let a = liveData.aqi || 0;
+    let sa = document.getElementById('smart-skin-analysis'); 
+    let dpBox = document.getElementById('dew-point-synergy');
+    let fBox = document.getElementById('display-primary-focus');
+    let tsBox = document.getElementById('target-tracking-status');
     
-    if (b === 'Compromised' && a > 20) {
-        sa.innerText = `🚨 System Alert: PM2.5 pollution is high (${a}) and your barrier is Compromised. Skip exfoliants today; mandate heavy occlusives!`;
-    } else if (b === 'Healing' || b === 'OverExfoliated') {
-        sa.innerText = `✨ Gentle Phase: Barrier is fragile. Stick to hydration, ceramide repair, and skip the harsh acids.`;
-    } else if (h === 'Luteal' || h === 'Menstrual') {
-        sa.innerText = `🩸 Hormonal Shift: You are in your ${h} phase. Sebum is spiking. Preemptively use BHA/Salicylic acid to clear congestion today.`;
-    } else {
-        sa.innerText = `🌸 Atmosphere and barrier are balanced! Proceed optimally with your ${userProfile.primaryFocus} routine.`;
+    let b = userProfile.barrierState; let h = userProfile.hormonePhase; let a = liveData.aqi || 0; let st = userProfile.skinType; let dew = liveData.dew;
+    
+    // Matrix Analysis
+    if(sa) {
+        if (b === 'Compromised' && a > 20) { sa.innerText = `🚨 System Alert: PM2.5 pollution is high (${a}) and your barrier is Compromised. Skip exfoliants today; mandate heavy occlusives!`; } 
+        else if (b === 'Healing' || b === 'OverExfoliated') { sa.innerText = `✨ Gentle Phase: Barrier is fragile. Stick to hydration, ceramide repair, and skip the harsh acids.`; } 
+        else if (h === 'Luteal' || h === 'Menstrual') { sa.innerText = `🩸 Hormonal Shift: You are in your ${h} phase. Sebum is spiking. Preemptively use BHA/Salicylic acid to clear congestion today.`; } 
+        else { sa.innerText = `🌸 Atmosphere and barrier are balanced! Proceed optimally with your ${userProfile.primaryFocus} routine.`; }
+    }
+
+    // Dew Point Synergy
+    if(dpBox && dew !== 0) {
+        dpBox.style.display = 'block';
+        if ((st === 'oily' || st === 'combination') && dew > 65) { dpBox.innerText = `💧 High humidity detected (Dew: ${dew.toFixed(1)}°F). Skip heavy moisturizers today; your hydrating SPF will be enough.`; } 
+        else if ((st === 'dry' || st === 'sensitive') && dew < 40) { dpBox.innerText = `🌵 Atmosphere is pulling moisture (Dew: ${dew.toFixed(1)}°F). TEWL risk is high. Seal your hydrating serums with a heavy occlusive layer today.`; } 
+        else { dpBox.innerText = `🌡️ Dew point is balanced for your skin type. Normal hydration protocols apply.`; }
+    }
+
+    // Target Tracking Pod
+    if(fBox && tsBox) {
+        fBox.innerText = userProfile.primaryFocus;
+        let dayRoutines = userProfile.routine[todayName] || {am:[], pm:[]};
+        let fullRoutineText = (dayRoutines.am.join(" ") + " " + dayRoutines.pm.join(" ")).toLowerCase();
+        
+        if(userProfile.primaryFocus === "Hyperpigmentation") {
+            if(fullRoutineText.includes("vitamin c") || fullRoutineText.includes("arbutin") || fullRoutineText.includes("tranexamic")) { tsBox.innerText = `✅ Tyrosinase inhibitors detected in today's routine. Keep it up!`; } 
+            else { tsBox.innerText = `⚠️ No Brightening actives (Vitamin C, Alpha Arbutin, etc.) detected in today's routine.`; }
+        } else if (userProfile.primaryFocus === "Acne Control") {
+            if(fullRoutineText.includes("bha") || fullRoutineText.includes("salicylic") || fullRoutineText.includes("benzoyl") || fullRoutineText.includes("retinol")) { tsBox.innerText = `✅ Congestion-clearing actives detected.`; } 
+            else { tsBox.innerText = `⚠️ No BHA or cell-turnover actives found in today's routine.`; }
+        } else if (userProfile.primaryFocus === "Hydration") {
+            if(fullRoutineText.includes("hyaluronic") || fullRoutineText.includes("ceramide") || fullRoutineText.includes("snail")) { tsBox.innerText = `✅ Optimal humectants/lipids detected for hydration.`; } 
+            else { tsBox.innerText = `⚠️ Consider adding a dedicated Hydrating serum or essence.`; }
+        } else {
+            tsBox.innerText = `✅ Routine active and tracking perfectly.`;
+        }
     }
 }
 
 // ==========================================
-// 5. FACE MAP & BODY MAP (Clean Lists)
+// 5. ROUTINE LAYERING ANALYZER
+// ==========================================
+function analyzeRoutineLayering() {
+    let out = document.getElementById('routine-analysis-output'); if(!out) return;
+    let dayRoutines = userProfile.routine[todayName] || {am:[], pm:[]};
+    let pmStr = dayRoutines.pm.join(" ").toLowerCase();
+    let amStr = dayRoutines.am.join(" ").toLowerCase();
+    
+    out.style.display = 'block';
+    out.innerHTML = "<strong>🧪 Layering Analysis:</strong><br>";
+    let warnings = 0;
+
+    // Check PM conflicts
+    if((pmStr.includes("retinol") || pmStr.includes("tretinoin") || pmStr.includes("adapalene")) && (pmStr.includes("aha") || pmStr.includes("glycolic") || pmStr.includes("lactic") || pmStr.includes("bha") || pmStr.includes("salicylic"))) {
+        out.innerHTML += `<span style="color:#cc0000;">🚨 Conflict: Retinoid + Strong Acid detected in the same PM routine. High risk of chemical burn/barrier damage. Alternate nights!</span><br>`; warnings++;
+    }
+    // Check AM conflicts
+    if(amStr.includes("retinol") || amStr.includes("tretinoin")) {
+        out.innerHTML += `<span style="color:#cc0000;">🚨 Conflict: Retinoids degrade in UV light. Move to PM routine!</span><br>`; warnings++;
+    }
+    if((amStr.includes("aha") || amStr.includes("bha") || amStr.includes("vitamin c")) && !amStr.includes("spf") && !amStr.includes("sunscreen")) {
+        out.innerHTML += `<span style="color:#cc0000;">🚨 Danger: Exfoliating/Brightening actives in AM without SPF. You will cause hyperpigmentation! Add SPF.</span><br>`; warnings++;
+    }
+    
+    if(warnings === 0) {
+        out.innerHTML += `<span style="color:#006600;">✅ Excellent chemistry! No harmful overlapping ingredients detected in today's blocks.</span>`;
+    }
+}
+
+// ==========================================
+// 6. FACE MAP & BODY MAP (Clean Lists)
 // ==========================================
 function populateSelects() {
     let bSel = document.getElementById('body-zone-select'); 
@@ -227,55 +282,33 @@ function populateSelects() {
 }
 
 function logFaceZone() {
-    let zoneEl = document.getElementById('face-zone-select'); 
-    let typeEl = document.getElementById('face-acne-type');
-    let sevEl = document.getElementById('face-severity');
-    let sensEl = document.getElementById('face-sensation');
+    let zoneEl = document.getElementById('face-zone-select'); let typeEl = document.getElementById('face-acne-type'); let sevEl = document.getElementById('face-severity'); let sensEl = document.getElementById('face-sensation');
     if(!zoneEl || !typeEl || !sevEl || !sensEl) return;
     
-    let zone = zoneEl.value; let type = typeEl.value; 
-    let severity = parseInt(sevEl.value); let sensation = sensEl.value;
-    
+    let zone = zoneEl.value; let type = typeEl.value; let severity = parseInt(sevEl.value); let sensation = sensEl.value;
     let colorMap = {"Cystic":"#cc0000", "Whitehead":"#e6e6e6", "Blackhead":"#333333", "Pustule":"#ff9933", "Papule":"#ff66b2"};
     loggedFaceZones.push({ zone, type, severity, sensation, color: colorMap[type] });
     localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones)); 
     renderMapLogs('face');
     
-    // Dynamic Clinical Diagnosis
     let box = document.getElementById('face-map-analysis-box');
     if(box) {
         box.style.display = 'block';
         let diag = "🩺 <strong>Diagnostic:</strong> ";
-        if (sensation === "Itchy" || sensation === "Tight") {
-            diag += "Barrier compromise detected on " + zone + ". Sensation indicates dehydration or acid damage. Mandate ceramides. ";
-        }
-        if ((zone.includes("Jawline") || zone.includes("Chin")) && type === "Cystic" && userProfile.hormonePhase === 'Luteal') {
-            diag += "Possible hormonal inflammation on the jawline/chin 🌸 Skip manual exfoliation there today, apply ice, and stick to your spot treatments! ";
-        } else if ((zone.includes("Jawline") || zone.includes("Chin")) && type === "Cystic") {
-            diag += "Deep cystic inflammation detected. Ice and spot treat; avoid harsh scrubbing. ";
-        }
-        if (zone.includes("Nose") && type === "Blackhead") {
-            diag += "Sebum oxidation on the T-Zone. Suggest integrating a BHA. ";
-        }
-        if (zone.includes("Forehead") && type === "Whitehead") {
-            diag += "Forehead congestion often links to sweat or hair products. Ensure thorough double-cleansing. ";
-        }
-        if (severity >= 7) {
-            diag += "<strong>High severity alert.</strong> Coach mandates scaling back all actives to focus strictly on soothing inflammation.";
-        }
-        if(liveData.aqi > 20) {
-            diag += " *Note: High AQI detected. Double cleanse tonight to remove environmental free-radicals.*";
-        }
-        
-        if(diag === "🩺 <strong>Diagnostic:</strong> ") diag += "Standard spot treatment advised.";
+        if (sensation === "Itchy" || sensation === "Tight") { diag += "Barrier compromise detected on " + zone + ". Sensation indicates dehydration or acid damage. Mandate ceramides. "; }
+        if ((zone.includes("Jawline") || zone.includes("Chin")) && type === "Cystic" && userProfile.hormonePhase === 'Luteal') { diag += "Possible hormonal inflammation on the jawline/chin 🌸 Skip manual exfoliation there today, apply ice, and stick to your spot treatments! "; } 
+        else if ((zone.includes("Jawline") || zone.includes("Chin")) && type === "Cystic") { diag += "Deep cystic inflammation detected. Ice and spot treat; avoid harsh scrubbing. "; }
+        if (zone.includes("Nose") && type === "Blackhead") { diag += "Sebum oxidation on the T-Zone. Suggest integrating a BHA. "; }
+        if (zone.includes("Forehead") && type === "Whitehead") { diag += "Forehead congestion often links to sweat or hair products. Ensure thorough double-cleansing. "; }
+        if (severity >= 7) { diag += "<strong>High severity alert.</strong> Coach mandates scaling back all actives to focus strictly on soothing inflammation."; }
+        if (liveData.aqi > 20) { diag += " *Note: High AQI detected. Double cleanse tonight to remove environmental free-radicals.*"; }
+        if (diag === "🩺 <strong>Diagnostic:</strong> ") diag += "Standard spot treatment advised.";
         box.innerHTML = diag;
     }
 }
 
 function logBodyZone() {
-    let zoneEl = document.getElementById('body-zone-select'); 
-    let typeEl = document.getElementById('body-tension-type');
-    let sevEl = document.getElementById('body-severity');
+    let zoneEl = document.getElementById('body-zone-select'); let typeEl = document.getElementById('body-tension-type'); let sevEl = document.getElementById('body-severity');
     if(!zoneEl || !typeEl || !sevEl) return;
     
     let zone = zoneEl.value; let type = typeEl.value; let severity = sevEl.value;
@@ -290,7 +323,6 @@ function renderMapLogs(mapType) {
     let list = document.getElementById(`${mapType}-log-list`); if(!list) return;
     list.innerHTML = '';
     let logs = mapType === 'face' ? loggedFaceZones : loggedBodyZones;
-    
     logs.forEach((log, idx) => {
         let extra = mapType === 'face' ? ` <em>(Sev: ${log.severity}, ${log.sensation})</em>` : ` <em>(Sev: ${log.severity}/10)</em>`;
         list.innerHTML += `<li style="border-left: 5px solid ${log.color};"><strong>${log.zone}</strong>: ${log.type}${extra} <button class="prod-del" style="float:right;" onclick="removeMapLog('${mapType}', ${idx})">X</button></li>`;
@@ -304,7 +336,7 @@ function removeMapLog(mapType, idx) {
 }
 
 // ==========================================
-// 6. DIGITAL VANITY & PAO TIMER
+// 7. DIGITAL VANITY, PAO & ALLERGEN SCANNER
 // ==========================================
 function addProduct() {
     let nameEl = document.getElementById('prod-name'); if(!nameEl) return;
@@ -312,25 +344,33 @@ function addProduct() {
     let brand = document.getElementById('prod-brand') ? document.getElementById('prod-brand').value : "";
     let type = document.getElementById('prod-type') ? document.getElementById('prod-type').value : "Other"; 
     let paoEl = document.getElementById('prod-pao'); let pao = paoEl ? parseInt(paoEl.value) : 0;
-    let price = document.getElementById('prod-price') ? document.getElementById('prod-price').value : ""; 
     let openDate = document.getElementById('prod-open-date') ? document.getElementById('prod-open-date').value : "";
     let wish = document.getElementById('prod-wishlist') ? document.getElementById('prod-wishlist').checked : false; 
     let fav = document.getElementById('prod-fav') ? document.getElementById('prod-fav').checked : false;
+    let ingText = document.getElementById('prod-ingredients') ? document.getElementById('prod-ingredients').value.toLowerCase() : "";
     
     if(!name) return; let exp = "Sealed 🔒"; let addedTime = null;
     if(pao && !wish && openDate) { 
         let d = new Date(openDate); 
-        // Need exact midnight of local date to avoid timezone shifts jumping a day
         addedTime = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); 
         d.setMonth(d.getMonth() + pao); 
         exp = `Exp: ${d.toLocaleDateString()}`; 
     }
+
+    // Allergen Scanner
+    let allergenWarning = "";
+    if(ingText !== "" && userProfile.allergies !== "") {
+        let algs = userProfile.allergies.toLowerCase().split(",").map(s => s.trim());
+        algs.forEach(alg => {
+            if(alg !== "" && ingText.includes(alg)) { allergenWarning = alg; }
+        });
+    }
     
     let prods = JSON.parse(localStorage.getItem('products')) || [];
-    prods.push({ name, brand, type, pao, price, wish, fav, exp, addedTime });
+    prods.push({ name, brand, type, pao, wish, fav, exp, addedTime, allergenWarning });
     localStorage.setItem('products', JSON.stringify(prods));
     
-    document.querySelectorAll('#skincare input[type="text"], #skincare input[type="number"], #skincare input[type="date"]').forEach(i => i.value = '');
+    document.querySelectorAll('#skincare input[type="text"], #skincare input[type="number"], #skincare input[type="date"], #skincare textarea').forEach(i => i.value = '');
     let wChk = document.getElementById('prod-wishlist'); if(wChk) wChk.checked = false;
     let fChk = document.getElementById('prod-fav'); if(fChk) fChk.checked = false;
     renderProducts();
@@ -344,16 +384,16 @@ function renderProducts() {
     let prods = JSON.parse(localStorage.getItem('products')) || []; 
     let grid = document.getElementById('product-database-grid'); if(!grid) return;
     grid.innerHTML = '';
-    
     let now = new Date().getTime();
     
     prods.forEach((p, idx) => {
         let f = p.fav ? '❤️ ' : ''; let tagClass = `tag-${p.type.split('/')[0].toLowerCase()}`;
-        
+        let alertHTML = p.allergenWarning ? `<div style="background:#ffcccc; color:#cc0000; font-size:0.7rem; font-weight:bold; padding:2px; border-radius:5px; margin-top:5px;">⚠️ Contains ${p.allergenWarning}</div>` : '';
+
         let paoBarHTML = '';
         if(p.pao && !p.wish && p.addedTime) {
             let daysPassed = (now - p.addedTime) / (1000 * 3600 * 24);
-            let totalDays = p.pao * 30; // Approx month calculation
+            let totalDays = p.pao * 30; 
             let percent = Math.max(0, Math.min((daysPassed / totalDays) * 100, 100));
             let barColor = percent < 60 ? '#66cc99' : (percent < 90 ? '#ffcc00' : '#cc0000');
             paoBarHTML = `<div class="pao-bar-container"><div class="pao-bar-fill" style="width: ${percent}%; background: ${barColor};"></div></div>`;
@@ -363,7 +403,8 @@ function renderProducts() {
             <div class="product-card">
                 <div class="prod-header">${f}${p.name}</div>
                 <div><span class="prod-tag ${tagClass}">${p.type}</span></div>
-                <div style="font-size:0.75rem; color:#885566; margin-top:5px;">${p.brand} | ${p.price || "-"}</div>
+                <div style="font-size:0.75rem; color:#885566; margin-top:5px;">${p.brand}</div>
+                ${alertHTML}
                 <div style="font-size:0.75rem; margin-top:5px; font-weight:bold;">${p.exp}</div>
                 ${paoBarHTML}
                 <button class="prod-del" onclick="removeProduct(${idx})">Remove</button>
@@ -372,7 +413,7 @@ function renderProducts() {
 }
 
 // ==========================================
-// 7. ROUTINE BUILDER & WEEKLY HEART STAMPS
+// 8. ROUTINE BUILDER & WEEKLY HEART STAMPS
 // ==========================================
 let currentCheckType = ""; 
 
@@ -439,7 +480,6 @@ function renderConsistencyBanner() {
     
     const fullDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     
-    // Draw 14 slots spanning the top header
     fullDays.forEach((day) => {
         let amSlot = heartsData[day].am ? `<div class="heart-slot" title="${day} AM"><img src="Heart.png" alt="AM"></div>` : `<div class="heart-slot" title="${day} AM"></div>`;
         let pmSlot = heartsData[day].pm ? `<div class="heart-slot" title="${day} PM"><img src="Heart.png" alt="PM"></div>` : `<div class="heart-slot" title="${day} PM"></div>`;
@@ -448,13 +488,12 @@ function renderConsistencyBanner() {
 }
 
 // ==========================================
-// 8. RECOVERY & REGULATION TIMERS
+// 9. RECOVERY & REGULATION TIMERS
 // ==========================================
 function toggleRecoveryPanel(panelId) {
     let panel = document.getElementById(panelId); if(!panel) return;
     panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
     
-    // Auto-clear timers when panel is closed
     if (panelId === 'somatic-pacer' && panel.style.display === 'none') { clearTimeout(breathingPhaseTimeout); clearInterval(breathingTimer); }
     if (panelId === 'lymphatic-sequence' && panel.style.display === 'none') { clearInterval(lymphTimerInterval); }
     if (panelId === 'vagus-dive' && panel.style.display === 'none') { clearInterval(vagusTimerInterval); }
@@ -556,7 +595,7 @@ function startNerveTimer() {
 function startDecompTimer() {
     clearInterval(decompTimerInterval);
     let display = document.getElementById('decomp-timer-display'); 
-    let timeLeft = 180; // 3 minutes
+    let timeLeft = 180; 
     display.innerText = `03:00`;
     
     decompTimerInterval = setInterval(() => {
@@ -567,17 +606,14 @@ function startDecompTimer() {
 }
 
 // ==========================================
-// 9. SMART COACH LOGIC
+// 10. SMART COACH & VAULT
 // ==========================================
 function addWater(amount) {
     let waterEl = document.getElementById('water-oz');
     if(waterEl) { let current = parseInt(waterEl.value) || 0; waterEl.value = current + amount; }
 }
 
-function saveCoachMetrics() {
-    // Allows manual save without compiling full journal
-    alert("Metrics saved locally. Coach updated.");
-}
+function saveCoachMetrics() { alert("Metrics saved locally. Coach updated."); }
 
 function smartSuggest() {
     let res = document.getElementById('vault-suggestion'); if(!res) return;
@@ -596,7 +632,6 @@ function smartSuggest() {
     }
 }
 
-// Vault functions
 function addToVault() {
     let titleEl = document.getElementById('vault-title'); if(!titleEl) return;
     let title = titleEl.value; let url = document.getElementById('vault-url') ? document.getElementById('vault-url').value : "";
@@ -621,7 +656,7 @@ function renderVault() {
 }
 
 // ==========================================
-// 10. 5x5 CONTORTION ACADEMY
+// 11. 5x5 CONTORTION ACADEMY
 // ==========================================
 const academyData = [
     {
@@ -833,7 +868,7 @@ function checkSkillLocks() {
 }
 
 // ==========================================
-// 11. ORACLE DECK (Full 50 Cards) & LOG COMPILER
+// 12. ORACLE DECK (Full 50 Cards) & LOG COMPILER
 // ==========================================
 const deck = [
     { suit: "Lunar", name: "🌑 The Void Moon", meaning: "Rest completely. No active holds." },
