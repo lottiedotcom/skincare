@@ -170,6 +170,12 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
     box-shadow: 0px 0px 10px rgba(153, 102, 255, 0.5);
 }
 
+/* VAULT DETAILS */
+.cute-details { background: #fff; border: 2px dashed #ff99cc; border-radius: 15px; padding: 10px; margin-top: 10px; }
+.cute-details summary { font-weight: bold; color: #cc0066; cursor: pointer; list-style: none; }
+.cute-details summary::-webkit-details-marker { display: none; }
+.details-content { margin-top: 10px; }
+
 /* ==========================================
    ARCHIVE LOGS
    ========================================== */
