@@ -8,13 +8,10 @@
 </head>
 <body>
 
-    <!-- STICKY TOP HEADER -->
     <header class="top-header">
         <h1>✨ Daily Wellness & Aura ✨</h1>
-        <!-- Always-Visible 14 Heart Slots -->
         <div id="top-hearts-container" class="hearts-row">
-            <!-- Populated by JS -->
-        </div>
+            </div>
         <nav class="tab-container">
             <button class="tab-btn active" onclick="openTab('skincare')">🧴 Skin</button>
             <button class="tab-btn" onclick="openTab('flexibility')">🧘 Flex</button>
@@ -26,7 +23,6 @@
 
     <main class="content-area">
         
-        <!-- SKINCARE PAGE -->
         <section id="skincare" class="tab-content active">
             <h2>🌸 Skincare & Barrier Health</h2>
             
@@ -39,7 +35,14 @@
                 </div>
                 <div id="bio-impact-warnings" style="margin-top: 10px;">
                     <p class="highlight-text" id="smart-skin-analysis" style="background:#e6f2ff; color:#0066cc;">Analyzing skin profile and atmosphere...</p>
+                    <p class="highlight-text" id="dew-point-synergy" style="background:#e6ffe6; color:#006600; display:none;"></p>
                 </div>
+            </div>
+
+            <div class="bubbly-box" style="background: #fff9e6; border-color: #ffcc66;">
+                <h3 style="color: #cc8800; border-bottom-color: #ffcc66;">🎯 Formulation Focus: <span id="display-primary-focus">Hydration</span></h3>
+                <p class="small-text" style="color: #996600;">Tracking your routine against your primary goal.</p>
+                <p id="target-tracking-status" class="highlight-text" style="background: #fff; color: #cc8800; border: 1px dashed #ffcc66; font-size: 0.85rem;">Status: Awaiting analysis...</p>
             </div>
 
             <div class="bubbly-box">
@@ -50,6 +53,9 @@
                 
                 <h4 style="color: #4b0082; margin-top: 15px;">🌙 Night (PM)</h4>
                 <div class="routine-checklist" id="custom-routine-list-pm"></div>
+
+                <button class="action-btn" onclick="analyzeRoutineLayering()" style="background: #9966ff; box-shadow: 0px 3px 0px #6633cc; margin-top: 20px;">🧪 Analyze Layering & Weather</button>
+                <div id="routine-analysis-output" style="margin-top: 15px; display: none; font-size: 0.85rem;"></div>
             </div>
 
             <div class="bubbly-box">
@@ -104,7 +110,7 @@
 
             <div class="bubbly-box">
                 <h3>🧴 The Digital Vanity</h3>
-                <p class="small-text">Track your arsenal. Input the Date Opened to activate the PAO visual timer. Leave blank for Sealed items.</p>
+                <p class="small-text">Track your arsenal. Paste full ingredient lists to cross-reference with allergies and daily weather.</p>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <input type="text" id="prod-name" placeholder="Product Name" style="grid-column: span 2;">
                     <input type="text" id="prod-brand" placeholder="Brand">
@@ -116,6 +122,9 @@
                         <option value="SPF">SPF</option>
                         <option value="Mask">Mask</option>
                     </select>
+                    
+                    <textarea id="prod-ingredients" rows="3" placeholder="Paste full ingredient list here..." style="grid-column: span 2; resize: vertical; font-size: 0.8rem;"></textarea>
+
                     <input type="number" id="prod-pao" placeholder="PAO (Months)">
                     <div style="display:flex; flex-direction:column; justify-content: flex-end;">
                         <span style="font-size:0.75rem; color:#cc0066; font-weight:bold; margin-bottom:2px;">Date Opened:</span>
@@ -134,11 +143,9 @@
             </div>
         </section>
 
-        <!-- FLEXIBILITY PAGE -->
         <section id="flexibility" class="tab-content">
             <h2>🎀 Contortion & Body Work</h2>
 
-            <!-- SMART COACH METRICS -->
             <div class="bubbly-box">
                 <h3>🔮 The Smart Coach</h3>
                 <p class="small-text">Input your recovery metrics below. Coach will calculate hydration, rest, weather, and the Oracle card to clear your training safely.</p>
@@ -193,7 +200,6 @@
                 <ul id="body-log-list" class="log-list"></ul>
             </div>
 
-            <!-- EXPANDED RECOVERY & REGULATION -->
             <div class="bubbly-box" style="background: #e6ffe6; border-color: #99ff99;">
                 <h3 style="color: #006600; border-bottom-color: #99ff99;">🌬️ Recovery & Regulation</h3>
                 <p class="small-text" style="color: #004d00;">Nervous system resets, flossing, and sensory intervention.</p>
@@ -207,7 +213,6 @@
                     <button class="action-btn" onclick="toggleRecoveryPanel('spinal-decompression')" style="background: #6699ff; box-shadow: 0px 3px 0px #0033cc; margin-top: 0;">Decompression</button>
                 </div>
                 
-                <!-- Panels -->
                 <div id="somatic-pacer" class="recovery-panel" style="display: none; text-align: center; margin-top: 20px; background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed #99ff99;">
                     <select id="breathing-mode" style="margin-bottom: 10px;" onchange="updateBreathingMode()">
                         <option value="box">Box Breathing (4-4-4-4)</option>
@@ -265,7 +270,6 @@
                     <div style="text-align: center;"><button class="action-btn" onclick="toggleRecoveryPanel('bilateral-tapping')" style="background: #999; width: auto; padding: 5px 15px; margin-top:10px;">Hide</button></div>
                 </div>
 
-                <!-- NEW TIMER PANELS FOR FLOSSING & DECOMPRESSION -->
                 <div id="nerve-flossing" class="recovery-panel highlight-text" style="display: none; background: #ffe6cc; color: #cc6600; font-size: 0.85rem; text-align: left; margin-top: 15px;">
                     <h4 style="text-align:center;">Nerve Flossing (2-Min Split)</h4>
                     <p id="nerve-timer-display" style="font-size: 1.5rem; text-align: center; font-weight: bold; margin: 10px 0;">02:00</p>
@@ -324,7 +328,6 @@
             </div>
         </section>
 
-        <!-- EDUCATION TAB -->
         <section id="skill-tree-tab" class="tab-content">
             <h2>🎓 5x5 Contortion Academy</h2>
             
@@ -338,13 +341,11 @@
                 </ul>
             </div>
 
-            <!-- Dynamic Courses populated by JS -->
             <div id="academy-courses-container"></div>
             
             <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; margin-bottom: 20px;">⬅ Back to Flexibility</button>
         </section>
 
-        <!-- ORACLE TAB -->
         <section id="oracle-aura" class="tab-content">
             <h2>🔮 Intuitive Oracle & Aura Synthesis</h2>
             
@@ -368,7 +369,6 @@
             </div>
         </section>
 
-        <!-- LOGS PAGE -->
         <section id="logs" class="tab-content">
             <h2>📝 Auto-Synthesis Archive</h2>
             
@@ -391,7 +391,6 @@
             </div>
         </section>
 
-        <!-- SETTINGS PAGE -->
         <section id="settings" class="tab-content">
             <h2>⚙️ System Settings & Profile</h2>
             
@@ -491,7 +490,6 @@
 
     </main>
 
-    <!-- MODALS -->
     <div id="quiz-modal" class="modal-overlay">
         <div class="quiz-box">
             <h3 id="quiz-title">Form Check Quiz</h3>
