@@ -46,7 +46,7 @@ body {
 
 .data-pod { flex: 1; background: rgba(255,255,255,0.7); padding: 10px; border-radius: 10px; border: 1px solid #ffccf2; text-align: center; }
 
-input[type="text"], input[type="number"], input[type="time"], select, textarea {
+input[type="text"], input[type="number"], input[type="time"], input[type="date"], select, textarea {
     width: 100%; padding: 12px; margin: 6px 0 12px 0;
     border: 2px solid #ffb3d9; border-radius: 15px; font-family: inherit;
     font-size: 0.95rem; background: rgba(255, 255, 255, 0.9);
@@ -101,10 +101,10 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .tag-mask { background: #f2e6ff; color: #6600cc; }
 .tag-active { background: #ffe6f9; color: #cc0099; }
 .prod-del { background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 4px; font-weight: bold; cursor: pointer; margin-top: 5px;}
-.pao-bar-container { height: 6px; width: 100%; background: #eee; border-radius: 3px; margin-top: 5px; overflow: hidden;}
+.pao-bar-container { height: 8px; width: 100%; background: #eee; border-radius: 4px; margin-top: 5px; overflow: hidden; border: 1px solid #ddd;}
 .pao-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
 
-/* 5x5 SKILL TREE & QUIZ MODAL */
+/* SKILL TREE */
 .skill-path { background: #fff; border: 3px solid #ff99cc; border-radius: 20px; padding: 15px; margin-bottom: 20px; }
 .skill-path h3 { color: #cc0066; border-bottom: 2px dashed #ffb3d9; padding-bottom: 5px; margin-bottom: 15px; }
 .skill-tier { background: #ffe6f2; border: 2px solid #ffb3d9; border-radius: 15px; padding: 15px; margin-bottom: 10px; transition: all 0.3s ease; }
@@ -112,6 +112,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .skill-tier h4 { color: #cc0066; margin-bottom: 5px; font-size: 1.1rem;}
 .tier-drills { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
 
+/* MODALS */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 100000;
@@ -122,14 +123,21 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 }
 .quiz-btn:active { background: #ffe6f2 !important; }
 
-/* SOMATIC BREATHING PACER */
+/* SOMATIC BREATHING PINK PACER */
 .breathing-circle {
-    width: 100px; height: 100px; background: #66cc99; border-radius: 50%;
-    margin: 20px auto; opacity: 0.8; box-shadow: 0px 0px 20px #99ffcc;
-    transition: transform 4s ease-in-out;
+    width: 120px; height: 120px; background: #ff66b2; border-radius: 50%;
+    margin: 20px auto; opacity: 0.85; box-shadow: 0px 0px 25px #ff99cc;
+    transition: transform 1s linear; /* Default transition, overridden in JS */
 }
-.breathe-in { transform: scale(1.8); }
-.breathe-out { transform: scale(1); }
+
+/* TOOLTIPS */
+.info-btn {
+    background: none; border: none; color: #cc0066; font-weight: bold; cursor: pointer; font-size: 0.9rem; margin-left: 5px;
+}
+.info-drop {
+    display: none; background: #fff; border: 1px dashed #ff99cc; padding: 10px; border-radius: 10px; 
+    margin-top: 5px; font-size: 0.8rem; color: #885566; margin-bottom: 10px;
+}
 
 .log-list { list-style-type: none; margin-top: 15px; padding:0;}
 .log-list li { background: #fff; border: 2px solid #ffb3d9; padding: 15px; border-radius: 15px; margin-bottom: 12px; font-size: 0.9rem; }
