@@ -59,7 +59,7 @@
                     <img src="Face2d.png" alt="Face Map" class="interactive-map">
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; position: relative; z-index: 10;">
                     <select id="face-zone-select" style="grid-column: span 2;">
                         <option value="1: Cheeks">1: Cheeks</option>
                         <option value="2: Forehead">2: Forehead</option>
@@ -149,7 +149,6 @@
                     <button class="action-btn" onclick="addWater(16)" style="flex:1; margin:0; background:#66ccff; box-shadow:0px 3px 0px #0066cc;">💧 +16 oz</button>
                 </div>
                 
-                <!-- Quick Save to prevent data loss before 7 AM reset -->
                 <button class="action-btn" onclick="saveCoachMetrics()" style="background:#cc99ff; width:100%; box-shadow: 0px 3px 0px #9933cc; margin-bottom: 10px;">💾 Save Metrics</button>
                 
                 <button class="action-btn" onclick="smartSuggest()" style="background:#cc0066; width:100%;">🔮 Ask Smart Coach</button>
@@ -164,11 +163,11 @@
 
             <div class="bubbly-box">
                 <h3>2D Body Map (Tension Tracker)</h3>
-                <p class="small-text">Log tension to flag the Smart Coach.</p>
+                <p class="small-text">Select the specific muscle from the diagram to flag the Smart Coach.</p>
                 <div class="map-container" style="aspect-ratio: 1 / 1;">
-                    <img src="body2d.jpg" alt="Body Map" class="interactive-map">
+                    <img src="47066.jpg" alt="Muscle Diagram" class="interactive-map">
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; position: relative; z-index: 10;">
                     <select id="body-zone-select" style="grid-column: span 2; margin: 0;"></select>
                     <select id="body-tension-type" style="margin: 0;">
                         <option value="DOMS (Soreness)">DOMS (Soreness)</option>
@@ -229,16 +228,16 @@
                     <button class="action-btn" id="lymph-btn" onclick="startLymphTimer()" style="background: #009966; margin-bottom: 15px;">▶ Start Sequence</button>
                     
                     <strong>The Sequence Map:</strong><br><br>
-                    1. <strong>Clavicle</strong> <button class="info-btn" onclick="toggleInfo('info-clavicle')">[ ? ]</button>
+                    1. <strong>Clavicle</strong> <button class="info-btn" onclick="toggleInfo('info-clavicle')">?</button>
                     <div id="info-clavicle" class="info-drop">Use two flat fingers to gently press the hollow dips just above the collarbone. This opens the main drain.</div><br>
                     
-                    2. <strong>Axillary</strong> <button class="info-btn" onclick="toggleInfo('info-axillary')">[ ? ]</button>
+                    2. <strong>Axillary</strong> <button class="info-btn" onclick="toggleInfo('info-axillary')">?</button>
                     <div id="info-axillary" class="info-drop">Use a flat hand to gently pump up into the hollow of your armpit to clear upper body fluid.</div><br>
                     
-                    3. <strong>Inguinal</strong> <button class="info-btn" onclick="toggleInfo('info-inguinal')">[ ? ]</button>
+                    3. <strong>Inguinal</strong> <button class="info-btn" onclick="toggleInfo('info-inguinal')">?</button>
                     <div id="info-inguinal" class="info-drop">Where your leg meets your pelvis. Gently pump to drain leg swelling.</div><br>
                     
-                    4. <strong>Legs up Wall</strong> <button class="info-btn" onclick="toggleInfo('info-legs')">[ ? ]</button>
+                    4. <strong>Legs up Wall</strong> <button class="info-btn" onclick="toggleInfo('info-legs')">?</button>
                     <div id="info-legs" class="info-drop">Lie on your back, legs straight up against a wall. Let gravity pull the stagnant fluid back to your core.</div><br>
                     
                     <div style="text-align: center;"><button class="action-btn" onclick="toggleRecoveryPanel('lymphatic-sequence')" style="background: #999; width: auto; padding: 5px 15px;">Hide Panel</button></div>
@@ -266,17 +265,31 @@
                     <div style="text-align: center;"><button class="action-btn" onclick="toggleRecoveryPanel('bilateral-tapping')" style="background: #999; width: auto; padding: 5px 15px; margin-top:10px;">Hide</button></div>
                 </div>
 
+                <!-- NEW TIMER PANELS FOR FLOSSING & DECOMPRESSION -->
                 <div id="nerve-flossing" class="recovery-panel highlight-text" style="display: none; background: #ffe6cc; color: #cc6600; font-size: 0.85rem; text-align: left; margin-top: 15px;">
-                    <strong>Nerve Flossing Guides (Do NOT stretch, glide!):</strong><br><br>
-                    1. <strong>Sciatic Nerve:</strong> Lie on back. Clasp behind thigh. As you straighten the knee, point the toe. As you bend the knee, flex the foot. 15x.<br>
-                    2. <strong>Brachial Nerve (Arms):</strong> Arm straight out to side, palm up. Tilt head AWAY from arm while bending wrist UP. Tilt head TOWARD arm while dropping wrist DOWN. 10x.<br>
+                    <h4 style="text-align:center;">Nerve Flossing (2-Min Split)</h4>
+                    <p id="nerve-timer-display" style="font-size: 1.5rem; text-align: center; font-weight: bold; margin: 10px 0;">02:00</p>
+                    <p id="nerve-step-text" style="text-align: center; margin-bottom: 10px;">Press start to begin sequence.</p>
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <button class="action-btn" id="nerve-btn" onclick="startNerveTimer()" style="background: #cc6600; width: auto; padding: 8px 20px; margin-top: 0;">▶ Start Flossing</button>
+                    </div>
+
+                    <strong>Guides (Do NOT stretch, glide!):</strong><br><br>
+                    1. <strong>Sciatic Nerve:</strong> Lie on back. Clasp behind thigh. As you straighten the knee, point the toe. As you bend the knee, flex the foot.<br>
+                    2. <strong>Brachial Nerve (Arms):</strong> Arm straight out to side, palm up. Tilt head AWAY from arm while bending wrist UP. Tilt head TOWARD arm while dropping wrist DOWN.<br>
                     <div style="text-align: center;"><button class="action-btn" onclick="toggleRecoveryPanel('nerve-flossing')" style="background: #999; width: auto; padding: 5px 15px; margin-top:10px;">Hide</button></div>
                 </div>
 
                 <div id="spinal-decompression" class="recovery-panel highlight-text" style="display: none; background: #cce0ff; color: #0033cc; font-size: 0.85rem; text-align: left; margin-top: 15px;">
-                    <strong>Spinal Decompression:</strong><br><br>
-                    1. <strong>Dead Hang:</strong> Hang passively from a pull-up bar for 30-60 seconds. Let the pelvis drop completely.<br>
-                    2. <strong>Supported Child's Pose:</strong> Knees wide, chest on a pillow or bolster. Rest for 3 minutes to open the lumbar.<br>
+                    <h4 style="text-align:center;">Spinal Decompression (3-Min Deep Hold)</h4>
+                    <p id="decomp-timer-display" style="font-size: 1.5rem; text-align: center; font-weight: bold; margin: 10px 0;">03:00</p>
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <button class="action-btn" id="decomp-btn" onclick="startDecompTimer()" style="background: #0033cc; width: auto; padding: 8px 20px; margin-top: 0;">▶ Start Hold</button>
+                    </div>
+
+                    <strong>Guides:</strong><br><br>
+                    1. <strong>Dead Hang:</strong> Hang passively from a pull-up bar. Let the pelvis drop completely.<br>
+                    2. <strong>Supported Child's Pose:</strong> Knees wide, chest on a pillow or bolster to open the lumbar.<br>
                     <div style="text-align: center;"><button class="action-btn" onclick="toggleRecoveryPanel('spinal-decompression')" style="background: #999; width: auto; padding: 5px 15px; margin-top:10px;">Hide</button></div>
                 </div>
             </div>
