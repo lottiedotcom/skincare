@@ -13,6 +13,9 @@ let liveData = { dew: 0, uv: 0, aqi: 0, pressure: 0 };
 let currentDrawnCard = "None Drawn Today";
 let hasCompiledToday = false; 
 
+// Cumulative Coach Metrics (for biphasic sleep & daily water)
+let liveMetrics = JSON.parse(localStorage.getItem('liveMetrics')) || { sleep: 0, water: 0 };
+
 // Timers & Intervals
 let breathingTimer; let breathingPhaseTimeout;
 let lymphTimerInterval; 
@@ -49,9 +52,10 @@ window.onload = () => {
         
         check7AMResetEngine();
         renderConsistencyBanner(); 
+        updateMetricsDisplay();
         
         let lastCompile = localStorage.getItem('lastCompileDate');
-        if(lastCompile === new Date().toLocaleDateString()) {
+        if(lastCompile === new Date().toLocaleDateString("en-US", {timeZone: "America/Phoenix"})) {
             hasCompiledToday = true;
             let warning = document.getElementById('journal-warning');
             if(warning) { warning.style.display = 'block'; warning.innerText = "✅ Daily Map already compiled for today."; }
@@ -76,13 +80,19 @@ function check7AMResetEngine() {
         compileJournal(true); 
         
         document.querySelectorAll('.routine-chk-am, .routine-chk-pm').forEach(cb => cb.checked = false);
-        let sleepEl = document.getElementById('sleep-hours'); if(sleepEl) sleepEl.value = '';
-        let waterEl = document.getElementById('water-oz'); if(waterEl) waterEl.value = '';
+        
+        // Reset Cumulative Metrics
+        liveMetrics = { sleep: 0, water: 0 };
+        localStorage.setItem('liveMetrics', JSON.stringify(liveMetrics));
+        updateMetricsDisplay();
+
         let dumpEl = document.getElementById('brain-dump'); if(dumpEl) dumpEl.value = '';
         
         loggedFaceZones = []; localStorage.setItem('stagedFace', JSON.stringify([]));
         loggedBodyZones = []; localStorage.setItem('stagedBody', JSON.stringify([]));
+        
         let faceBox = document.getElementById('face-map-analysis-box'); if(faceBox) faceBox.style.display = 'none';
+        let bodyBox = document.getElementById('body-map-analysis-box'); if(bodyBox) bodyBox.style.display = 'none';
         
         if (mstTime.getDay() === 1) { 
             let emptyHearts = { "Monday":{am:false,pm:false}, "Tuesday":{am:false,pm:false}, "Wednesday":{am:false,pm:false}, "Thursday":{am:false,pm:false}, "Friday":{am:false,pm:false}, "Saturday":{am:false,pm:false}, "Sunday":{am:false,pm:false} };
@@ -218,7 +228,7 @@ function updateSkinAnalysis() {
         else { dpBox.innerText = `🌡️ Dew point is balanced for your skin type. Normal hydration protocols apply.`; }
     }
 
-    // Target Tracking Pod (Pulls full ingredients of matched products)
+    // Target Tracking Pod
     if(fBox && tsBox) {
         fBox.innerText = userProfile.primaryFocus;
         let dayRoutines = userProfile.routine[todayName] || {am:[], pm:[]};
@@ -294,7 +304,7 @@ function analyzeRoutineLayering() {
 }
 
 // ==========================================
-// 6. FACE MAP & BODY MAP (Clean Lists)
+// 6. FACE MAP & BODY MAP DIAGNOSTICS
 // ==========================================
 function populateSelects() {
     let bSel = document.getElementById('body-zone-select'); 
@@ -334,12 +344,37 @@ function logBodyZone() {
     let zoneEl = document.getElementById('body-zone-select'); let typeEl = document.getElementById('body-tension-type'); let sevEl = document.getElementById('body-severity');
     if(!zoneEl || !typeEl || !sevEl) return;
     
-    let zone = zoneEl.value; let type = typeEl.value; let severity = sevEl.value;
+    let zone = zoneEl.value; let type = typeEl.value; let severity = parseInt(sevEl.value);
     let colorMap = {"DOMS (Soreness)":"#99ccff", "Muscle (Dull/Pull)":"#3399ff", "Fascia (Tight/Stuck)":"#ff99cc", "Joint (Pinching/Blocked)":"#cc0000", "Nerve (Sharp/Tingly)":"#ffcc00"};
     
     loggedBodyZones.push({ zone, type, severity, color: colorMap[type] });
     localStorage.setItem('stagedBody', JSON.stringify(loggedBodyZones)); 
     renderMapLogs('body');
+
+    // Body Map Diagnostic Logic
+    let box = document.getElementById('body-map-analysis-box');
+    if(box) {
+        box.style.display = 'block';
+        let diag = "🩺 <strong>Biomechanics Diagnostic:</strong><br>";
+        
+        if (type.includes("Nerve")) {
+            diag += `🚨 <strong>Nerve tension in ${zone}.</strong> STOP any stretches pulling on this pathway. Do NOT stretch nerves. Proceed immediately with flossing protocols.<br>`;
+        }
+        if (type.includes("Joint")) {
+            diag += `⚠️ <strong>Joint impingement in ${zone}.</strong> This is a structural block, not a muscle tightness. Back out of the pose and pad the joint. Do not force.<br>`;
+        }
+        if (type.includes("DOMS")) {
+            diag += `💡 <strong>DOMS in ${zone}.</strong> Blood flow is needed. Prioritize active range of motion (AROM) and light dynamic movement before attempting deep holds.<br>`;
+        }
+        if (severity >= 7) {
+            diag += `🛑 <strong>Severity High (${severity}/10).</strong> The Smart Coach mandates capping your session at 60% intensity to prevent micro-tears in the fascia.`;
+        }
+        
+        if (diag === "🩺 <strong>Biomechanics Diagnostic:</strong><br>") {
+            diag += "Standard tension detected. Ensure thorough 15-minute thixotropic warm-up before entering end-ranges.";
+        }
+        box.innerHTML = diag;
+    }
 }
 
 function renderMapLogs(mapType) {
@@ -715,19 +750,40 @@ function startDecompTimer() {
 }
 
 // ==========================================
-// 10. SMART COACH & VAULT
+// 10. SMART COACH & CUMULATIVE METRICS
 // ==========================================
-function addWater(amount) {
-    let waterEl = document.getElementById('water-oz');
-    if(waterEl) { let current = parseInt(waterEl.value) || 0; waterEl.value = current + amount; }
+function updateMetricsDisplay() {
+    let dSleep = document.getElementById('display-sleep'); if(dSleep) dSleep.innerText = liveMetrics.sleep;
+    let dWater = document.getElementById('display-water'); if(dWater) dWater.innerText = liveMetrics.water;
 }
 
-function saveCoachMetrics() { alert("Metrics saved locally. Coach updated."); }
+function addSleep() {
+    let input = document.getElementById('sleep-input');
+    if(input && input.value) {
+        liveMetrics.sleep += parseFloat(input.value);
+        localStorage.setItem('liveMetrics', JSON.stringify(liveMetrics));
+        updateMetricsDisplay();
+        input.value = '';
+    }
+}
+
+function addWater(amount) {
+    liveMetrics.water += amount;
+    localStorage.setItem('liveMetrics', JSON.stringify(liveMetrics));
+    updateMetricsDisplay();
+}
+
+function clearCoachMetrics() {
+    liveMetrics = { sleep: 0, water: 0 };
+    localStorage.setItem('liveMetrics', JSON.stringify(liveMetrics));
+    updateMetricsDisplay();
+}
 
 function smartSuggest() {
     let res = document.getElementById('vault-suggestion'); if(!res) return;
-    let sleepEl = document.getElementById('sleep-hours'); let waterEl = document.getElementById('water-oz');
-    let sleep = sleepEl ? parseFloat(sleepEl.value) : 0; let water = waterEl ? parseFloat(waterEl.value) : 0;
+    
+    let sleep = liveMetrics.sleep; 
+    let water = liveMetrics.water;
     
     res.style.display = 'block';
     let nervePain = loggedBodyZones.some(log => log.type.includes("Nerve"));
@@ -735,7 +791,7 @@ function smartSuggest() {
     if (nervePain) { 
         res.innerHTML = "🚨 <strong>COACH VETO:</strong> Nerve tension detected. <em>Mandatory: Somatic Reset & Nerve Flossing only.</em>"; 
     } else if (sleep < 6 || water < 30) {
-        res.innerHTML = `⚠️ <strong>COACH WARNING:</strong> You only logged ${sleep}hrs sleep and ${water}oz water. Your fascia is dehydrated. Deep peak poses are highly dangerous. The Oracle drew [${currentDrawnCard}]. It is highly recommended to shift focus to Lymphatic Drainage, but if you proceed with active training, mandate a long warm-up.`;
+        res.innerHTML = `⚠️ <strong>COACH WARNING:</strong> You only have ${sleep}hrs sleep and ${water}oz water logged. Your fascia is dehydrated. Deep peak poses are highly dangerous. The Oracle drew [${currentDrawnCard}]. It is highly recommended to shift focus to Lymphatic Drainage, but if you proceed with active training, mandate a long warm-up.`;
     } else { 
         res.innerHTML = `✅ <strong>CONDITION GREEN:</strong> System hydrated and primed. Atmospheric pressure is ${liveData.pressure}. Listen to your body and proceed safely.`; 
     }
@@ -1066,11 +1122,20 @@ function compileJournal(isAutoReset = false) {
     let journals = JSON.parse(localStorage.getItem('journals')) || []; journals.unshift(j); localStorage.setItem('journals', JSON.stringify(journals));
     
     if(!isAutoReset) {
-        localStorage.setItem('lastCompileDate', new Date().toLocaleDateString()); hasCompiledToday = true; 
+        localStorage.setItem('lastCompileDate', new Date().toLocaleDateString("en-US", {timeZone: "America/Phoenix"})); 
+        hasCompiledToday = true; 
         let warnEl = document.getElementById('journal-warning'); if(warnEl) { warnEl.style.display = 'block'; warnEl.innerText = "✅ Daily Map compiled for today."; }
+        
         loggedFaceZones = []; localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones));
         loggedBodyZones = []; localStorage.setItem('stagedBody', JSON.stringify(loggedBodyZones));
         document.querySelectorAll('.routine-chk-am, .routine-chk-pm').forEach(cb => cb.checked = false); if(dumpEl) dumpEl.value = '';
+        
+        // Reset Cumulative Metrics on manual compile as well
+        liveMetrics = { sleep: 0, water: 0 }; localStorage.setItem('liveMetrics', JSON.stringify(liveMetrics)); updateMetricsDisplay();
+        
+        let faceBox = document.getElementById('face-map-analysis-box'); if(faceBox) faceBox.style.display = 'none';
+        let bodyBox = document.getElementById('body-map-analysis-box'); if(bodyBox) bodyBox.style.display = 'none';
+        
         renderMapLogs('face'); renderMapLogs('body'); renderJournals();
     }
 }
@@ -1095,7 +1160,7 @@ function renderJournals() {
 }
 
 function logHygiene(type) { 
-    let d = new Date().toLocaleDateString(); 
+    let d = new Date().toLocaleDateString("en-US", {timeZone: "America/Phoenix"}); 
     localStorage.setItem('pillowDate', d); 
     let pEl = document.getElementById('pillowcase-date'); if(pEl) pEl.innerText = d; 
 }
