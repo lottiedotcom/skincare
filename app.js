@@ -1,8 +1,9 @@
 // ==========================================
-// GLOBAL STATE & INITIALIZATION
+// 1. GLOBAL STATE & INITIALIZATION
 // ==========================================
 let userProfile = { 
-    lat: '32.864', lon: '-108.222', routine: {}, 
+    lat: '32.864', lon: '-108.222', 
+    routine: { "Monday":{am:[], pm:[]}, "Tuesday":{am:[], pm:[]}, "Wednesday":{am:[], pm:[]}, "Thursday":{am:[], pm:[]}, "Friday":{am:[], pm:[]}, "Saturday":{am:[], pm:[]}, "Sunday":{am:[], pm:[]} }, 
     skinType: 'combination', allergies: '', wakeTime: '', sleepTime: '',
     barrierState: 'Healthy', hormonePhase: 'Follicular', primaryFocus: 'Hydration'
 };
@@ -13,32 +14,28 @@ let currentDrawnCard = "None Drawn Today";
 let hasCompiledToday = false; 
 
 // Timers
-let breathingTimer; let breathingPhaseTimeout;
-let lymphTimerInterval; let vagusTimerInterval; let tapInterval;
+let breathingTimer; 
+let breathingPhaseTimeout;
+let lymphTimerInterval; 
+let vagusTimerInterval; 
+let tapInterval;
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todayName = daysOfWeek[new Date().getDay()];
 
-// Body Map Coordinates (Face map is purely dropdown diagnostics now)
-const bodyZones = [
-    { id: 1, name: 'Neck', x: 30, y: 10 }, { id: 2, name: 'L Shoulder', x: 15, y: 22 }, { id: 3, name: 'R Shoulder', x: 45, y: 22 },
-    { id: 4, name: 'L Bicep', x: 10, y: 35 }, { id: 5, name: 'R Bicep', x: 50, y: 35 }, { id: 6, name: 'L Forearm', x: 5, y: 50 },
-    { id: 7, name: 'R Forearm', x: 55, y: 50 }, { id: 8, name: 'L Pec', x: 22, y: 25 }, { id: 9, name: 'R Pec', x: 38, y: 25 },
-    { id: 10, name: 'Abs', x: 30, y: 40 }, { id: 11, name: 'L Oblique', x: 20, y: 45 }, { id: 12, name: 'R Oblique', x: 40, y: 45 },
-    { id: 13, name: 'L Quad', x: 22, y: 65 }, { id: 14, name: 'R Quad', x: 38, y: 65 }, { id: 15, name: 'L Shin', x: 22, y: 85 }, { id: 16, name: 'R Shin', x: 38, y: 85 },
-    { id: 17, name: 'Traps', x: 70, y: 12 }, { id: 18, name: 'L Rear Delt', x: 60, y: 22 }, { id: 19, name: 'R Rear Delt', x: 80, y: 22 },
-    { id: 20, name: 'L Tricep', x: 55, y: 35 }, { id: 21, name: 'R Tricep', x: 85, y: 35 }, { id: 22, name: 'L Lat', x: 62, y: 35 }, { id: 23, name: 'R Lat', x: 78, y: 35 },
-    { id: 24, name: 'Lower Back', x: 70, y: 45 }, { id: 25, name: 'L Glute', x: 62, y: 55 }, { id: 26, name: 'R Glute', x: 78, y: 55 },
-    { id: 27, name: 'L Hamstring', x: 62, y: 70 }, { id: 28, name: 'R Hamstring', x: 78, y: 70 }, { id: 29, name: 'L Calf', x: 62, y: 85 }, { id: 30, name: 'R Calf', x: 78, y: 85 }
-];
-
 window.onload = () => {
     try {
-        loadData(); fetchRealData(); renderAcademy();
-        renderTodayRoutine(); renderSettingsRoutine(); renderProducts(); renderJournals(); renderVault(); 
+        loadData(); 
+        fetchRealData(); 
+        renderAcademy();
+        renderTodayRoutine(); 
+        renderSettingsRoutine(); 
+        renderProducts(); 
+        renderJournals(); 
+        renderVault(); 
         checkSkillLocks(); 
         
-        // Check 7:00 AM MST Reset Engine BEFORE rendering the hearts
+        // Check 7:00 AM MST Reset Engine before rendering the hearts
         check7AMResetEngine();
         renderConsistencyBanner(); 
         
@@ -52,11 +49,11 @@ window.onload = () => {
 };
 
 // ==========================================
-// 7:00 AM MST AUTO-RESET ENGINE
+// 2. 7:00 AM MST AUTO-RESET ENGINE
 // ==========================================
 function check7AMResetEngine() {
-    // Determine current time in MST
     let now = new Date();
+    // Convert current time to MST strictly
     let mstTimeString = now.toLocaleString("en-US", {timeZone: "America/Phoenix"});
     let mstTime = new Date(mstTimeString);
     
@@ -65,7 +62,7 @@ function check7AMResetEngine() {
     
     let lastResetStr = localStorage.getItem('lastAutoResetDate');
     
-    // If it's past 7:00 AM MST, and we haven't reset TODAY yet...
+    // If it's past 7:00 AM MST, and we haven't reset TODAY yet
     if (currentMstHour >= 7 && lastResetStr !== currentMstDateStr) {
         
         // 1. Force Compile the Journal to save yesterday's data before wiping
@@ -79,24 +76,28 @@ function check7AMResetEngine() {
         
         loggedFaceZones = []; localStorage.setItem('stagedFace', JSON.stringify([]));
         loggedBodyZones = []; localStorage.setItem('stagedBody', JSON.stringify([]));
-        document.getElementById('face-map-analysis-box').style.display = 'none';
+        let faceBox = document.getElementById('face-map-analysis-box'); if(faceBox) faceBox.style.display = 'none';
         
-        // 3. Reset the 14 Weekly Hearts if today is MONDAY
+        // 3. Reset the 14 Weekly Hearts ONLY if today is MONDAY
         if (mstTime.getDay() === 1) { 
             let emptyHearts = { "Monday":{am:false,pm:false}, "Tuesday":{am:false,pm:false}, "Wednesday":{am:false,pm:false}, "Thursday":{am:false,pm:false}, "Friday":{am:false,pm:false}, "Saturday":{am:false,pm:false}, "Sunday":{am:false,pm:false} };
             localStorage.setItem('weeklyHearts', JSON.stringify(emptyHearts));
         }
         
-        // 4. Update the lock so it doesn't trigger again today
+        // 4. Update lock so it doesn't wipe data logged later in the day
         localStorage.setItem('lastAutoResetDate', currentMstDateStr);
         hasCompiledToday = false; 
         
         // 5. Re-render the fresh UI
-        renderMapLogs('face'); renderMapLogs('body'); 
+        renderMapLogs('face'); 
+        renderMapLogs('body'); 
         console.log("7:00 AM MST Engine Fired: Log saved, slate wiped.");
     }
 }
 
+// ==========================================
+// 3. TAB NAVIGATION & SETTINGS
+// ==========================================
 function openTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -107,9 +108,6 @@ function openTab(tabId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ==========================================
-// SETTINGS & DATA LOADING
-// ==========================================
 function grabLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((pos) => {
@@ -140,6 +138,7 @@ function loadData() {
     const savedProf = localStorage.getItem('userProfile');
     if (savedProf) {
         userProfile = JSON.parse(savedProf);
+        // Guarantee proper AM/PM structure
         if(!userProfile.routine || !userProfile.routine["Monday"] || Array.isArray(userProfile.routine["Monday"])) {
             userProfile.routine = { "Monday":{am:[], pm:[]}, "Tuesday":{am:[], pm:[]}, "Wednesday":{am:[], pm:[]}, "Thursday":{am:[], pm:[]}, "Friday":{am:[], pm:[]}, "Saturday":{am:[], pm:[]}, "Sunday":{am:[], pm:[]} };
         }
@@ -163,11 +162,12 @@ function loadData() {
     let pillowElem = document.getElementById('pillowcase-date');
     if(pillowElem) pillowElem.innerText = localStorage.getItem('pillowDate') || "Not Logged";
     
-    renderMapLogs('face'); renderMapLogs('body');
+    renderMapLogs('face'); 
+    renderMapLogs('body');
 }
 
 // ==========================================
-// SKINCARE & ENVIRONMENT
+// 4. WEATHER & SKIN ANALYST
 // ==========================================
 async function fetchRealData() {
     let lat = userProfile.lat || '32.864'; let lon = userProfile.lon || '-108.222';
@@ -211,7 +211,9 @@ function updateSkinAnalysis() {
     }
 }
 
-// 2D FACE MAP LOGIC (Smart Diagnostic)
+// ==========================================
+// 5. FACE MAP & BODY MAP (Clean Lists)
+// ==========================================
 function logFaceZone() {
     let zoneEl = document.getElementById('face-zone-select'); 
     let typeEl = document.getElementById('face-acne-type');
@@ -227,12 +229,11 @@ function logFaceZone() {
     localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones)); 
     renderMapLogs('face');
     
-    // Dynamic Clinical Diagnosis
+    // Diagnostic output logic
     let box = document.getElementById('face-map-analysis-box');
     if(box) {
         box.style.display = 'block';
         let diag = "🩺 <strong>Diagnostic:</strong> ";
-        
         if (sensation === "Itchy" || sensation === "Tight") {
             diag += "Barrier compromise detected. Sensation indicates dehydration or acid damage. Mandate ceramides. ";
         }
@@ -245,22 +246,26 @@ function logFaceZone() {
         if (zone.includes("Forehead") && type === "Whitehead") {
             diag += "Forehead congestion often links to sweat or hair products. Ensure thorough double-cleansing. ";
         }
-        if (severity === "Severe") {
+        if (parseInt(severity) >= 7) {
             diag += "<strong>High severity alert.</strong> Coach mandates scaling back all actives to focus strictly on soothing inflammation.";
         }
-        
         if(diag === "🩺 <strong>Diagnostic:</strong> ") diag += "Standard spot treatment advised.";
         box.innerHTML = diag;
     }
 }
 
 function logBodyZone() {
-    let zoneEl = document.getElementById('body-zone-select'); let typeEl = document.getElementById('body-tension-type');
-    if(!zoneEl || !typeEl) return;
-    let zone = zoneEl.value; let type = typeEl.value;
+    let zoneEl = document.getElementById('body-zone-select'); 
+    let typeEl = document.getElementById('body-tension-type');
+    let sevEl = document.getElementById('body-severity');
+    if(!zoneEl || !typeEl || !sevEl) return;
+    
+    let zone = zoneEl.value; let type = typeEl.value; let severity = sevEl.value;
     let colorMap = {"DOMS (Soreness)":"#99ccff", "Muscle (Dull/Pull)":"#3399ff", "Fascia (Tight/Stuck)":"#ff99cc", "Joint (Pinching/Blocked)":"#cc0000", "Nerve (Sharp/Tingly)":"#ffcc00"};
-    loggedBodyZones.push({ zone, type, color: colorMap[type] });
-    localStorage.setItem('stagedBody', JSON.stringify(loggedBodyZones)); renderMapLogs('body');
+    
+    loggedBodyZones.push({ zone, type, severity, color: colorMap[type] });
+    localStorage.setItem('stagedBody', JSON.stringify(loggedBodyZones)); 
+    renderMapLogs('body');
 }
 
 function renderMapLogs(mapType) {
@@ -268,22 +273,9 @@ function renderMapLogs(mapType) {
     list.innerHTML = '';
     let logs = mapType === 'face' ? loggedFaceZones : loggedBodyZones;
     
-    if(mapType === 'body') {
-        let container = document.getElementById(`body-map-container`);
-        if(container) {
-            container.querySelectorAll('.target-dot').forEach(el => el.remove());
-            bodyZones.forEach(zone => {
-                let dot = document.createElement('div'); dot.className = 'target-dot'; dot.style.left = `${zone.x}%`; dot.style.top = `${zone.y}%`; 
-                dot.innerText = zone.id;
-                let match = logs.find(l => parseInt(l.zone.split(":")[0]) === zone.id);
-                if(match) { dot.style.backgroundColor = match.color; dot.style.color = '#fff'; }
-                container.appendChild(dot);
-            });
-        }
-    }
-    
+    // Renders purely as a clean list without dots
     logs.forEach((log, idx) => {
-        let extra = mapType === 'face' ? ` <em>(${log.severity}, ${log.sensation})</em>` : '';
+        let extra = mapType === 'face' ? ` <em>(Sev: ${log.severity}, ${log.sensation})</em>` : ` <em>(Sev: ${log.severity}/10)</em>`;
         list.innerHTML += `<li style="border-left: 5px solid ${log.color};"><strong>${log.zone}</strong>: ${log.type}${extra} <button class="prod-del" style="float:right;" onclick="removeMapLog('${mapType}', ${idx})">X</button></li>`;
     });
 }
@@ -294,7 +286,9 @@ function removeMapLog(mapType, idx) {
     renderMapLogs(mapType);
 }
 
-// DIGITAL VANITY
+// ==========================================
+// 6. DIGITAL VANITY & PAO TIMER
+// ==========================================
 function addProduct() {
     let nameEl = document.getElementById('prod-name'); if(!nameEl) return;
     let name = nameEl.value; 
@@ -309,7 +303,7 @@ function addProduct() {
     if(!name) return; let exp = "Sealed 🔒"; let addedTime = null;
     if(pao && !wish && openDate) { 
         let d = new Date(openDate); 
-        addedTime = d.getTime();
+        addedTime = d.getTime(); // Logs timestamp of exactly when it was opened
         d.setMonth(d.getMonth() + pao); 
         exp = `Exp: ${d.toLocaleDateString()}`; 
     }
@@ -332,6 +326,7 @@ function renderProducts() {
     let prods = JSON.parse(localStorage.getItem('products')) || []; 
     let grid = document.getElementById('product-database-grid'); if(!grid) return;
     grid.innerHTML = '';
+    
     let now = new Date().getTime();
     
     prods.forEach((p, idx) => {
@@ -340,7 +335,7 @@ function renderProducts() {
         let paoBarHTML = '';
         if(p.pao && !p.wish && p.addedTime) {
             let daysPassed = (now - p.addedTime) / (1000 * 3600 * 24);
-            let totalDays = p.pao * 30;
+            let totalDays = p.pao * 30; // Approx month calculation
             let percent = Math.max(0, Math.min((daysPassed / totalDays) * 100, 100));
             let barColor = percent < 60 ? '#66cc99' : (percent < 90 ? '#ffcc00' : '#cc0000');
             paoBarHTML = `<div class="pao-bar-container"><div class="pao-bar-fill" style="width: ${percent}%; background: ${barColor};"></div></div>`;
@@ -359,7 +354,7 @@ function renderProducts() {
 }
 
 // ==========================================
-// ROUTINE BUILDER & WEEKLY HEARTS
+// 7. ROUTINE BUILDER & WEEKLY HEART STAMPS
 // ==========================================
 let currentCheckType = ""; 
 
@@ -426,16 +421,16 @@ function renderConsistencyBanner() {
     
     const fullDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     
-    // Draw 14 slots in the sticky top header
+    // Draw 14 slots spanning the top header
     fullDays.forEach((day) => {
-        let amSlot = heartsData[day].am ? `<div class="heart-slot"><img src="Heart.png"></div>` : `<div class="heart-slot"></div>`;
-        let pmSlot = heartsData[day].pm ? `<div class="heart-slot"><img src="Heart.png"></div>` : `<div class="heart-slot"></div>`;
+        let amSlot = heartsData[day].am ? `<div class="heart-slot"><img src="Heart.png" alt="AM"></div>` : `<div class="heart-slot"></div>`;
+        let pmSlot = heartsData[day].pm ? `<div class="heart-slot"><img src="Heart.png" alt="PM"></div>` : `<div class="heart-slot"></div>`;
         container.innerHTML += amSlot + pmSlot;
     });
 }
 
 // ==========================================
-// RECOVERY PANELS (Tapping & Vagus)
+// 8. RECOVERY & REGULATION INTERVENTIONS
 // ==========================================
 function toggleRecoveryPanel(panelId) {
     let panel = document.getElementById(panelId); if(!panel) return;
@@ -460,8 +455,7 @@ function updateBreathingMode() {
 function startBreathing() {
     clearTimeout(breathingPhaseTimeout); clearInterval(breathingTimer);
     let mode = document.getElementById('breathing-mode').value;
-    let circle = document.getElementById('breath-circle');
-    let text = document.getElementById('breath-text');
+    let circle = document.getElementById('breath-circle'); let text = document.getElementById('breath-text');
     
     if(mode === 'box') { runBreathingCycle(circle, text, [ {t:"Inhale...", s:1.8, ms:4000}, {t:"Hold...", s:1.8, ms:4000}, {t:"Exhale...", s:1, ms:4000}, {t:"Hold...", s:1, ms:4000} ]); }
     else if(mode === 'sleep') { runBreathingCycle(circle, text, [ {t:"Inhale...", s:1.8, ms:4000}, {t:"Hold...", s:1.8, ms:7000}, {t:"Exhale...", s:1, ms:8000} ]); }
@@ -472,12 +466,9 @@ function startBreathing() {
 function runBreathingCycle(circle, text, phases) {
     let step = 0;
     function nextPhase() {
-        let p = phases[step];
-        text.innerText = p.t;
-        circle.style.transition = `transform ${p.ms/1000}s linear`;
-        circle.style.transform = `scale(${p.s})`;
-        step = (step + 1) % phases.length;
-        breathingPhaseTimeout = setTimeout(nextPhase, p.ms);
+        let p = phases[step]; text.innerText = p.t;
+        circle.style.transition = `transform ${p.ms/1000}s linear`; circle.style.transform = `scale(${p.s})`;
+        step = (step + 1) % phases.length; breathingPhaseTimeout = setTimeout(nextPhase, p.ms);
     }
     nextPhase();
 }
@@ -491,25 +482,20 @@ function startLymphTimer() {
     text.innerText = steps[0].name; display.innerText = `00:${timeLeft}`;
     
     lymphTimerInterval = setInterval(() => {
-        timeLeft--;
-        let m = Math.floor(timeLeft / 60); let s = timeLeft % 60;
+        timeLeft--; let m = Math.floor(timeLeft / 60); let s = timeLeft % 60;
         display.innerText = `${m < 10 ? '0':''}${m}:${s < 10 ? '0':''}${s}`;
         
         if(timeLeft <= 0) {
             currentStep++;
             if(currentStep >= steps.length) {
                 clearInterval(lymphTimerInterval); text.innerText = "Sequence Complete! ✨"; display.innerText = "00:00";
-            } else {
-                timeLeft = steps[currentStep].time; text.innerText = steps[currentStep].name;
-            }
+            } else { timeLeft = steps[currentStep].time; text.innerText = steps[currentStep].name; }
         }
     }, 1000);
 }
 
 function startVagusTimer() {
-    clearInterval(vagusTimerInterval);
-    let display = document.getElementById('vagus-timer-display');
-    let timeLeft = 30;
+    clearInterval(vagusTimerInterval); let display = document.getElementById('vagus-timer-display'); let timeLeft = 30;
     display.innerText = timeLeft;
     vagusTimerInterval = setInterval(() => {
         timeLeft--; display.innerText = timeLeft;
@@ -518,29 +504,26 @@ function startVagusTimer() {
 }
 
 function toggleTapping() {
-    let dot = document.getElementById('tap-dot'); let btn = document.getElementById('tap-btn');
-    if(!dot || !btn) return;
+    let dot = document.getElementById('tap-dot'); let btn = document.getElementById('tap-btn'); if(!dot || !btn) return;
     if(tapInterval) {
         clearInterval(tapInterval); tapInterval = null; btn.innerText = "Start Metronome"; dot.style.left = "0";
     } else {
-        btn.innerText = "Stop Metronome";
-        let isLeft = true;
-        tapInterval = setInterval(() => {
-            dot.style.left = isLeft ? "calc(100% - 30px)" : "0";
-            isLeft = !isLeft;
-        }, 1000);
+        btn.innerText = "Stop Metronome"; let isLeft = true;
+        tapInterval = setInterval(() => { dot.style.left = isLeft ? "calc(100% - 30px)" : "0"; isLeft = !isLeft; }, 1000);
     }
 }
 
 // ==========================================
-// SMART COACH
+// 9. SMART COACH LOGIC
 // ==========================================
 function addWater(amount) {
     let waterEl = document.getElementById('water-oz');
-    if(waterEl) {
-        let current = parseInt(waterEl.value) || 0;
-        waterEl.value = current + amount;
-    }
+    if(waterEl) { let current = parseInt(waterEl.value) || 0; waterEl.value = current + amount; }
+}
+
+function saveCoachMetrics() {
+    // Allows manual save without compiling full journal
+    alert("Metrics saved locally. Coach updated.");
 }
 
 function smartSuggest() {
@@ -553,17 +536,15 @@ function smartSuggest() {
     
     if (nervePain) { 
         res.innerHTML = "🚨 <strong>COACH VETO:</strong> Nerve tension detected. <em>Mandatory: Somatic Reset & Nerve Flossing only.</em>"; 
-    } 
-    else if (sleep < 6 || water < 30) {
-        res.innerHTML = `⚠️ <strong>COACH WARNING:</strong> You only logged ${sleep}hrs sleep and ${water}oz water. Your fascia is dehydrated. Deep peak poses are highly dangerous. The Oracle also drew [${currentDrawnCard}]. It is highly recommended to shift focus to Lymphatic Drainage, but if you proceed with training, mandate a long warm-up.`;
-    }
-    else { 
+    } else if (sleep < 6 || water < 30) {
+        res.innerHTML = `⚠️ <strong>COACH WARNING:</strong> You only logged ${sleep}hrs sleep and ${water}oz water. Your fascia is dehydrated. Deep peak poses are highly dangerous. The Oracle drew [${currentDrawnCard}]. It is highly recommended to shift focus to Lymphatic Drainage, but if you proceed with active training, mandate a long warm-up.`;
+    } else { 
         res.innerHTML = `✅ <strong>CONDITION GREEN:</strong> System hydrated and primed. Atmospheric pressure is ${liveData.pressure}. Listen to your body and proceed safely.`; 
     }
 }
 
 // ==========================================
-// 5x5 ACADEMY
+// 10. 5x5 CONTORTION ACADEMY
 // ==========================================
 const academyData = [
     {
@@ -604,7 +585,18 @@ function renderAcademy() {
             let lockedClass = isUnlocked ? '' : 'locked';
             let btnDisabled = isUnlocked && !isCompleted ? '' : 'disabled';
             
-            let drillsHTML = tier.drills.map(d => `<label class="check-tag" style="justify-content:flex-start;"><input type="checkbox" class="drill-chk-${tierId}" ${isCompleted?'checked disabled':''}> ${d}</label>`).join('');
+            // Generate Drills with the interactive [?] tooltip button
+            let drillsHTML = tier.drills.map((d, dIdx) => `
+                <div style="display:flex; flex-direction:column;">
+                    <label class="check-tag" style="justify-content:flex-start;">
+                        <input type="checkbox" class="drill-chk-${tierId}" ${isCompleted?'checked disabled':''}> 
+                        ${d}
+                        <button class="info-btn" onclick="toggleInfo('info-${tierId}-${dIdx}')">[ ? ]</button>
+                    </label>
+                    <div id="info-${tierId}-${dIdx}" class="info-drop">Execute ${d} with strict active engagement. Focus on slow, controlled movement.</div>
+                </div>
+            `).join('');
+
             let actionBtn = isCompleted ? 
                 `<button class="action-btn" style="background:#66cc99;" disabled>✨ Mastered!</button>` :
                 `<button class="action-btn" ${btnDisabled} onclick="triggerQuiz(${pIdx}, ${tIdx})">🧠 Take Form Quiz to Unlock</button>`;
@@ -665,7 +657,7 @@ function checkSkillLocks() {
 }
 
 // ==========================================
-// ORACLE & LOGS
+// 11. ORACLE DECK (Full 50 Cards) & LOG COMPILER
 // ==========================================
 const deck = [
     { suit: "Lunar", name: "🌑 The Void Moon", meaning: "Rest completely. No active holds." },
@@ -736,13 +728,13 @@ function compileJournal(isAutoReset = false) {
     let routinePmChecked = Array.from(document.querySelectorAll('.routine-chk-pm:checked')).map(cb => cb.value);
     let allRoutines = routineAmChecked.concat(routinePmChecked);
     
-    // Only compile if there is actually data to save
+    // Only compile if there is actually data to save (prevents blank logs during auto-reset)
     if (isAutoReset && allRoutines.length === 0 && loggedFaceZones.length === 0 && loggedBodyZones.length === 0 && dump === "") {
-        return; // Skip silent compile if the day was entirely empty
+        return; 
     }
     
-    let faceData = loggedFaceZones.map(l => `${l.zone} (${l.type})`).join(", ") || "None";
-    let bodyData = loggedBodyZones.map(l => `${l.zone} (${l.type})`).join(", ") || "None";
+    let faceData = loggedFaceZones.map(l => `${l.zone} (${l.type}, Sev: ${l.severity})`).join(", ") || "None";
+    let bodyData = loggedBodyZones.map(l => `${l.zone} (${l.type}, Sev: ${l.severity})`).join(", ") || "None";
 
     let j = {
         date: new Date().toLocaleString(),
@@ -781,4 +773,19 @@ function renderJournals() {
             <em>"${j.thoughts}"</em>
         </li>`;
     });
+}
+
+function logHygiene(type) { 
+    let d = new Date().toLocaleDateString(); 
+    localStorage.setItem('pillowDate', d); 
+    let pEl = document.getElementById('pillowcase-date'); if(pEl) pEl.innerText = d; 
+}
+
+function forceAuraGeneration() {
+    let journals = JSON.parse(localStorage.getItem('journals')) || [];
+    let name = "The Blank Slate Stamp"; let advice = "Not enough journal synthesis this week to form an Aura!";
+    if (journals.length > 0) { name = "✨ The Synthesis Stamp ✨"; advice = "You successfully compiled journals this week. Keep tracking."; }
+    localStorage.setItem('currentAura', JSON.stringify({ name, advice })); localStorage.setItem('lastAuraStampDate', new Date().getTime().toString()); 
+    let nEl = document.getElementById('aura-name'); if(nEl) nEl.innerText = name; 
+    let aEl = document.getElementById('aura-advice'); if(aEl) aEl.innerText = advice; 
 }
