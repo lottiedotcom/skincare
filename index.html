@@ -41,19 +41,31 @@
 
             <div class="bubbly-box">
                 <h3 id="today-routine-header">✅ Today's Custom Routine</h3>
-                <p class="small-text">Your specific checklist for today. (Edit in Settings!)</p>
-                <div class="routine-checklist" id="custom-routine-list"></div>
+                
+                <h4 style="color: #cc0066; margin-top: 10px;">☀️ Morning (AM)</h4>
+                <div class="routine-checklist" id="custom-routine-list-am"></div>
+                
+                <h4 style="color: #4b0082; margin-top: 15px;">🌙 Night (PM)</h4>
+                <div class="routine-checklist" id="custom-routine-list-pm"></div>
             </div>
 
             <div class="bubbly-box">
                 <h3>2D Face Map (Acne Tracker)</h3>
                 <p class="small-text">Reference the 7 zones on your map, then stage the breakout below.</p>
-                <!-- Aspect Ratio Container locks dots to image -->
-                <div class="map-container" id="face-map-container" style="aspect-ratio: 1 / 1;">
+                <div class="map-container" id="face-map-container">
+                    <!-- Clean image, no floating dots -->
                     <img src="Face2d.png" alt="Face Map" class="interactive-map">
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <select id="face-zone-select" style="flex: 2; margin: 0;"></select>
+                    <select id="face-zone-select" style="flex: 2; margin: 0;">
+                        <option value="1: Cheeks">1: Cheeks</option>
+                        <option value="2: Forehead">2: Forehead</option>
+                        <option value="3: Glabella">3: Glabella</option>
+                        <option value="4: Nose">4: Nose</option>
+                        <option value="5: Temples">5: Temples</option>
+                        <option value="6: Jawline">6: Jawline</option>
+                        <option value="7: Chin">7: Chin</option>
+                    </select>
                     <select id="face-acne-type" style="flex: 1; margin: 0;">
                         <option value="Cystic">Cystic</option>
                         <option value="Whitehead">Whitehead</option>
@@ -131,23 +143,53 @@
                 <button class="action-btn" onclick="openTab('skill-tree-tab')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; width: 100%;">Enter Education & Skill Tree ➔</button>
             </div>
 
+            <!-- EXPANDED RECOVERY & REGULATION -->
             <div class="bubbly-box" style="background: #e6ffe6; border-color: #99ff99;">
                 <h3 style="color: #006600; border-bottom-color: #99ff99;">🌬️ Recovery & Regulation</h3>
-                <p class="small-text" style="color: #004d00;">Nervous system resets and metabolic waste clearing.</p>
-                <div style="display: flex; gap: 10px;">
-                    <button class="action-btn" onclick="toggleSomaticReset()" style="background: #33cc33; box-shadow: 0px 3px 0px #009900; flex: 1;">Somatic Reset</button>
-                    <button class="action-btn" onclick="generateLymphatic()" style="background: #00cc99; box-shadow: 0px 3px 0px #006644; flex: 1;">Lymph Clearing</button>
+                <p class="small-text" style="color: #004d00;">Nervous system resets, flossing, and decompression.</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <button class="action-btn" onclick="toggleRecoveryPanel('somatic-pacer')" style="background: #33cc33; box-shadow: 0px 3px 0px #009900; margin-top: 0;">Somatic Reset</button>
+                    <button class="action-btn" onclick="toggleRecoveryPanel('lymphatic-sequence')" style="background: #00cc99; box-shadow: 0px 3px 0px #006644; margin-top: 0;">Lymph Clearing</button>
+                    <button class="action-btn" onclick="toggleRecoveryPanel('nerve-flossing')" style="background: #ff9933; box-shadow: 0px 3px 0px #cc6600; margin-top: 0;">Nerve Flossing</button>
+                    <button class="action-btn" onclick="toggleRecoveryPanel('spinal-decompression')" style="background: #6699ff; box-shadow: 0px 3px 0px #0033cc; margin-top: 0;">Decompression</button>
                 </div>
-                <div id="somatic-pacer" style="display: none; text-align: center; margin-top: 20px;">
+                
+                <!-- Panels (Hidden by default) -->
+                <div id="somatic-pacer" class="recovery-panel" style="display: none; text-align: center; margin-top: 20px;">
                     <p class="highlight-text" style="background: #ccffcc; color: #006600;">Box Breathing: Inhale (4s) - Hold (4s) - Exhale (4s) - Hold (4s)</p>
                     <div class="breathing-circle" id="breath-circle"></div>
                     <p id="breath-text" style="font-weight: bold; color: #006600; margin-top: 10px;">Breathe...</p>
+                    <button class="action-btn" onclick="toggleRecoveryPanel('somatic-pacer')" style="background: #999; margin-top: 15px; width: auto; padding: 5px 15px;">Hide</button>
                 </div>
-                <p id="lymphatic-sequence" class="highlight-text" style="display: none; background: #ccffcc; color: #006600; font-size: 0.85rem; text-align: left;"></p>
+
+                <div id="lymphatic-sequence" class="recovery-panel highlight-text" style="display: none; background: #ccffcc; color: #006600; font-size: 0.85rem; text-align: left; margin-top: 15px;">
+                    <strong>Lymphatic Clearing Sequence:</strong><br><br>
+                    1. <strong>Clavicle (Collarbone):</strong> Gently pump the hollows above your collarbone 15x.<br>
+                    2. <strong>Axillary (Armpits):</strong> Pump deeply into the armpits 15x.<br>
+                    3. <strong>Inguinal (Hips):</strong> Pump the creases of your hips 15x.<br>
+                    4. <strong>Legs up the Wall:</strong> Rest inverted for 10 minutes.<br>
+                    <div style="text-align: right;"><button class="action-btn" onclick="toggleRecoveryPanel('lymphatic-sequence')" style="background: #999; width: auto; padding: 5px 15px;">Hide</button></div>
+                </div>
+
+                <div id="nerve-flossing" class="recovery-panel highlight-text" style="display: none; background: #ffe6cc; color: #cc6600; font-size: 0.85rem; text-align: left; margin-top: 15px;">
+                    <strong>Nerve Flossing Guides (Do NOT stretch, glide!):</strong><br><br>
+                    1. <strong>Sciatic Nerve:</strong> Lie on back. Clasp behind thigh. As you straighten the knee, point the toe. As you bend the knee, flex the foot. 15x.<br>
+                    2. <strong>Brachial Nerve (Arms):</strong> Arm straight out to side, palm up. Tilt head AWAY from arm while bending wrist UP. Tilt head TOWARD arm while dropping wrist DOWN. 10x.<br>
+                    <div style="text-align: right;"><button class="action-btn" onclick="toggleRecoveryPanel('nerve-flossing')" style="background: #999; width: auto; padding: 5px 15px;">Hide</button></div>
+                </div>
+
+                <div id="spinal-decompression" class="recovery-panel highlight-text" style="display: none; background: #cce0ff; color: #0033cc; font-size: 0.85rem; text-align: left; margin-top: 15px;">
+                    <strong>Spinal Decompression:</strong><br><br>
+                    1. <strong>Dead Hang:</strong> Hang passively from a pull-up bar for 30-60 seconds. Let the pelvis drop completely.<br>
+                    2. <strong>Supported Child's Pose:</strong> Knees wide, chest on a pillow or bolster. Rest for 3 minutes to open the lumbar.<br>
+                    <div style="text-align: right;"><button class="action-btn" onclick="toggleRecoveryPanel('spinal-decompression')" style="background: #999; width: auto; padding: 5px 15px;">Hide</button></div>
+                </div>
             </div>
 
             <div class="bubbly-box">
-                <h3>📼 Video Vault & Smart Coach</h3>
+                <h3>🔮 Smart Coach</h3>
+                <p class="small-text">Input your recovery metrics for clinical analysis.</p>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;">
                     <input type="number" id="sleep-hours" placeholder="Hours Slept" style="flex:1; margin:0;">
                     <input type="number" id="water-oz" placeholder="Oz Water" style="flex:1; margin:0;">
@@ -202,9 +244,7 @@
                 </ul>
             </div>
 
-            <!-- Dynamic 5x5 Courses Rendered Here via JS -->
             <div id="academy-courses-container"></div>
-            
             <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff;">⬅ Back to Flexibility</button>
         </section>
 
@@ -238,13 +278,12 @@
             
             <div class="bubbly-box">
                 <h3>🛏️ Hygiene Tracker</h3>
-                <p class="small-text">Kept out of the clinical skin tab for a cleaner vanity.</p>
                 <p>Last Pillowcase Change: <strong id="pillowcase-date">Not Logged</strong></p>
                 <button class="action-btn" onclick="logHygiene('pillow')" style="background: #99ccff; box-shadow: 0px 3px 0px #0066cc;">I Changed My Pillowcase Today</button>
             </div>
 
             <div class="bubbly-box">
-                <h3>The Vacuum Compiler</h3>
+                <h3>The Daily Map</h3>
                 <p class="small-text">Type your brain dump, then hit Compile. The system will grab your staged Face Map, Body Map, checked Routine, Weather, and Oracle card, fusing it into one daily receipt. (Compiled once per day).</p>
                 <textarea id="brain-dump" rows="4" placeholder="How did today feel?"></textarea>
                 <button class="action-btn" onclick="compileJournal()" style="width:100%; background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Compile Today's Master Journal</button>
@@ -270,7 +309,7 @@
             </div>
 
             <div class="bubbly-box">
-                <h3>🕰️ Biphasic Clock</h3>
+                <h3>🕰️ Sleep Schedule</h3>
                 <div style="display: flex; gap: 10px;">
                     <input type="time" id="wake-time" onchange="saveSettings()">
                     <input type="time" id="sleep-time" onchange="saveSettings()">
@@ -290,9 +329,11 @@
                 
                 <h3 style="margin-top: 15px; font-size: 1rem;">Current Barrier State</h3>
                 <select id="barrier-state" onchange="saveSettings()">
-                    <option value="Healthy">Healthy (Intact)</option>
-                    <option value="Healing">Healing (Fragile)</option>
+                    <option value="Healthy">Healthy & Intact</option>
+                    <option value="Healing">Healing & Fragile</option>
                     <option value="Compromised">Compromised (Red/Stinging)</option>
+                    <option value="Dehydrated">Dehydrated (Tight/Dull)</option>
+                    <option value="OverExfoliated">Over-Exfoliated</option>
                 </select>
 
                 <h3 style="margin-top: 15px; font-size: 1rem;">Hormonal Phase</h3>
@@ -305,9 +346,11 @@
 
                 <h3 style="margin-top: 15px; font-size: 1rem;">Primary Focus</h3>
                 <select id="primary-focus" onchange="saveSettings()">
+                    <option value="Anti-Aging">Anti-Aging</option>
+                    <option value="Fine Lines">Fine Lines & Texture</option>
                     <option value="Hydration">Hydration & Plumping</option>
                     <option value="Acne Control">Acne & Congestion Control</option>
-                    <option value="Hyperpigmentation">Hyperpigmentation / Tyrosinase Inhibition</option>
+                    <option value="Hyperpigmentation">Brightening / Hyperpigmentation</option>
                 </select>
 
                 <h3 style="margin-top: 15px; font-size: 1rem;">Allergies</h3>
@@ -316,7 +359,7 @@
 
             <div class="bubbly-box">
                 <h3>✅ Daily Routine Builder</h3>
-                <p class="small-text">Build specific routines for each day of the week.</p>
+                <p class="small-text">Build specific AM and PM routines for each day.</p>
                 <select id="routine-day-select" onchange="renderSettingsRoutine()">
                     <option value="Monday">Monday</option>
                     <option value="Tuesday">Tuesday</option>
@@ -326,11 +369,21 @@
                     <option value="Saturday">Saturday</option>
                     <option value="Sunday">Sunday</option>
                 </select>
+                
                 <div style="display: flex; gap: 8px; margin-top:10px;">
-                    <input type="text" id="new-routine-step" placeholder="e.g., Exfoliating Mask">
-                    <button class="action-btn" onclick="addRoutineStep()" style="margin-top:0;">Add</button>
+                    <select id="routine-time-select" style="flex: 1; margin:0;">
+                        <option value="am">AM ☀️</option>
+                        <option value="pm">PM 🌙</option>
+                    </select>
+                    <input type="text" id="new-routine-step" placeholder="e.g., Exfoliating Mask" style="flex: 2; margin:0;">
+                    <button class="action-btn" onclick="addRoutineStep()" style="margin:0; flex: 1;">Add</button>
                 </div>
-                <ul id="settings-routine-list" class="log-list" style="margin-top: 15px;"></ul>
+                
+                <h4 style="margin-top: 15px; color: #cc0066; font-size: 0.9rem;">AM Routine</h4>
+                <ul id="settings-routine-list-am" class="log-list" style="margin-top: 5px;"></ul>
+                
+                <h4 style="margin-top: 15px; color: #4b0082; font-size: 0.9rem;">PM Routine</h4>
+                <ul id="settings-routine-list-pm" class="log-list" style="margin-top: 5px;"></ul>
             </div>
         </section>
 
