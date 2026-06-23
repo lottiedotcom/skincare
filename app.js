@@ -38,6 +38,7 @@ window.onload = () => {
         loadData(); 
         fetchRealData(); 
         populateSelects();
+        populateVanityDropdown();
         renderAcademy();
         renderTodayRoutine(); 
         renderSettingsRoutine(); 
@@ -203,7 +204,6 @@ function updateSkinAnalysis() {
     
     let b = userProfile.barrierState; let h = userProfile.hormonePhase; let a = liveData.aqi || 0; let st = userProfile.skinType; let dew = liveData.dew;
     
-    // Matrix Analysis
     if(sa) {
         if (b === 'Compromised' && a > 20) { sa.innerText = `🚨 System Alert: PM2.5 pollution is high (${a}) and your barrier is Compromised. Skip exfoliants today; mandate heavy occlusives!`; } 
         else if (b === 'Healing' || b === 'OverExfoliated') { sa.innerText = `✨ Gentle Phase: Barrier is fragile. Stick to hydration, ceramide repair, and skip the harsh acids.`; } 
@@ -211,7 +211,6 @@ function updateSkinAnalysis() {
         else { sa.innerText = `🌸 Atmosphere and barrier are balanced! Proceed optimally with your ${userProfile.primaryFocus} routine.`; }
     }
 
-    // Dew Point Synergy
     if(dpBox && dew !== 0) {
         dpBox.style.display = 'block';
         if ((st === 'oily' || st === 'combination') && dew > 65) { dpBox.innerText = `💧 High humidity detected (Dew: ${dew.toFixed(1)}°F). Skip heavy moisturizers today; your hydrating SPF will be enough.`; } 
@@ -219,20 +218,28 @@ function updateSkinAnalysis() {
         else { dpBox.innerText = `🌡️ Dew point is balanced for your skin type. Normal hydration protocols apply.`; }
     }
 
-    // Target Tracking Pod
+    // Target Tracking Pod (Pulls full ingredients of matched products)
     if(fBox && tsBox) {
         fBox.innerText = userProfile.primaryFocus;
         let dayRoutines = userProfile.routine[todayName] || {am:[], pm:[]};
-        let fullRoutineText = (dayRoutines.am.join(" ") + " " + dayRoutines.pm.join(" ")).toLowerCase();
+        let prods = JSON.parse(localStorage.getItem('products')) || [];
+        
+        let fullRoutineText = "";
+        dayRoutines.am.concat(dayRoutines.pm).forEach(step => {
+            fullRoutineText += step.toLowerCase() + " ";
+            prods.forEach(p => {
+                if(step.includes(p.name) && p.ingredients) fullRoutineText += p.ingredients.toLowerCase() + " ";
+            });
+        });
         
         if(userProfile.primaryFocus === "Hyperpigmentation") {
-            if(fullRoutineText.includes("vitamin c") || fullRoutineText.includes("arbutin") || fullRoutineText.includes("tranexamic")) { tsBox.innerText = `✅ Tyrosinase inhibitors detected in today's routine. Keep it up!`; } 
-            else { tsBox.innerText = `⚠️ No Brightening actives (Vitamin C, Alpha Arbutin, etc.) detected in today's routine.`; }
+            if(fullRoutineText.includes("vitamin c") || fullRoutineText.includes("arbutin") || fullRoutineText.includes("tranexamic") || fullRoutineText.includes("niacinamide") || fullRoutineText.includes("kojic") || fullRoutineText.includes("licorice")) { tsBox.innerText = `✅ Tyrosinase inhibitors detected in today's routine. Keep it up!`; } 
+            else { tsBox.innerText = `⚠️ No Brightening actives (Vitamin C, Alpha Arbutin, Tranexamic Acid) detected in today's routine. Consider swapping a product in your vanity.`; }
         } else if (userProfile.primaryFocus === "Acne Control") {
-            if(fullRoutineText.includes("bha") || fullRoutineText.includes("salicylic") || fullRoutineText.includes("benzoyl") || fullRoutineText.includes("retinol")) { tsBox.innerText = `✅ Congestion-clearing actives detected.`; } 
+            if(fullRoutineText.includes("bha") || fullRoutineText.includes("salicylic") || fullRoutineText.includes("benzoyl") || fullRoutineText.includes("retinol") || fullRoutineText.includes("adapalene")) { tsBox.innerText = `✅ Congestion-clearing actives detected.`; } 
             else { tsBox.innerText = `⚠️ No BHA or cell-turnover actives found in today's routine.`; }
         } else if (userProfile.primaryFocus === "Hydration") {
-            if(fullRoutineText.includes("hyaluronic") || fullRoutineText.includes("ceramide") || fullRoutineText.includes("snail")) { tsBox.innerText = `✅ Optimal humectants/lipids detected for hydration.`; } 
+            if(fullRoutineText.includes("hyaluronic") || fullRoutineText.includes("ceramide") || fullRoutineText.includes("snail") || fullRoutineText.includes("glycerin")) { tsBox.innerText = `✅ Optimal humectants/lipids detected for hydration.`; } 
             else { tsBox.innerText = `⚠️ Consider adding a dedicated Hydrating serum or essence.`; }
         } else {
             tsBox.innerText = `✅ Routine active and tracking perfectly.`;
@@ -246,23 +253,39 @@ function updateSkinAnalysis() {
 function analyzeRoutineLayering() {
     let out = document.getElementById('routine-analysis-output'); if(!out) return;
     let dayRoutines = userProfile.routine[todayName] || {am:[], pm:[]};
-    let pmStr = dayRoutines.pm.join(" ").toLowerCase();
-    let amStr = dayRoutines.am.join(" ").toLowerCase();
+    let prods = JSON.parse(localStorage.getItem('products')) || [];
+    
+    function getFullRoutineText(routineArr) {
+        let fullStr = "";
+        routineArr.forEach(step => {
+            fullStr += step.toLowerCase() + " ";
+            prods.forEach(p => {
+                if(step.includes(p.name) && p.ingredients) fullStr += p.ingredients.toLowerCase() + " ";
+            });
+        });
+        return fullStr;
+    }
+    
+    let pmStr = getFullRoutineText(dayRoutines.pm);
+    let amStr = getFullRoutineText(dayRoutines.am);
     
     out.style.display = 'block';
     out.innerHTML = "<strong>🧪 Layering Analysis:</strong><br>";
     let warnings = 0;
 
-    // Check PM conflicts
     if((pmStr.includes("retinol") || pmStr.includes("tretinoin") || pmStr.includes("adapalene")) && (pmStr.includes("aha") || pmStr.includes("glycolic") || pmStr.includes("lactic") || pmStr.includes("bha") || pmStr.includes("salicylic"))) {
         out.innerHTML += `<span style="color:#cc0000;">🚨 Conflict: Retinoid + Strong Acid detected in the same PM routine. High risk of chemical burn/barrier damage. Alternate nights!</span><br>`; warnings++;
     }
-    // Check AM conflicts
-    if(amStr.includes("retinol") || amStr.includes("tretinoin")) {
-        out.innerHTML += `<span style="color:#cc0000;">🚨 Conflict: Retinoids degrade in UV light. Move to PM routine!</span><br>`; warnings++;
+    if(amStr.includes("retinol") || amStr.includes("tretinoin") || amStr.includes("adapalene")) {
+        out.innerHTML += `<span style="color:#cc0000;">🚨 Conflict: Retinoids degrade rapidly in UV light. Move them to your PM routine!</span><br>`; warnings++;
     }
-    if((amStr.includes("aha") || amStr.includes("bha") || amStr.includes("vitamin c")) && !amStr.includes("spf") && !amStr.includes("sunscreen")) {
+    if((amStr.includes("aha") || amStr.includes("bha") || amStr.includes("vitamin c")) && !amStr.includes("spf") && !amStr.includes("sunscreen") && !amStr.includes("titanium") && !amStr.includes("zinc")) {
         out.innerHTML += `<span style="color:#cc0000;">🚨 Danger: Exfoliating/Brightening actives in AM without SPF. You will cause hyperpigmentation! Add SPF.</span><br>`; warnings++;
+    }
+    if(userProfile.barrierState === "Compromised" || userProfile.barrierState === "OverExfoliated") {
+        if(pmStr.includes("aha") || amStr.includes("aha") || pmStr.includes("bha") || amStr.includes("bha") || pmStr.includes("retinol")) {
+            out.innerHTML += `<span style="color:#cc0000;">🚨 Barrier Warning: You have harsh actives mapped while your barrier is compromised. Pause them!</span><br>`; warnings++;
+        }
     }
     
     if(warnings === 0) {
@@ -336,8 +359,17 @@ function removeMapLog(mapType, idx) {
 }
 
 // ==========================================
-// 7. DIGITAL VANITY, PAO & ALLERGEN SCANNER
+// 7. DIGITAL VANITY, EDIT MODAL & ALLERGEN SCANNER
 // ==========================================
+function populateVanityDropdown() {
+    let select = document.getElementById('routine-product-link'); if(!select) return;
+    select.innerHTML = '<option value="">-- Custom Step / No Product --</option>';
+    let prods = JSON.parse(localStorage.getItem('products')) || [];
+    prods.forEach(p => {
+        select.innerHTML += `<option value="${p.name}">${p.name} (${p.type})</option>`;
+    });
+}
+
 function addProduct() {
     let nameEl = document.getElementById('prod-name'); if(!nameEl) return;
     let name = nameEl.value; 
@@ -347,7 +379,7 @@ function addProduct() {
     let openDate = document.getElementById('prod-open-date') ? document.getElementById('prod-open-date').value : "";
     let wish = document.getElementById('prod-wishlist') ? document.getElementById('prod-wishlist').checked : false; 
     let fav = document.getElementById('prod-fav') ? document.getElementById('prod-fav').checked : false;
-    let ingText = document.getElementById('prod-ingredients') ? document.getElementById('prod-ingredients').value.toLowerCase() : "";
+    let ingredients = document.getElementById('prod-ingredients') ? document.getElementById('prod-ingredients').value : "";
     
     if(!name) return; let exp = "Sealed 🔒"; let addedTime = null;
     if(pao && !wish && openDate) { 
@@ -357,8 +389,8 @@ function addProduct() {
         exp = `Exp: ${d.toLocaleDateString()}`; 
     }
 
-    // Allergen Scanner
     let allergenWarning = "";
+    let ingText = ingredients.toLowerCase();
     if(ingText !== "" && userProfile.allergies !== "") {
         let algs = userProfile.allergies.toLowerCase().split(",").map(s => s.trim());
         algs.forEach(alg => {
@@ -367,17 +399,79 @@ function addProduct() {
     }
     
     let prods = JSON.parse(localStorage.getItem('products')) || [];
-    prods.push({ name, brand, type, pao, wish, fav, exp, addedTime, allergenWarning });
+    prods.push({ name, brand, type, pao, wish, fav, exp, addedTime, ingredients, allergenWarning });
     localStorage.setItem('products', JSON.stringify(prods));
     
     document.querySelectorAll('#skincare input[type="text"], #skincare input[type="number"], #skincare input[type="date"], #skincare textarea').forEach(i => i.value = '');
     let wChk = document.getElementById('prod-wishlist'); if(wChk) wChk.checked = false;
     let fChk = document.getElementById('prod-fav'); if(fChk) fChk.checked = false;
     renderProducts();
+    populateVanityDropdown();
 }
 
 function removeProduct(idx) {
-    let prods = JSON.parse(localStorage.getItem('products')) || []; prods.splice(idx, 1); localStorage.setItem('products', JSON.stringify(prods)); renderProducts();
+    let prods = JSON.parse(localStorage.getItem('products')) || []; prods.splice(idx, 1); localStorage.setItem('products', JSON.stringify(prods)); 
+    renderProducts(); populateVanityDropdown();
+}
+
+function openEditModal(idx) {
+    let prods = JSON.parse(localStorage.getItem('products')) || [];
+    let p = prods[idx];
+    document.getElementById('edit-prod-index').value = idx;
+    document.getElementById('edit-prod-name').value = p.name;
+    document.getElementById('edit-prod-brand').value = p.brand || '';
+    document.getElementById('edit-prod-type').value = p.type || 'Serum';
+    document.getElementById('edit-prod-ingredients').value = p.ingredients || '';
+    document.getElementById('edit-prod-pao').value = p.pao || '';
+    
+    let openDateInput = document.getElementById('edit-prod-open-date');
+    if(p.addedTime) {
+        let d = new Date(p.addedTime);
+        openDateInput.value = d.toISOString().split('T')[0];
+    } else {
+        openDateInput.value = '';
+    }
+    document.getElementById('edit-product-modal').style.display = 'flex';
+}
+
+function closeEditModal() { document.getElementById('edit-product-modal').style.display = 'none'; }
+
+function saveProductEdits() {
+    let idx = document.getElementById('edit-prod-index').value;
+    let prods = JSON.parse(localStorage.getItem('products')) || [];
+    let name = document.getElementById('edit-prod-name').value;
+    if(!name) return;
+    
+    let p = prods[idx];
+    p.name = name;
+    p.brand = document.getElementById('edit-prod-brand').value;
+    p.type = document.getElementById('edit-prod-type').value;
+    p.ingredients = document.getElementById('edit-prod-ingredients').value;
+    p.pao = document.getElementById('edit-prod-pao').value ? parseInt(document.getElementById('edit-prod-pao').value) : 0;
+    
+    let openDate = document.getElementById('edit-prod-open-date').value;
+    if(openDate && p.pao) {
+        let d = new Date(openDate);
+        p.addedTime = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+        d.setMonth(d.getMonth() + p.pao);
+        p.exp = `Exp: ${d.toLocaleDateString()}`;
+    } else {
+        p.addedTime = null;
+        p.exp = "Sealed 🔒";
+    }
+    
+    p.allergenWarning = "";
+    let ingText = p.ingredients.toLowerCase();
+    if(ingText !== "" && userProfile.allergies !== "") {
+        let algs = userProfile.allergies.toLowerCase().split(",").map(s => s.trim());
+        algs.forEach(alg => { if(alg !== "" && ingText.includes(alg)) { p.allergenWarning = alg; } });
+    }
+    
+    prods[idx] = p;
+    localStorage.setItem('products', JSON.stringify(prods));
+    closeEditModal();
+    renderProducts();
+    populateVanityDropdown();
 }
 
 function renderProducts() {
@@ -407,23 +501,38 @@ function renderProducts() {
                 ${alertHTML}
                 <div style="font-size:0.75rem; margin-top:5px; font-weight:bold;">${p.exp}</div>
                 ${paoBarHTML}
-                <button class="prod-del" onclick="removeProduct(${idx})">Remove</button>
+                <div class="prod-actions">
+                    <button class="prod-edit" onclick="openEditModal(${idx})">Edit</button>
+                    <button class="prod-del" onclick="removeProduct(${idx})">X</button>
+                </div>
             </div>`;
     });
 }
 
 // ==========================================
-// 8. ROUTINE BUILDER & WEEKLY HEART STAMPS
+// 8. LINKED ROUTINE BUILDER & WEEKLY HEART STAMPS
 // ==========================================
 let currentCheckType = ""; 
 
 function addRoutineStep() {
-    let dayEl = document.getElementById('routine-day-select'); let timeEl = document.getElementById('routine-time-select'); let stepEl = document.getElementById('new-routine-step');
-    if(!dayEl || !timeEl || !stepEl) return;
-    let day = dayEl.value; let time = timeEl.value; let step = stepEl.value; if(!step) return;
+    let dayEl = document.getElementById('routine-day-select'); 
+    let timeEl = document.getElementById('routine-time-select'); 
+    let prodEl = document.getElementById('routine-product-link');
+    let noteEl = document.getElementById('new-routine-step-note');
+    if(!dayEl || !timeEl) return;
+    
+    let day = dayEl.value; let time = timeEl.value; 
+    let prod = prodEl ? prodEl.value : "";
+    let note = noteEl ? noteEl.value : "";
+    
+    let step = prod ? (note ? `${prod} - ${note}` : prod) : note;
+    if(!step) return;
+    
     if(!userProfile.routine[day]) userProfile.routine[day] = {am:[], pm:[]};
     userProfile.routine[day][time].push(step);
-    localStorage.setItem('userProfile', JSON.stringify(userProfile)); stepEl.value = '';
+    localStorage.setItem('userProfile', JSON.stringify(userProfile)); 
+    if(noteEl) noteEl.value = '';
+    if(prodEl) prodEl.value = '';
     renderSettingsRoutine(); renderTodayRoutine();
 }
 
