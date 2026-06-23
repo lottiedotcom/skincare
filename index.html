@@ -153,7 +153,7 @@
 
             <div class="bubbly-box">
                 <h3>🔮 The Smart Coach</h3>
-                <p class="small-text">Log your cumulative rest and hydration metrics. Coach will clear your training safely.</p>
+                <p class="small-text">Log your cumulative rest and hydration metrics. Coach will clear your training safely based on your biometric baseline.</p>
                 
                 <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
                     <div style="flex:1; display:flex; flex-direction:column; min-width: 120px;">
@@ -317,10 +317,22 @@
 
             <div class="bubbly-box" style="background: #e6e6ff; border-color: #ccccff;">
                 <h3 style="color: #4b0082; border-bottom-color: #ccccff;">🎓 Contortion Academy</h3>
-                <p class="small-text">Enter the 5x5 clinical curriculums and Form-Check Quizzes.</p>
+                <p class="small-text">Complete daily practice logs to build your streak and unlock the next tiers.</p>
                 <button class="action-btn" onclick="openTab('skill-tree-tab')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; width: 100%;">Enter Education & Skill Tree ➔</button>
             </div>
             
+            <!-- NEW: GENERAL FLEXIBILITY SESSION TRACKER -->
+            <div class="bubbly-box">
+                <h3>📝 General Session Log</h3>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <input type="text" id="flex-session-focus" placeholder="Focus (e.g., Backbends)" style="flex: 2; margin:0;">
+                    <input type="number" id="flex-session-duration" placeholder="Mins" style="flex: 1; margin:0;">
+                </div>
+                <textarea id="flex-session-notes" rows="2" placeholder="How did it feel? Any breakthroughs or pain?"></textarea>
+                <button class="action-btn" onclick="logFlexSession()">+ Log Session</button>
+                <ul id="flex-session-list" class="log-list"></ul>
+            </div>
+
             <div class="bubbly-box">
                 <details class="cute-details">
                     <summary>➕ Add Routine to Vault</summary>
@@ -359,6 +371,7 @@
                 </ul>
             </div>
 
+            <!-- Dynamic Courses populated by JS -->
             <div id="academy-courses-container"></div>
             
             <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; margin-bottom: 20px;">⬅ Back to Flexibility</button>
@@ -421,6 +434,16 @@
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <input type="text" id="lat-input" placeholder="Latitude" onchange="saveSettings()">
                     <input type="text" id="lon-input" placeholder="Longitude" onchange="saveSettings()">
+                </div>
+            </div>
+
+            <!-- NEW: BIOMETRICS FOR SMART COACH -->
+            <div class="bubbly-box">
+                <h3>⚖️ Biometrics (Smart Coach Baseline)</h3>
+                <p class="small-text">Coach uses this to calculate optimal hydration and tension recovery.</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="user-weight" placeholder="Weight (lbs)" onchange="saveSettings()">
+                    <input type="number" id="user-height" placeholder="Height (inches)" onchange="saveSettings()">
                 </div>
             </div>
 
@@ -550,14 +573,19 @@
     </div>
 
     <!-- MODALS -->
-    <div id="quiz-modal" class="modal-overlay">
+    <!-- NEW ACADEMY STREAK LOG MODAL -->
+    <div id="academy-log-modal" class="modal-overlay">
         <div class="quiz-box">
-            <h3 id="quiz-title">Form Check Quiz</h3>
-            <p id="quiz-question" style="margin: 15px 0; font-weight: bold;"></p>
-            <button class="action-btn quiz-btn" id="quiz-opt-a" onclick="submitQuiz('a')" style="background: #fff; color: #cc0066; border: 2px solid #ff99cc; box-shadow: none;">A</button>
-            <button class="action-btn quiz-btn" id="quiz-opt-b" onclick="submitQuiz('b')" style="background: #fff; color: #cc0066; border: 2px solid #ff99cc; box-shadow: none;">B</button>
-            <p id="quiz-feedback" class="highlight-text" style="display:none;"></p>
-            <button class="action-btn" onclick="closeQuiz()" style="margin-top: 20px; background: #999;">Cancel</button>
+            <h3 id="academy-log-title" style="color: #cc0066; border-bottom: 2px dashed #ffb3d9; padding-bottom: 5px;">Log Daily Practice</h3>
+            <p id="academy-log-desc" style="font-size: 0.85rem; margin-top: 10px; margin-bottom: 15px; color: #885566;"></p>
+            
+            <div id="academy-log-questions" style="text-align: left; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+                <!-- Populated by JS -->
+            </div>
+            
+            <button class="action-btn" onclick="submitAcademyLog()" style="background: #66cc99;">Stamp Practice ✨</button>
+            <p id="academy-log-feedback" class="highlight-text" style="display:none; margin-top: 10px;"></p>
+            <button class="action-btn" onclick="closeAcademyModal()" style="margin-top: 10px; background: #999;">Cancel</button>
         </div>
     </div>
 
