@@ -8,7 +8,6 @@
 </head>
 <body>
 
-    <!-- TOP NAVIGATION -->
     <header class="top-header">
         <h1>✨ Daily Wellness & Aura ✨</h1>
         <nav class="tab-container">
@@ -22,9 +21,15 @@
 
     <main class="content-area">
         
-        <!-- SKINCARE PAGE -->
         <section id="skincare" class="tab-content active">
             <h2>🌸 Skincare & Barrier Health</h2>
+
+            <div class="bubbly-box" style="background: #fff0f5; border-color: #ff99cc; text-align: center;">
+                <h3 style="border: none; margin-bottom: 5px;">💖 Weekly Consistency</h3>
+                <p id="heart-status-text" class="small-text" style="color: #cc0066;">Collect 14 hearts for Barrier Thriving status!</p>
+                <div id="weekly-hearts-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; min-height: 25px; margin-top: 10px;">
+                    </div>
+            </div>
             
             <div class="bubbly-box">
                 <h3>🦠 Clinical Environmental Matrix</h3>
@@ -35,7 +40,7 @@
                 </div>
                 <div id="bio-impact-warnings" style="margin-top: 10px;">
                     <p class="highlight-text" id="smart-skin-analysis" style="background:#e6f2ff; color:#0066cc;">Analyzing skin profile and atmosphere...</p>
-                    <p class="highlight-text" id="action-uv" style="background:#fff0b3; color:#cc8800; display:none;"></p>
+                    <p class="highlight-text" id="face-map-analysis" style="background:#fff0f5; color:#cc0066; display:none;"></p>
                 </div>
             </div>
 
@@ -53,7 +58,6 @@
                 <h3>2D Face Map (Acne Tracker)</h3>
                 <p class="small-text">Reference the 7 zones on your map, then stage the breakout below.</p>
                 <div class="map-container" id="face-map-container">
-                    <!-- Clean image, no floating dots -->
                     <img src="Face2d.png" alt="Face Map" class="interactive-map">
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -80,7 +84,7 @@
 
             <div class="bubbly-box">
                 <h3>🧴 The Digital Vanity</h3>
-                <p class="small-text">Track your arsenal, PAO, and repurchases. Watch the progress bars to avoid expired actives!</p>
+                <p class="small-text">Input the "Date Opened" to start the PAO timer. Leave blank to keep it Sealed 🔒.</p>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <input type="text" id="prod-name" placeholder="Product Name" style="grid-column: span 2;">
                     <input type="text" id="prod-brand" placeholder="Brand">
@@ -93,7 +97,7 @@
                         <option value="Mask">Mask</option>
                     </select>
                     <input type="number" id="prod-pao" placeholder="PAO (Months)">
-                    <input type="text" id="prod-price" placeholder="Price (e.g., $15.00)">
+                    <input type="date" id="prod-open-date" placeholder="Date Opened">
                     <input type="text" id="prod-url" placeholder="Product URL" style="grid-column: span 2;">
                 </div>
                 
@@ -107,7 +111,6 @@
             </div>
         </section>
 
-        <!-- FLEXIBILITY PAGE -->
         <section id="flexibility" class="tab-content">
             <h2>🎀 Contortion & Body Work</h2>
 
@@ -143,7 +146,6 @@
                 <button class="action-btn" onclick="openTab('skill-tree-tab')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; width: 100%;">Enter Education & Skill Tree ➔</button>
             </div>
 
-            <!-- EXPANDED RECOVERY & REGULATION -->
             <div class="bubbly-box" style="background: #e6ffe6; border-color: #99ff99;">
                 <h3 style="color: #006600; border-bottom-color: #99ff99;">🌬️ Recovery & Regulation</h3>
                 <p class="small-text" style="color: #004d00;">Nervous system resets, flossing, and decompression.</p>
@@ -155,41 +157,59 @@
                     <button class="action-btn" onclick="toggleRecoveryPanel('spinal-decompression')" style="background: #6699ff; box-shadow: 0px 3px 0px #0033cc; margin-top: 0;">Decompression</button>
                 </div>
                 
-                <!-- Panels (Hidden by default) -->
-                <div id="somatic-pacer" class="recovery-panel" style="display: none; text-align: center; margin-top: 20px;">
-                    <p class="highlight-text" style="background: #ccffcc; color: #006600;">Box Breathing: Inhale (4s) - Hold (4s) - Exhale (4s) - Hold (4s)</p>
+                <div id="somatic-pacer" class="recovery-panel" style="display: none; text-align: center; margin-top: 20px; background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed #99ff99;">
+                    <select id="breathing-mode" style="margin-bottom: 10px;" onchange="updateBreathingMode()">
+                        <option value="box">Box Breathing (4-4-4-4)</option>
+                        <option value="sleep">Sleep Prep (4-7-8)</option>
+                        <option value="resonance">Resonance (5-5)</option>
+                        <option value="sigh">Physiological Sigh (Stress Reset)</option>
+                    </select>
                     <div class="breathing-circle" id="breath-circle"></div>
-                    <p id="breath-text" style="font-weight: bold; color: #006600; margin-top: 10px;">Breathe...</p>
-                    <button class="action-btn" onclick="toggleRecoveryPanel('somatic-pacer')" style="background: #999; margin-top: 15px; width: auto; padding: 5px 15px;">Hide</button>
+                    <p id="breath-text" style="font-weight: bold; color: #cc0066; margin-top: 10px; font-size: 1.2rem;">Ready...</p>
+                    <button class="action-btn" onclick="startBreathing()" id="breath-btn" style="background: #ff66b2; margin-top: 10px;">Start Breathing</button>
+                    <button class="action-btn" onclick="toggleRecoveryPanel('somatic-pacer')" style="background: #999; margin-top: 5px;">Hide Panel</button>
                 </div>
 
                 <div id="lymphatic-sequence" class="recovery-panel highlight-text" style="display: none; background: #ccffcc; color: #006600; font-size: 0.85rem; text-align: left; margin-top: 15px;">
-                    <strong>Lymphatic Clearing Sequence:</strong><br><br>
-                    1. <strong>Clavicle (Collarbone):</strong> Gently pump the hollows above your collarbone 15x.<br>
-                    2. <strong>Axillary (Armpits):</strong> Pump deeply into the armpits 15x.<br>
-                    3. <strong>Inguinal (Hips):</strong> Pump the creases of your hips 15x.<br>
-                    4. <strong>Legs up the Wall:</strong> Rest inverted for 10 minutes.<br>
-                    <div style="text-align: right;"><button class="action-btn" onclick="toggleRecoveryPanel('lymphatic-sequence')" style="background: #999; width: auto; padding: 5px 15px;">Hide</button></div>
+                    <h4 style="text-align:center; margin-bottom:10px;">Active Lymph Drainage</h4>
+                    <p id="lymph-timer-display" style="font-size: 1.5rem; text-align: center; font-weight: bold; color: #006600;">00:00</p>
+                    <p id="lymph-step-text" style="text-align: center; margin-bottom: 15px;">Press start to begin sequence.</p>
+                    <button class="action-btn" id="lymph-btn" onclick="startLymphTimer()" style="background: #009966; margin-bottom: 15px;">▶ Start Sequence</button>
+                    
+                    <strong>The Sequence Map:</strong><br><br>
+                    1. <strong>Clavicle</strong> <button class="info-btn" onclick="toggleInfo('info-clavicle')">[ ? ]</button>
+                    <div id="info-clavicle" class="info-drop">This means your collarbone! Use two flat fingers to gently press the hollow dips just above the bone. This opens the main drain.</div><br>
+                    
+                    2. <strong>Axillary</strong> <button class="info-btn" onclick="toggleInfo('info-axillary')">[ ? ]</button>
+                    <div id="info-axillary" class="info-drop">Your armpits! Use a flat hand to gently pump up into the hollow of your armpit to clear upper body fluid.</div><br>
+                    
+                    3. <strong>Inguinal</strong> <button class="info-btn" onclick="toggleInfo('info-inguinal')">[ ? ]</button>
+                    <div id="info-inguinal" class="info-drop">Your hip creases! Where your leg meets your pelvis. Gently pump to drain leg swelling.</div><br>
+                    
+                    4. <strong>Legs up Wall</strong> <button class="info-btn" onclick="toggleInfo('info-legs')">[ ? ]</button>
+                    <div id="info-legs" class="info-drop">Lie on your back, legs straight up against a wall. Let gravity pull the stagnant fluid back to your core.</div><br>
+                    
+                    <div style="text-align: center;"><button class="action-btn" onclick="toggleRecoveryPanel('lymphatic-sequence')" style="background: #999; width: auto; padding: 5px 15px;">Hide Panel</button></div>
                 </div>
 
                 <div id="nerve-flossing" class="recovery-panel highlight-text" style="display: none; background: #ffe6cc; color: #cc6600; font-size: 0.85rem; text-align: left; margin-top: 15px;">
                     <strong>Nerve Flossing Guides (Do NOT stretch, glide!):</strong><br><br>
                     1. <strong>Sciatic Nerve:</strong> Lie on back. Clasp behind thigh. As you straighten the knee, point the toe. As you bend the knee, flex the foot. 15x.<br>
                     2. <strong>Brachial Nerve (Arms):</strong> Arm straight out to side, palm up. Tilt head AWAY from arm while bending wrist UP. Tilt head TOWARD arm while dropping wrist DOWN. 10x.<br>
-                    <div style="text-align: right;"><button class="action-btn" onclick="toggleRecoveryPanel('nerve-flossing')" style="background: #999; width: auto; padding: 5px 15px;">Hide</button></div>
+                    <div style="text-align: center;"><button class="action-btn" onclick="toggleRecoveryPanel('nerve-flossing')" style="background: #999; width: auto; padding: 5px 15px;">Hide</button></div>
                 </div>
 
                 <div id="spinal-decompression" class="recovery-panel highlight-text" style="display: none; background: #cce0ff; color: #0033cc; font-size: 0.85rem; text-align: left; margin-top: 15px;">
                     <strong>Spinal Decompression:</strong><br><br>
                     1. <strong>Dead Hang:</strong> Hang passively from a pull-up bar for 30-60 seconds. Let the pelvis drop completely.<br>
                     2. <strong>Supported Child's Pose:</strong> Knees wide, chest on a pillow or bolster. Rest for 3 minutes to open the lumbar.<br>
-                    <div style="text-align: right;"><button class="action-btn" onclick="toggleRecoveryPanel('spinal-decompression')" style="background: #999; width: auto; padding: 5px 15px;">Hide</button></div>
+                    <div style="text-align: center;"><button class="action-btn" onclick="toggleRecoveryPanel('spinal-decompression')" style="background: #999; width: auto; padding: 5px 15px;">Hide</button></div>
                 </div>
             </div>
 
             <div class="bubbly-box">
                 <h3>🔮 Smart Coach</h3>
-                <p class="small-text">Input your recovery metrics for clinical analysis.</p>
+                <p class="small-text">Input your recovery metrics. The Coach pulls all data for clinical analysis.</p>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;">
                     <input type="number" id="sleep-hours" placeholder="Hours Slept" style="flex:1; margin:0;">
                     <input type="number" id="water-oz" placeholder="Oz Water" style="flex:1; margin:0;">
@@ -230,7 +250,6 @@
             </div>
         </section>
 
-        <!-- EDUCATION & SKILL TREE TAB -->
         <section id="skill-tree-tab" class="tab-content">
             <h2>🎓 5x5 Contortion Academy</h2>
             
@@ -248,7 +267,6 @@
             <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff;">⬅ Back to Flexibility</button>
         </section>
 
-        <!-- ORACLE & AURA PAGE -->
         <section id="oracle-aura" class="tab-content">
             <h2>🔮 Intuitive Oracle & Aura Synthesis</h2>
             
@@ -272,7 +290,6 @@
             </div>
         </section>
 
-        <!-- LOGS PAGE -->
         <section id="logs" class="tab-content">
             <h2>📝 Auto-Synthesis Journal</h2>
             
@@ -295,7 +312,6 @@
             </div>
         </section>
 
-        <!-- SETTINGS PAGE -->
         <section id="settings" class="tab-content">
             <h2>⚙️ System Settings & Profile</h2>
             
@@ -389,7 +405,6 @@
 
     </main>
 
-    <!-- QUIZ MODAL -->
     <div id="quiz-modal" class="modal-overlay">
         <div class="quiz-box">
             <h3 id="quiz-title">Form Check Quiz</h3>
@@ -398,6 +413,15 @@
             <button class="action-btn quiz-btn" id="quiz-opt-b" onclick="submitQuiz('b')" style="background: #fff; color: #cc0066; border: 2px solid #ff99cc; box-shadow: none;">B</button>
             <p id="quiz-feedback" class="highlight-text" style="display:none;"></p>
             <button class="action-btn" onclick="closeQuiz()" style="margin-top: 20px; background: #999;">Cancel</button>
+        </div>
+    </div>
+
+    <div id="routine-modal" class="modal-overlay">
+        <div class="quiz-box" style="border-color: #ff66b2;">
+            <h3 style="color: #ff66b2;">💖 Routine Complete?</h3>
+            <p style="margin: 15px 0; font-weight: bold;">Are you sure you’ve completed your entire routine? ✨</p>
+            <button class="action-btn" onclick="confirmRoutineStamp()" style="background: #ff66b2;">Yes, Stamp It! 💖</button>
+            <button class="action-btn" onclick="document.getElementById('routine-modal').style.display='none'" style="margin-top: 10px; background: #999;">Not yet</button>
         </div>
     </div>
 
