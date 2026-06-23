@@ -55,7 +55,7 @@
             <div class="bubbly-box">
                 <h3>2D Face Map Diagnostics</h3>
                 <p class="small-text">Reference the 7 zones on your map, then stage the breakout below to generate a clinical diagnosis.</p>
-                <div class="map-container" id="face-map-container">
+                <div class="map-container" style="aspect-ratio: 1 / 1;">
                     <img src="Face2d.png" alt="Face Map" class="interactive-map">
                 </div>
                 
@@ -77,9 +77,16 @@
                         <option value="Papule">Papule</option>
                     </select>
                     <select id="face-severity">
-                        <option value="Low">Mild (1-3)</option>
-                        <option value="Moderate">Moderate (4-6)</option>
-                        <option value="Severe">Severe (7-10)</option>
+                        <option value="1">Severity: 1</option>
+                        <option value="2">Severity: 2</option>
+                        <option value="3">Severity: 3</option>
+                        <option value="4">Severity: 4</option>
+                        <option value="5">Severity: 5</option>
+                        <option value="6">Severity: 6</option>
+                        <option value="7">Severity: 7</option>
+                        <option value="8">Severity: 8</option>
+                        <option value="9">Severity: 9</option>
+                        <option value="10">Severity: 10</option>
                     </select>
                     <select id="face-sensation" style="grid-column: span 2;">
                         <option value="Painless">Painless / Dormant</option>
@@ -110,8 +117,8 @@
                         <option value="Mask">Mask</option>
                     </select>
                     <input type="number" id="prod-pao" placeholder="PAO (Months)">
-                    <div style="display:flex; flex-direction:column;">
-                        <span style="font-size:0.7rem; color:#cc0066; font-weight:bold; margin-bottom:2px;">Date Opened:</span>
+                    <div style="display:flex; flex-direction:column; justify-content: flex-end;">
+                        <span style="font-size:0.75rem; color:#cc0066; font-weight:bold; margin-bottom:2px;">Date Opened:</span>
                         <input type="date" id="prod-open-date" style="margin:0;">
                     </div>
                     <input type="text" id="prod-url" placeholder="Product URL" style="grid-column: span 2;">
@@ -142,6 +149,9 @@
                     <button class="action-btn" onclick="addWater(16)" style="flex:1; margin:0; background:#66ccff; box-shadow:0px 3px 0px #0066cc;">💧 +16 oz</button>
                 </div>
                 
+                <!-- Quick Save to prevent data loss before 7 AM reset -->
+                <button class="action-btn" onclick="saveCoachMetrics()" style="background:#cc99ff; width:100%; box-shadow: 0px 3px 0px #9933cc; margin-bottom: 10px;">💾 Save Metrics</button>
+                
                 <button class="action-btn" onclick="smartSuggest()" style="background:#cc0066; width:100%;">🔮 Ask Smart Coach</button>
                 
                 <p id="vault-suggestion" class="highlight-text" style="display:none; margin-top: 15px; font-size: 0.95rem; line-height: 1.4;"></p>
@@ -155,19 +165,31 @@
             <div class="bubbly-box">
                 <h3>2D Body Map (Tension Tracker)</h3>
                 <p class="small-text">Log tension to flag the Smart Coach.</p>
-                <div class="map-container" id="body-map-container" style="aspect-ratio: 1 / 1;">
+                <div class="map-container" style="aspect-ratio: 1 / 1;">
                     <img src="body2d.jpg" alt="Body Map" class="interactive-map">
                 </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <select id="body-zone-select" style="flex: 2; margin: 0;"></select>
-                    <select id="body-tension-type" style="flex: 2; margin: 0;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <select id="body-zone-select" style="grid-column: span 2; margin: 0;"></select>
+                    <select id="body-tension-type" style="margin: 0;">
                         <option value="DOMS (Soreness)">DOMS (Soreness)</option>
                         <option value="Muscle (Dull/Pull)">Muscle (Dull/Pull)</option>
                         <option value="Fascia (Tight/Stuck)">Fascia (Tight/Stuck)</option>
                         <option value="Joint (Pinching/Blocked)">Joint (Pinching/Blocked)</option>
                         <option value="Nerve (Sharp/Tingly)">Nerve (Sharp/Tingly)</option>
                     </select>
-                    <button class="action-btn" onclick="logBodyZone()" style="margin: 0; flex: 1;">Stage</button>
+                    <select id="body-severity" style="margin: 0;">
+                        <option value="1">Severity: 1</option>
+                        <option value="2">Severity: 2</option>
+                        <option value="3">Severity: 3</option>
+                        <option value="4">Severity: 4</option>
+                        <option value="5">Severity: 5</option>
+                        <option value="6">Severity: 6</option>
+                        <option value="7">Severity: 7</option>
+                        <option value="8">Severity: 8</option>
+                        <option value="9">Severity: 9</option>
+                        <option value="10">Severity: 10</option>
+                    </select>
+                    <button class="action-btn" onclick="logBodyZone()" style="grid-column: span 2; margin: 0;">Stage</button>
                 </div>
                 <ul id="body-log-list" class="log-list"></ul>
             </div>
@@ -248,195 +270,4 @@
                     <strong>Nerve Flossing Guides (Do NOT stretch, glide!):</strong><br><br>
                     1. <strong>Sciatic Nerve:</strong> Lie on back. Clasp behind thigh. As you straighten the knee, point the toe. As you bend the knee, flex the foot. 15x.<br>
                     2. <strong>Brachial Nerve (Arms):</strong> Arm straight out to side, palm up. Tilt head AWAY from arm while bending wrist UP. Tilt head TOWARD arm while dropping wrist DOWN. 10x.<br>
-                    <div style="text-align: center;"><button class="action-btn" onclick="toggleRecoveryPanel('nerve-flossing')" style="background: #999; width: auto; padding: 5px 15px; margin-top:10px;">Hide</button></div>
-                </div>
-
-                <div id="spinal-decompression" class="recovery-panel highlight-text" style="display: none; background: #cce0ff; color: #0033cc; font-size: 0.85rem; text-align: left; margin-top: 15px;">
-                    <strong>Spinal Decompression:</strong><br><br>
-                    1. <strong>Dead Hang:</strong> Hang passively from a pull-up bar for 30-60 seconds. Let the pelvis drop completely.<br>
-                    2. <strong>Supported Child's Pose:</strong> Knees wide, chest on a pillow or bolster. Rest for 3 minutes to open the lumbar.<br>
-                    <div style="text-align: center;"><button class="action-btn" onclick="toggleRecoveryPanel('spinal-decompression')" style="background: #999; width: auto; padding: 5px 15px; margin-top:10px;">Hide</button></div>
-                </div>
-            </div>
-
-            <div class="bubbly-box" style="background: #e6e6ff; border-color: #ccccff;">
-                <h3 style="color: #4b0082; border-bottom-color: #ccccff;">🎓 Contortion Academy</h3>
-                <p class="small-text">Enter the 5x5 clinical curriculums and Form-Check Quizzes.</p>
-                <button class="action-btn" onclick="openTab('skill-tree-tab')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; width: 100%;">Enter Education & Skill Tree ➔</button>
-            </div>
-        </section>
-
-        <!-- EDUCATION TAB -->
-        <section id="skill-tree-tab" class="tab-content">
-            <h2>🎓 5x5 Contortion Academy</h2>
-            
-            <div class="bubbly-box" style="background:#fff9e6; border-color:#ffcc66;">
-                <h3 style="color:#cc8800; border-bottom-color:#ffcc66;">🧠 The Biomechanics Library</h3>
-                <p class="small-text" style="color:#996600;">End-Range Strength is mandatory. Passive flexibility without active muscle engagement causes subluxation.</p>
-                <ul style="font-size:0.85rem; color:#664400; padding-left:20px; margin-top:10px;">
-                    <li><strong>Synovial Fluid:</strong> The joint lubricant. Cold stretching rips tissues; thixotropic heat melts the fascia.</li>
-                    <li><strong>Neural Gliding:</strong> Nerves do not stretch. If you feel sharp, electrical pain, STOP and floss.</li>
-                    <li><strong>AROM:</strong> Your active range of motion is how far you can lift a limb using *only* muscle, no gravity.</li>
-                </ul>
-            </div>
-
-            <div id="academy-courses-container"></div>
-            <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; margin-bottom: 20px;">⬅ Back to Flexibility</button>
-        </section>
-
-        <!-- ORACLE TAB -->
-        <section id="oracle-aura" class="tab-content">
-            <h2>🔮 Intuitive Oracle & Aura Synthesis</h2>
-            
-            <div class="bubbly-box">
-                <h3>The 50-Card Deck</h3>
-                <button class="action-btn draw-btn" onclick="drawCard()">Draw Daily Card</button>
-                <div id="card-result" class="card-display">
-                    <p id="card-name" style="font-size: 1.6rem;">--</p>
-                    <p id="card-suit" style="color: #ff66b2; font-weight: bold; text-transform: uppercase;">--</p>
-                    <p id="card-meaning">Waiting for draw...</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- LOGS PAGE -->
-        <section id="logs" class="tab-content">
-            <h2>📝 Auto-Synthesis Archive</h2>
-            
-            <div class="bubbly-box">
-                <h3>🛏️ Hygiene Tracker</h3>
-                <p>Last Pillowcase Change: <strong id="pillowcase-date">Not Logged</strong></p>
-                <button class="action-btn" onclick="logHygiene('pillow')" style="background: #99ccff; box-shadow: 0px 3px 0px #0066cc;">I Changed My Pillowcase Today</button>
-            </div>
-
-            <div class="bubbly-box">
-                <h3>The Daily Map</h3>
-                <p class="small-text">Type your brain dump. The 7:00 AM Auto-Reset Engine will grab everything on this page and compile your permanent log automatically when you open the app tomorrow.</p>
-                <textarea id="brain-dump" rows="4" placeholder="How did today feel?"></textarea>
-                <button class="action-btn" onclick="compileJournal()" style="width:100%; background:#99ccff; box-shadow:0px 3px 0px #0066cc;">📥 Force Compile Log Now</button>
-                <p id="journal-warning" style="color: red; font-size: 0.85rem; font-weight: bold; margin-top: 10px; display: none;"></p>
-            </div>
-            <div class="bubbly-box">
-                <h3>Master Archive</h3>
-                <ul id="journal-list" class="log-list"></ul>
-            </div>
-        </section>
-
-        <!-- SETTINGS PAGE -->
-        <section id="settings" class="tab-content">
-            <h2>⚙️ System Settings & Profile</h2>
-            
-            <div class="bubbly-box">
-                <h3>📍 Location Accuracy</h3>
-                <button class="action-btn" onclick="grabLocation()" style="background: #99ccff; box-shadow: 0px 3px 0px #0066cc;">📍 Auto-Grab My Location</button>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <input type="text" id="lat-input" placeholder="Latitude" onchange="saveSettings()">
-                    <input type="text" id="lon-input" placeholder="Longitude" onchange="saveSettings()">
-                </div>
-            </div>
-
-            <div class="bubbly-box">
-                <h3>🕰️ Sleep Schedule</h3>
-                <div style="display: flex; gap: 10px;">
-                    <input type="time" id="wake-time" onchange="saveSettings()">
-                    <input type="time" id="sleep-time" onchange="saveSettings()">
-                </div>
-            </div>
-
-            <div class="bubbly-box">
-                <h3>📋 Smart Clinical Skin Profile</h3>
-                <p class="small-text">This data feeds directly into the Skincare Tab's AI analyst.</p>
-                <select id="skin-type-select" onchange="saveSettings()">
-                    <option value="combination">Combination</option>
-                    <option value="dry">Dry</option>
-                    <option value="oily">Oily</option>
-                    <option value="normal">Normal</option>
-                    <option value="sensitive">Sensitive</option>
-                </select>
-                
-                <h3 style="margin-top: 15px; font-size: 1rem;">Current Barrier State</h3>
-                <select id="barrier-state" onchange="saveSettings()">
-                    <option value="Healthy">Healthy & Intact</option>
-                    <option value="Healing">Healing & Fragile</option>
-                    <option value="Compromised">Compromised (Red/Stinging)</option>
-                    <option value="Dehydrated">Dehydrated (Tight/Dull)</option>
-                    <option value="OverExfoliated">Over-Exfoliated</option>
-                </select>
-
-                <h3 style="margin-top: 15px; font-size: 1rem;">Hormonal Phase</h3>
-                <select id="hormone-phase" onchange="saveSettings()">
-                    <option value="Menstrual">Menstrual (Days 1-5)</option>
-                    <option value="Follicular">Follicular (Days 6-13)</option>
-                    <option value="Ovulatory">Ovulatory (Days 14-16)</option>
-                    <option value="Luteal">Luteal (Days 17-28)</option>
-                </select>
-
-                <h3 style="margin-top: 15px; font-size: 1rem;">Primary Focus</h3>
-                <select id="primary-focus" onchange="saveSettings()">
-                    <option value="Anti-Aging">Anti-Aging</option>
-                    <option value="Fine Lines">Fine Lines & Texture</option>
-                    <option value="Hydration">Hydration & Plumping</option>
-                    <option value="Acne Control">Acne & Congestion Control</option>
-                    <option value="Hyperpigmentation">Brightening / Hyperpigmentation</option>
-                </select>
-
-                <h3 style="margin-top: 15px; font-size: 1rem;">Allergies</h3>
-                <input type="text" id="allergy-input" placeholder="e.g., Niacinamide" onchange="saveSettings()">
-            </div>
-
-            <div class="bubbly-box">
-                <h3>✅ Daily Routine Builder</h3>
-                <p class="small-text">Build specific AM and PM routines for each day.</p>
-                <select id="routine-day-select" onchange="renderSettingsRoutine()">
-                    <option value="Monday">Monday</option>
-                    <option value="Tuesday">Tuesday</option>
-                    <option value="Wednesday">Wednesday</option>
-                    <option value="Thursday">Thursday</option>
-                    <option value="Friday">Friday</option>
-                    <option value="Saturday">Saturday</option>
-                    <option value="Sunday">Sunday</option>
-                </select>
-                
-                <div style="display: flex; gap: 8px; margin-top:10px;">
-                    <select id="routine-time-select" style="flex: 1; margin:0;">
-                        <option value="am">AM ☀️</option>
-                        <option value="pm">PM 🌙</option>
-                    </select>
-                    <input type="text" id="new-routine-step" placeholder="e.g., Exfoliating Mask" style="flex: 2; margin:0;">
-                    <button class="action-btn" onclick="addRoutineStep()" style="margin:0; flex: 1;">Add</button>
-                </div>
-                
-                <h4 style="margin-top: 15px; color: #cc0066; font-size: 0.9rem;">AM Routine</h4>
-                <ul id="settings-routine-list-am" class="log-list" style="margin-top: 5px;"></ul>
-                
-                <h4 style="margin-top: 15px; color: #4b0082; font-size: 0.9rem;">PM Routine</h4>
-                <ul id="settings-routine-list-pm" class="log-list" style="margin-top: 5px;"></ul>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- MODALS -->
-    <div id="quiz-modal" class="modal-overlay">
-        <div class="quiz-box">
-            <h3 id="quiz-title">Form Check Quiz</h3>
-            <p id="quiz-question" style="margin: 15px 0; font-weight: bold;"></p>
-            <button class="action-btn quiz-btn" id="quiz-opt-a" onclick="submitQuiz('a')" style="background: #fff; color: #cc0066; border: 2px solid #ff99cc; box-shadow: none;">A</button>
-            <button class="action-btn quiz-btn" id="quiz-opt-b" onclick="submitQuiz('b')" style="background: #fff; color: #cc0066; border: 2px solid #ff99cc; box-shadow: none;">B</button>
-            <p id="quiz-feedback" class="highlight-text" style="display:none;"></p>
-            <button class="action-btn" onclick="closeQuiz()" style="margin-top: 20px; background: #999;">Cancel</button>
-        </div>
-    </div>
-
-    <div id="routine-modal" class="modal-overlay">
-        <div class="quiz-box" style="border-color: #ff66b2;">
-            <h3 style="color: #ff66b2;">💖 Routine Complete?</h3>
-            <p style="margin: 15px 0; font-weight: bold;">Are you sure you’ve completed your entire routine? ✨</p>
-            <button class="action-btn" onclick="confirmRoutineStamp()" style="background: #ff66b2;">Yes, Stamp It! 💖</button>
-            <button class="action-btn" onclick="document.getElementById('routine-modal').style.display='none'" style="margin-top: 10px; background: #999;">Not yet</button>
-        </div>
-    </div>
-
-    <script src="app.js"></script>
-</body>
-</html>
+                    <div style="text-align: center;"><bu
