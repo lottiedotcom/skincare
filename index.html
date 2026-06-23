@@ -15,7 +15,7 @@
             <button class="tab-btn" onclick="openTab('flexibility')">🧘 Flex</button>
             <button class="tab-btn" onclick="openTab('oracle-aura')">🔮 Aura</button>
             <button class="tab-btn" onclick="openTab('logs')">📝 Logs</button>
-            <button class="tab-btn" onclick="openTab('settings')">⚙️ Set</button>
+            <button class="tab-btn" onclick="openTab('settings')">⚙️ Settings</button>
         </nav>
     </header>
 
@@ -215,22 +215,22 @@
                 <div class="skill-tier" id="tier-cs-1">
                     <h4>Tier 1: Foundation</h4>
                     <p class="small-text">Routine: Cervical/Thoracic Mobility & Cat-Cows.</p>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-cs-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
+                    <label class="check-tag"><input type="checkbox" id="chk-cs-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
                 </div>
                 <div class="skill-tier locked" id="tier-cs-2">
                     <h4>Tier 2: Activation</h4>
                     <p class="small-text">Routine: Scapular Retractions & Glute Bridges.</p>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-cs-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
+                    <label class="check-tag"><input type="checkbox" id="chk-cs-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
                 </div>
                 <div class="skill-tier locked" id="tier-cs-3">
                     <h4>Tier 3: Sub-Shape</h4>
                     <p class="small-text">Routine: Active Cobra Liftoffs & Sphinx holds.</p>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-cs-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
+                    <label class="check-tag"><input type="checkbox" id="chk-cs-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
                 </div>
                 <div class="skill-tier locked" id="tier-cs-4">
                     <h4>Tier 4: Peak</h4>
                     <p class="small-text">Routine: Unassisted Chest Stand Hold.</p>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-cs-4" onchange="checkSkillLocks()" disabled> Mastered Peak</label>
+                    <label class="check-tag"><input type="checkbox" id="chk-cs-4" onchange="checkSkillLocks()" disabled> Mastered Peak</label>
                 </div>
             </div>
 
@@ -239,21 +239,19 @@
                 <div class="skill-tier" id="tier-ms-1">
                     <h4>Tier 1: Isolation</h4>
                     <p class="small-text">Routine: Hip Capsule Rotations & Frog Pose.</p>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-ms-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
+                    <label class="check-tag"><input type="checkbox" id="chk-ms-1" onchange="checkSkillLocks()"> Mastered Tier 1</label>
                 </div>
                 <div class="skill-tier locked" id="tier-ms-2">
                     <h4>Tier 2: Lengthening</h4>
                     <p class="small-text">Routine: PNF Adductor Contractions & Pancake.</p>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-ms-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
+                    <label class="check-tag"><input type="checkbox" id="chk-ms-2" onchange="checkSkillLocks()" disabled> Mastered Tier 2</label>
                 </div>
                 <div class="skill-tier locked" id="tier-ms-3">
                     <h4>Tier 3: Active Strength</h4>
                     <p class="small-text">Routine: Isometric Straddle Lifts.</p>
-                    <label class="check-tag"><input type="checkbox" class="skill-chk" id="chk-ms-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
+                    <label class="check-tag"><input type="checkbox" id="chk-ms-3" onchange="checkSkillLocks()" disabled> Mastered Tier 3</label>
                 </div>
             </div>
-            
-            <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff;">⬅ Back to Flexibility</button>
         </section>
 
         <section id="oracle-aura" class="tab-content">
@@ -310,4 +308,45 @@
                 <h3>🕰️ Biphasic Clock</h3>
                 <div style="display: flex; gap: 10px;">
                     <input type="time" id="wake-time" onchange="saveSettings()">
-            
+                    <input type="time" id="sleep-time" onchange="saveSettings()">
+                </div>
+            </div>
+
+            <div class="bubbly-box">
+                <h3>📋 Clinical Skin Profile</h3>
+                <select id="skin-type-select" onchange="saveSettings()">
+                    <option value="combination">Combination</option>
+                    <option value="dry">Dry</option>
+                    <option value="oily">Oily</option>
+                    <option value="normal">Normal</option>
+                    <option value="sensitive">Sensitive</option>
+                </select>
+                <h3 style="margin-top: 15px;">Allergies</h3>
+                <input type="text" id="allergy-input" placeholder="e.g., Niacinamide" onchange="saveSettings()">
+            </div>
+
+            <div class="bubbly-box">
+                <h3>✅ Daily Routine Builder</h3>
+                <p class="small-text">Build specific routines for each day of the week.</p>
+                <select id="routine-day-select" onchange="renderSettingsRoutine()">
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+                <div style="display: flex; gap: 8px; margin-top:10px;">
+                    <input type="text" id="new-routine-step" placeholder="e.g., Exfoliating Mask">
+                    <button class="action-btn" onclick="addRoutineStep()" style="margin-top:0;">Add</button>
+                </div>
+                <ul id="settings-routine-list" class="log-list" style="margin-top: 15px;"></ul>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
