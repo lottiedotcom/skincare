@@ -7,7 +7,9 @@ body {
     color: #553344; padding: 0; margin: 0; 
 }
 
-/* TOP HEADER & NAVIGATION TABS */
+/* ==========================================
+   STICKY TOP HEADER & HEART BANNER
+   ========================================== */
 .top-header { 
     text-align: center; 
     margin-bottom: 20px; 
@@ -18,7 +20,6 @@ body {
 }
 .top-header h1 { font-size: 2rem; color: #fff; text-shadow: 2px 2px 4px rgba(255, 102, 178, 0.8); margin-bottom: 10px; }
 
-/* WEEKLY HEART STAMPS ROW */
 .hearts-row {
     display: flex; justify-content: center; gap: 6px; 
     height: 20px; margin-bottom: 15px;
@@ -26,10 +27,13 @@ body {
 .heart-slot {
     width: 20px; height: 20px; background: rgba(255, 255, 255, 0.5); 
     border: 1px dashed #ff99cc; border-radius: 4px; display: flex; 
-    justify-content: center; align-items: center;
+    justify-content: center; align-items: center; overflow: hidden;
 }
-.heart-slot img { width: 16px; height: 16px; object-fit: contain; }
+.heart-slot img { width: 14px; height: 14px; object-fit: contain; }
 
+/* ==========================================
+   NAVIGATION TABS
+   ========================================== */
 .tab-container { 
     display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; 
 }
@@ -42,6 +46,9 @@ body {
 .tab-btn:active { transform: translateY(4px); box-shadow: 0px 0px 0px #ff99cc; }
 .tab-btn.active { background: linear-gradient(180deg, #ff99cc 0%, #ff66b2 100%); color: white; border-color: #fff; }
 
+/* ==========================================
+   MAIN CONTENT & BUBBLY BOXES
+   ========================================== */
 .content-area { max-width: 600px; margin: 0 auto; padding: 20px; padding-bottom: 50px;}
 .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
 .tab-content.active { display: block; }
@@ -81,23 +88,19 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 }
 .action-btn:active { transform: translateY(3px); box-shadow: 0px 0px 0px #cc0066; }
 
-/* MAPS */
+/* ==========================================
+   CLEAN MAPS (No Dots)
+   ========================================== */
 .map-container {
     position: relative; display: block; margin: 0 auto 15px auto;
     width: 100%; max-width: 500px; background: #fff; border: 2px dashed #ffb3d9; 
     border-radius: 15px; overflow: hidden;
 }
 .interactive-map { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none;}
-.target-dot {
-    position: absolute; width: 22px; height: 22px;
-    background: rgba(255, 255, 255, 0.9); border: 2px solid #ff66b2;
-    border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer;
-    display: flex; justify-content: center; align-items: center;
-    font-size: 0.7rem; font-weight: bold; color: #cc0066;
-    transition: all 0.2s; box-shadow: 0px 0px 5px rgba(255, 102, 178, 0.8); z-index: 10;
-}
 
-/* PASTEL PRODUCT GRID & PAO BAR */
+/* ==========================================
+   PASTEL PRODUCT GRID & PAO BAR
+   ========================================== */
 .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
 .product-card {
     background: #fff; border: 2px dashed #ffb3d9; border-radius: 15px; padding: 12px;
@@ -116,7 +119,9 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .pao-bar-container { height: 8px; width: 100%; background: #eee; border-radius: 4px; margin-top: 5px; overflow: hidden; border: 1px solid #ddd;}
 .pao-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
 
-/* SKILL TREE */
+/* ==========================================
+   5x5 SKILL TREE & TOOLTIPS
+   ========================================== */
 .skill-path { background: #fff; border: 3px solid #ff99cc; border-radius: 20px; padding: 15px; margin-bottom: 20px; }
 .skill-path h3 { color: #cc0066; border-bottom: 2px dashed #ffb3d9; padding-bottom: 5px; margin-bottom: 15px; }
 .skill-tier { background: #ffe6f2; border: 2px solid #ffb3d9; border-radius: 15px; padding: 15px; margin-bottom: 10px; transition: all 0.3s ease; }
@@ -124,7 +129,19 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .skill-tier h4 { color: #cc0066; margin-bottom: 5px; font-size: 1.1rem;}
 .tier-drills { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
 
-/* MODALS */
+.info-btn {
+    background: none; border: none; color: #cc0066; font-weight: bold; cursor: pointer; font-size: 0.9rem; margin-left: 5px; padding: 2px;
+}
+.info-btn:active { transform: translateY(2px); }
+.info-drop {
+    display: none; background: #fff; border: 1px dashed #ff99cc; padding: 10px; border-radius: 10px; 
+    margin-top: 5px; font-size: 0.8rem; color: #885566; margin-bottom: 10px; box-shadow: 0px 4px 10px rgba(255, 102, 178, 0.2);
+}
+.info-drop img { max-width: 100%; border-radius: 8px; margin-top: 5px; }
+
+/* ==========================================
+   MODALS
+   ========================================== */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 100000;
@@ -135,7 +152,9 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 }
 .quiz-btn:active { background: #ffe6f2 !important; }
 
-/* RECOVERY TOOLS */
+/* ==========================================
+   RECOVERY TOOLS (Pink Pacer & EMDR)
+   ========================================== */
 .breathing-circle {
     width: 120px; height: 120px; background: #ff66b2; border-radius: 50%;
     margin: 20px auto; opacity: 0.85; box-shadow: 0px 0px 25px #ff99cc;
@@ -146,18 +165,14 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
     position: absolute; left: 0; transition: left 1s ease-in-out; 
 }
 
-/* TOOLTIPS */
-.info-btn {
-    background: none; border: none; color: #cc0066; font-weight: bold; cursor: pointer; font-size: 0.9rem; margin-left: 5px;
-}
-.info-drop {
-    display: none; background: #fff; border: 1px dashed #ff99cc; padding: 10px; border-radius: 10px; 
-    margin-top: 5px; font-size: 0.8rem; color: #885566; margin-bottom: 10px;
-}
-
+/* ==========================================
+   ARCHIVE LOGS
+   ========================================== */
 .log-list { list-style-type: none; margin-top: 15px; padding:0;}
 .log-list li { background: #fff; border: 2px solid #ffb3d9; padding: 15px; border-radius: 15px; margin-bottom: 12px; font-size: 0.9rem; }
 .journal-header { color: #cc0066; font-weight: bold; border-bottom: 1px dashed #ffb3d9; padding-bottom: 5px; margin-bottom: 8px; display: block; }
 .journal-data { font-size: 0.8rem; color: #555; background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ff99cc;}
+.card-display { background: #ffe6f2; border: 2px dashed #ff99cc; border-radius: 15px; padding: 20px; text-align: center; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
