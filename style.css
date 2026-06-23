@@ -16,7 +16,19 @@ body {
     border-bottom: 3px solid #ff99cc;
     position: sticky; top: 0; z-index: 9000;
 }
-.top-header h1 { font-size: 2rem; color: #fff; text-shadow: 2px 2px 4px rgba(255, 102, 178, 0.8); margin-bottom: 15px; }
+.top-header h1 { font-size: 2rem; color: #fff; text-shadow: 2px 2px 4px rgba(255, 102, 178, 0.8); margin-bottom: 10px; }
+
+/* WEEKLY HEART STAMPS ROW */
+.hearts-row {
+    display: flex; justify-content: center; gap: 6px; 
+    height: 20px; margin-bottom: 15px;
+}
+.heart-slot {
+    width: 20px; height: 20px; background: rgba(255, 255, 255, 0.5); 
+    border: 1px dashed #ff99cc; border-radius: 4px; display: flex; 
+    justify-content: center; align-items: center;
+}
+.heart-slot img { width: 16px; height: 16px; object-fit: contain; }
 
 .tab-container { 
     display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; 
@@ -123,11 +135,15 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 }
 .quiz-btn:active { background: #ffe6f2 !important; }
 
-/* SOMATIC BREATHING PINK PACER */
+/* RECOVERY TOOLS */
 .breathing-circle {
     width: 120px; height: 120px; background: #ff66b2; border-radius: 50%;
     margin: 20px auto; opacity: 0.85; box-shadow: 0px 0px 25px #ff99cc;
-    transition: transform 1s linear; /* Default transition, overridden in JS */
+    transition: transform 1s linear;
+}
+.tap-dot { 
+    width: 30px; height: 30px; background: #ff66b2; border-radius: 50%; 
+    position: absolute; left: 0; transition: left 1s ease-in-out; 
 }
 
 /* TOOLTIPS */
@@ -143,7 +159,5 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .log-list li { background: #fff; border: 2px solid #ffb3d9; padding: 15px; border-radius: 15px; margin-bottom: 12px; font-size: 0.9rem; }
 .journal-header { color: #cc0066; font-weight: bold; border-bottom: 1px dashed #ffb3d9; padding-bottom: 5px; margin-bottom: 8px; display: block; }
 .journal-data { font-size: 0.8rem; color: #555; background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ff99cc;}
-
-.card-display { background: #ffe6f2; border: 2px dashed #ff99cc; border-radius: 15px; padding: 20px; text-align: center; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
