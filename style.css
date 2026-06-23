@@ -14,7 +14,7 @@ body {
     background: rgba(255, 204, 242, 0.95);
     padding: 15px 10px;
     border-bottom: 3px solid #ff99cc;
-    position: sticky; top: 0; z-index: 9999;
+    position: sticky; top: 0; z-index: 9000;
 }
 .top-header h1 { font-size: 2rem; color: #fff; text-shadow: 2px 2px 4px rgba(255, 102, 178, 0.8); margin-bottom: 15px; }
 
@@ -30,7 +30,7 @@ body {
 .tab-btn:active { transform: translateY(4px); box-shadow: 0px 0px 0px #ff99cc; }
 .tab-btn.active { background: linear-gradient(180deg, #ff99cc 0%, #ff66b2 100%); color: white; border-color: #fff; }
 
-.content-area { max-width: 600px; margin: 0 auto; padding: 20px; }
+.content-area { max-width: 600px; margin: 0 auto; padding: 20px; padding-bottom: 50px;}
 .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
 .tab-content.active { display: block; }
 .tab-content h2 { color: #fff; text-shadow: 1px 1px 3px #ff66b2; margin-bottom: 15px; text-align: center; }
@@ -69,23 +69,23 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 }
 .action-btn:active { transform: translateY(3px); box-shadow: 0px 0px 0px #cc0066; }
 
-/* MAPS & NUMBERED DOTS */
+/* UNBREAKABLE MAPS */
 .map-container {
     position: relative; display: block; margin: 0 auto 15px auto;
     width: 100%; max-width: 500px; background: #fff; border: 2px dashed #ffb3d9; 
     border-radius: 15px; overflow: hidden;
 }
-.interactive-map { width: 100%; display: block; pointer-events: none;}
+.interactive-map { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none;}
 .target-dot {
-    position: absolute; width: 20px; height: 20px;
+    position: absolute; width: 22px; height: 22px;
     background: rgba(255, 255, 255, 0.9); border: 2px solid #ff66b2;
     border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer;
     display: flex; justify-content: center; align-items: center;
-    font-size: 0.65rem; font-weight: bold; color: #cc0066;
+    font-size: 0.7rem; font-weight: bold; color: #cc0066;
     transition: all 0.2s; box-shadow: 0px 0px 5px rgba(255, 102, 178, 0.8); z-index: 10;
 }
 
-/* PASTEL PRODUCT GRID */
+/* PASTEL PRODUCT GRID & PAO BAR */
 .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
 .product-card {
     background: #fff; border: 2px dashed #ffb3d9; border-radius: 15px; padding: 12px;
@@ -101,11 +101,26 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .tag-mask { background: #f2e6ff; color: #6600cc; }
 .tag-active { background: #ffe6f9; color: #cc0099; }
 .prod-del { background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 4px; font-weight: bold; cursor: pointer; margin-top: 5px;}
+.pao-bar-container { height: 6px; width: 100%; background: #eee; border-radius: 3px; margin-top: 5px; overflow: hidden;}
+.pao-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
 
-/* SKILL TREE */
-.skill-tier { background: #fff; border: 2px solid #ff99cc; border-radius: 15px; padding: 15px; margin-bottom: 10px; transition: all 0.3s ease; }
-.skill-tier.locked { opacity: 0.5; filter: grayscale(100%); pointer-events: none; border-style: dashed; }
-.skill-tier h4 { color: #cc0066; margin-bottom: 5px; }
+/* 5x5 SKILL TREE & QUIZ MODAL */
+.skill-path { background: #fff; border: 3px solid #ff99cc; border-radius: 20px; padding: 15px; margin-bottom: 20px; }
+.skill-path h3 { color: #cc0066; border-bottom: 2px dashed #ffb3d9; padding-bottom: 5px; margin-bottom: 15px; }
+.skill-tier { background: #ffe6f2; border: 2px solid #ffb3d9; border-radius: 15px; padding: 15px; margin-bottom: 10px; transition: all 0.3s ease; }
+.skill-tier.locked { opacity: 0.6; filter: grayscale(100%); pointer-events: none; border-style: dashed; }
+.skill-tier h4 { color: #cc0066; margin-bottom: 5px; font-size: 1.1rem;}
+.tier-drills { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 100000;
+}
+.quiz-box {
+    background: #fff; border: 4px solid #ff99cc; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px;
+    text-align: center; box-shadow: 0px 10px 30px rgba(255, 102, 178, 0.4);
+}
+.quiz-btn:active { background: #ffe6f2 !important; }
 
 /* SOMATIC BREATHING PACER */
 .breathing-circle {
