@@ -1,19 +1,26 @@
-// Global State - WRAPPED IN FAIL-SAFES
+// ==========================================
+// GLOBAL STATE & INITIALIZATION
+// ==========================================
 let userProfile = { 
     lat: '32.864', lon: '-108.222', routine: {}, 
     skinType: 'combination', allergies: '', wakeTime: '', sleepTime: '',
     barrierState: 'Healthy', hormonePhase: 'Follicular', primaryFocus: 'Hydration'
 };
-let loggedFaceZones = []; let loggedBodyZones = []; 
+let loggedFaceZones = []; 
+let loggedBodyZones = []; 
 let liveData = { dew: 0, uv: 0, aqi: 0, pressure: 0 };
 let currentDrawnCard = "None Drawn Today";
 let hasCompiledToday = false; 
-let breathingInterval;
+
+// Timers
+let breathingTimer;
+let breathingPhaseTimeout;
+let lymphTimerInterval;
 
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todayName = daysOfWeek[new Date().getDay()];
 
-// BODY ZONES
+// Body Map Coordinates (Face map no longer uses dots, so coordinates are removed)
 const bodyZones = [
     { id: 1, name: 'Neck', x: 30, y: 10 }, { id: 2, name: 'L Shoulder', x: 15, y: 22 }, { id: 3, name: 'R Shoulder', x: 45, y: 22 },
     { id: 4, name: 'L Bicep', x: 10, y: 35 }, { id: 5, name: 'R Bicep', x: 50, y: 35 }, { id: 6, name: 'L Forearm', x: 5, y: 50 },
@@ -26,49 +33,21 @@ const bodyZones = [
     { id: 27, name: 'L Hamstring', x: 62, y: 70 }, { id: 28, name: 'R Hamstring', x: 78, y: 70 }, { id: 29, name: 'L Calf', x: 62, y: 85 }, { id: 30, name: 'R Calf', x: 78, y: 85 }
 ];
 
-// 5x5 ACADEMY CURRICULUM
-const academyData = [
-    {
-        title: "Chest Stand",
-        tiers: [
-            { level: 1, name: "Foundation & Spinal Hygiene", drills: ["Cat-Cow x15", "Thoracic Rotations x10", "Puppy Pose 1m", "Neck Rolls x10", "Scapular Shrugs x15"], quiz: { q: "When holding Puppy Pose, where should you feel the engagement?", a: "In my lower back, pushing a deep pinch.", b: "In my upper back, with core slightly tucked.", ans: "b", fail: "Oops! 🛑 If you dump the bend into your lumbar, your thoracic spine won't open. Tuck your pelvis and try again tomorrow! 💕" } },
-            { level: 2, name: "Activation & Posterior Chain", drills: ["Prone Cobra Lifts x10", "Y-T-W Raises x15", "Posterior Pelvic Tilts", "Glute Bridges x20", "Sphinx Hold 2m"], quiz: { q: "During Cobra Lifts, what muscle group should be doing the hardest work?", a: "The glutes and upper back.", b: "My arms pushing the floor.", ans: "a", fail: "Ah! 🛑 Cobra liftoffs are AROM (Active Range of Motion). Your back muscles must do the lifting, not your arms pushing! 💕" } },
-            { level: 3, name: "Isometric Endurance", drills: ["Bow Pose Hold 30s", "Locust Hold 45s", "Bridge Push-ups x5", "Camel Pose 1m", "Scapular Retraction Holds"], quiz: { q: "How should you breathe while holding a deep bridge?", a: "Hold my breath to keep my core tight.", b: "Deep, slow breathing into my belly.", ans: "b", fail: "Oh no! 🛑 Holding your breath traps your nervous system in 'fight or flight', locking the fascia. Breathe through the tension! 💕" } },
-            { level: 4, name: "Neural Gliding & Deep Prep", drills: ["Sciatic Flossing x15/leg", "Brachial Flossing x15/arm", "Wall Pectoral Stretch", "Camel Drops x5", "Forearm Bridge Prep"], quiz: { q: "If you feel a sharp, electrical tingling in your arm during pectoral stretches, what do you do?", a: "Push through it; it's a deep stretch.", b: "Stop immediately and do nerve flossing.", ans: "b", fail: "Wait! 🛑 Tingling is nerve tension. Nerves do NOT stretch; they tear. Back off and floss instead. 💕" } },
-            { level: 5, name: "Sub-shape Mastery", drills: ["Supported Chest Stand (Blocks)", "Chin Stand", "Hollow Back Prep", "Scorpion Drills", "Wall Chest Stand"], quiz: { q: "What is the safest way to exit a chest stand?", a: "Roll out sideways.", b: "Tuck the chin and roll forward smoothly.", ans: "a", fail: "Careful! 🛑 Rolling forward compresses the cervical spine dangerously under load. Always roll out sideways. 💕" } }
-        ]
-    },
-    {
-        title: "Middle Splits",
-        tiers: [
-            { level: 1, name: "Capsule Isolation", drills: ["Frog Pose 2m", "Hip Circles x10", "90/90 Switches x10", "Kneeling Adductor Stretch", "Butterfly 2m"], quiz: { q: "If your knees hurt in Frog Pose, what should you do?", a: "Put padding under my knees and adjust hip angle.", b: "Squeeze my knees into the floor harder.", ans: "a", fail: "No! 🛑 Joint pain means structural pinching. Pad the joints and alter the angle to find the muscle belly! 💕" } },
-            { level: 2, name: "Lengthening (PNF)", drills: ["PNF Pancake 2m", "Supine Wall Straddle 3m", "Tailor Pose", "Cossack Squats x10", "Wide Leg Fold"], quiz: { q: "What is the key to a safe pancake fold?", a: "Rounding my back to get my head down.", b: "Anterior pelvic tilt (sticking glutes out).", ans: "b", fail: "Oops! 🛑 Rounding the back just stretches the spine. Tilt the pelvis to target the adductors! 💕" } },
-            { level: 3, name: "Active Strength", drills: ["Straddle Leg Lifts x10", "Side Lunges x15", "Isometric Skaters", "Glute Medius Clamshells", "Adductor Slides"], quiz: { q: "Why do we do leg lifts in a straddle?", a: "To build End-Range Strength.", b: "To warm up the knees.", ans: "a", fail: "Not quite! 🛑 Active liftoffs build the crucial strength needed to protect the joint when you are in the deepest part of the split. 💕" } },
-            { level: 4, name: "Neural Gliding", drills: ["Supine Sciatic Glides x15", "Hamstring Flossing", "Flossing in Pike", "Active Point/Flex", "Hip Flexor Glides"], quiz: { q: "True or False: Neural gliding should feel like a deep, painful burn.", a: "True.", b: "False.", ans: "b", fail: "False! 🛑 Gliding should feel like gentle movement, not a burn. Pain means inflammation. 💕" } },
-            { level: 5, name: "Peak Mastery", drills: ["Oversplit Prep (Blocks)", "PNF Middle Split", "Wall Middle Split", "Active Straddle Hold", "Peak Middle Split"], quiz: { q: "Where should your toes point in a true middle split?", a: "Forward or slightly up.", b: "Straight down behind me.", ans: "a", fail: "Watch out! 🛑 Pointing them down internally rotates the femur and grinds the hip joint. Keep them up or forward! 💕" } }
-        ]
-    }
-];
-
-let activeQuizTier = null;
-
-// INIT
 window.onload = () => {
     try {
-        loadData(); fetchRealData(); populateSelects(); renderAcademy();
+        loadData(); fetchRealData(); renderAcademy();
         renderTodayRoutine(); renderSettingsRoutine(); renderProducts(); renderJournals(); renderVault(); 
-        checkWeeklyAura(); 
+        renderConsistencyBanner(); checkSkillLocks(); 
         
         let lastCompile = localStorage.getItem('lastCompileDate');
         if(lastCompile === new Date().toLocaleDateString()) {
             hasCompiledToday = true;
             let warning = document.getElementById('journal-warning');
-            if(warning) { warning.style.display = 'block'; warning.innerText = "✅ Journal already compiled for today."; }
+            if(warning) { warning.style.display = 'block'; warning.innerText = "✅ Daily Map already compiled for today."; }
         }
     } catch(e) { console.error("Safe Load Error: ", e); }
 };
 
-// TABS
 function openTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -80,7 +59,9 @@ function openTab(tabId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// LOCATION
+// ==========================================
+// SETTINGS & DATA LOADING
+// ==========================================
 function grabLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((pos) => {
@@ -111,18 +92,9 @@ function loadData() {
     const savedProf = localStorage.getItem('userProfile');
     if (savedProf) {
         userProfile = JSON.parse(savedProf);
-        // Migrate old routine format to AM/PM structure
-        let needsMigration = false;
-        if(!userProfile.routine || Array.isArray(userProfile.routine)) needsMigration = true;
-        else if (userProfile.routine["Monday"] && Array.isArray(userProfile.routine["Monday"])) needsMigration = true;
-        
-        if (needsMigration) {
-            userProfile.routine = { 
-                "Monday":{am:[], pm:[]}, "Tuesday":{am:[], pm:[]}, "Wednesday":{am:[], pm:[]}, 
-                "Thursday":{am:[], pm:[]}, "Friday":{am:[], pm:[]}, "Saturday":{am:[], pm:[]}, "Sunday":{am:[], pm:[]} 
-            };
+        if(!userProfile.routine || !userProfile.routine["Monday"] || Array.isArray(userProfile.routine["Monday"])) {
+            userProfile.routine = { "Monday":{am:[], pm:[]}, "Tuesday":{am:[], pm:[]}, "Wednesday":{am:[], pm:[]}, "Thursday":{am:[], pm:[]}, "Friday":{am:[], pm:[]}, "Saturday":{am:[], pm:[]}, "Sunday":{am:[], pm:[]} };
         }
-        
         if(!userProfile.barrierState) userProfile.barrierState = 'Healthy';
         if(!userProfile.hormonePhase) userProfile.hormonePhase = 'Follicular';
         if(!userProfile.primaryFocus) userProfile.primaryFocus = 'Hydration';
@@ -135,98 +107,20 @@ function loadData() {
         let horEl = document.getElementById('hormone-phase'); if(horEl) horEl.value = userProfile.hormonePhase;
         let focEl = document.getElementById('primary-focus'); if(focEl) focEl.value = userProfile.primaryFocus;
     } else {
-        userProfile.routine = { 
-            "Monday":{am:[], pm:[]}, "Tuesday":{am:[], pm:[]}, "Wednesday":{am:[], pm:[]}, 
-            "Thursday":{am:[], pm:[]}, "Friday":{am:[], pm:[]}, "Saturday":{am:[], pm:[]}, "Sunday":{am:[], pm:[]} 
-        };
+        userProfile.routine = { "Monday":{am:[], pm:[]}, "Tuesday":{am:[], pm:[]}, "Wednesday":{am:[], pm:[]}, "Thursday":{am:[], pm:[]}, "Friday":{am:[], pm:[]}, "Saturday":{am:[], pm:[]}, "Sunday":{am:[], pm:[]} };
     }
     
     loggedFaceZones = JSON.parse(localStorage.getItem('stagedFace')) || [];
     loggedBodyZones = JSON.parse(localStorage.getItem('stagedBody')) || [];
-    
     let pillowElem = document.getElementById('pillowcase-date');
     if(pillowElem) pillowElem.innerText = localStorage.getItem('pillowDate') || "Not Logged";
     
     renderMapLogs('face'); renderMapLogs('body');
 }
 
-// SMART SKIN ANALYST
-function updateSkinAnalysis() {
-    let sa = document.getElementById('smart-skin-analysis'); if(!sa) return;
-    let b = userProfile.barrierState; let h = userProfile.hormonePhase; let a = liveData.aqi || 0;
-    
-    if (b === 'Compromised' && a > 20) {
-        sa.innerText = `🚨 System Alert: PM2.5 pollution is high (${a}) and your barrier is Compromised. Skip exfoliants today; mandate heavy occlusives!`;
-    } else if (b === 'Healing' || b === 'OverExfoliated') {
-        sa.innerText = `✨ Gentle Phase: Barrier is fragile. Stick to hydration, ceramide repair, and skip the harsh acids.`;
-    } else if (h === 'Luteal') {
-        sa.innerText = `🩸 Hormonal Shift: You are in your Luteal phase. Sebum is spiking. Preemptively use BHA/Salicylic acid to clear congestion today.`;
-    } else {
-        sa.innerText = `🌸 Atmosphere and barrier are balanced! Proceed optimally with your ${userProfile.primaryFocus} routine.`;
-    }
-}
-
-// AM/PM ROUTINE BUILDER
-function addRoutineStep() {
-    let dayEl = document.getElementById('routine-day-select'); 
-    let timeEl = document.getElementById('routine-time-select');
-    let stepEl = document.getElementById('new-routine-step');
-    if(!dayEl || !timeEl || !stepEl) return;
-    
-    let day = dayEl.value; let time = timeEl.value; let step = stepEl.value; 
-    if(!step) return;
-    
-    if(!userProfile.routine[day]) userProfile.routine[day] = {am:[], pm:[]};
-    userProfile.routine[day][time].push(step);
-    localStorage.setItem('userProfile', JSON.stringify(userProfile)); stepEl.value = '';
-    renderSettingsRoutine(); renderTodayRoutine();
-}
-
-function removeRoutineStep(day, time, index) {
-    if(!userProfile.routine[day] || !userProfile.routine[day][time]) return;
-    userProfile.routine[day][time].splice(index, 1); 
-    localStorage.setItem('userProfile', JSON.stringify(userProfile));
-    renderSettingsRoutine(); renderTodayRoutine();
-}
-
-function renderSettingsRoutine() {
-    let dayEl = document.getElementById('routine-day-select'); 
-    let listAm = document.getElementById('settings-routine-list-am'); 
-    let listPm = document.getElementById('settings-routine-list-pm'); 
-    if(!dayEl || !listAm || !listPm) return;
-    
-    listAm.innerHTML = ''; listPm.innerHTML = '';
-    let day = dayEl.value; 
-    let dayRoutines = userProfile.routine[day] || {am:[], pm:[]};
-    
-    dayRoutines.am.forEach((step, idx) => { listAm.innerHTML += `<li style="display:flex; justify-content:space-between;">${step} <button class="prod-del" onclick="removeRoutineStep('${day}', 'am', ${idx})">X</button></li>`; });
-    dayRoutines.pm.forEach((step, idx) => { listPm.innerHTML += `<li style="display:flex; justify-content:space-between;">${step} <button class="prod-del" onclick="removeRoutineStep('${day}', 'pm', ${idx})">X</button></li>`; });
-}
-
-function renderTodayRoutine() {
-    let head = document.getElementById('today-routine-header'); 
-    let listAm = document.getElementById('custom-routine-list-am'); 
-    let listPm = document.getElementById('custom-routine-list-pm'); 
-    if(!head || !listAm || !listPm) return;
-    
-    head.innerText = `✅ ${todayName}'s Routine`; 
-    listAm.innerHTML = ''; listPm.innerHTML = '';
-    
-    let dayRoutines = userProfile.routine[todayName] || {am:[], pm:[]};
-    
-    if(dayRoutines.am.length === 0 && dayRoutines.pm.length === 0) { 
-        listAm.innerHTML = "<p class='small-text'>No routines set for today. Go to Settings!</p>"; 
-        return; 
-    }
-    
-    dayRoutines.am.forEach(step => { listAm.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk" value="AM: ${step}"> ${step}</label>`; });
-    if(dayRoutines.am.length === 0) listAm.innerHTML = "<p class='small-text'>No AM routine.</p>";
-    
-    dayRoutines.pm.forEach(step => { listPm.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk" value="PM: ${step}"> ${step}</label>`; });
-    if(dayRoutines.pm.length === 0) listPm.innerHTML = "<p class='small-text'>No PM routine.</p>";
-}
-
-// WEATHER
+// ==========================================
+// SKINCARE & ENVIRONMENT
+// ==========================================
 async function fetchRealData() {
     let lat = userProfile.lat || '32.864'; let lon = userProfile.lon || '-108.222';
     try {
@@ -240,8 +134,8 @@ async function fetchRealData() {
         let dewEl = document.getElementById('live-dew'); if(dewEl) dewEl.innerText = `${liveData.dew.toFixed(1)}°F`; 
         let uvEl = document.getElementById('live-uv'); if(uvEl) uvEl.innerText = liveData.uv;
         let aqiEl = document.getElementById('live-aqi'); if(aqiEl) aqiEl.innerText = `${liveData.aqi} µg/m³`; 
-        
         let presEl = document.getElementById('live-pressure'); if(presEl) presEl.innerText = `${liveData.pressure} inHg`;
+        
         let actEl = document.getElementById('live-flex-action'); 
         if(actEl) {
             if(liveData.pressure < 29.8) {
@@ -254,19 +148,40 @@ async function fetchRealData() {
     } catch (error) { console.error("API Error"); }
 }
 
-// MAPS
-function populateSelects() {
-    let bSel = document.getElementById('body-zone-select'); 
-    if(bSel) { bSel.innerHTML = ''; bodyZones.forEach(z => bSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`); }
+function updateSkinAnalysis() {
+    let sa = document.getElementById('smart-skin-analysis'); if(!sa) return;
+    let b = userProfile.barrierState; let h = userProfile.hormonePhase; let a = liveData.aqi || 0;
+    
+    if (b === 'Compromised' && a > 20) {
+        sa.innerText = `🚨 System Alert: PM2.5 pollution is high (${a}) and your barrier is Compromised. Skip exfoliants today; mandate heavy occlusives!`;
+    } else if (b === 'Healing' || b === 'OverExfoliated') {
+        sa.innerText = `✨ Gentle Phase: Barrier is fragile. Stick to hydration, ceramide repair, and skip the harsh acids.`;
+    } else if (h === 'Luteal' || h === 'Menstrual') {
+        sa.innerText = `🩸 Hormonal Shift: You are in your ${h} phase. Sebum is spiking. Preemptively use BHA/Salicylic acid to clear congestion today.`;
+    } else {
+        sa.innerText = `🌸 Atmosphere and barrier are balanced! Proceed optimally with your ${userProfile.primaryFocus} routine.`;
+    }
 }
 
+// 2D MAP LOGIC
 function logFaceZone() {
     let zoneEl = document.getElementById('face-zone-select'); let typeEl = document.getElementById('face-acne-type');
     if(!zoneEl || !typeEl) return;
     let zone = zoneEl.value; let type = typeEl.value;
     let colorMap = {"Cystic":"#cc0000", "Whitehead":"#e6e6e6", "Blackhead":"#333333", "Pustule":"#ff9933", "Papule":"#ff66b2"};
+    
     loggedFaceZones.push({ zone, type, color: colorMap[type] });
-    localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones)); renderMapLogs('face');
+    localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones)); 
+    renderMapLogs('face');
+    
+    // Dynamic Face Map Analysis (Softer Language)
+    let faceAnalysis = document.getElementById('face-map-analysis');
+    if(faceAnalysis && zone.includes("Jawline") && userProfile.hormonePhase === 'Luteal') {
+        faceAnalysis.style.display = 'block';
+        faceAnalysis.innerText = "Possible hormonal inflammation on the jawline 🌸 Skip manual exfoliation there today, apply ice, and stick to your spot treatments!";
+    } else if (faceAnalysis) {
+        faceAnalysis.style.display = 'none';
+    }
 }
 
 function logBodyZone() {
@@ -283,7 +198,6 @@ function renderMapLogs(mapType) {
     list.innerHTML = '';
     let logs = mapType === 'face' ? loggedFaceZones : loggedBodyZones;
     
-    // Only draw dots for the Body map now. Face map has numbers baked in.
     if(mapType === 'body') {
         let container = document.getElementById(`body-map-container`);
         if(container) {
@@ -297,7 +211,7 @@ function renderMapLogs(mapType) {
             });
         }
     }
-
+    // No dots rendered for face map; it just lists them neatly below.
     logs.forEach((log, idx) => {
         list.innerHTML += `<li style="border-left: 5px solid ${log.color};"><strong>${log.zone}</strong>: ${log.type} <button class="prod-del" style="float:right;" onclick="removeMapLog('${mapType}', ${idx})">X</button></li>`;
     });
@@ -309,7 +223,7 @@ function removeMapLog(mapType, idx) {
     renderMapLogs(mapType);
 }
 
-// PRODUCT DIARY
+// DIGITAL VANITY (PAO tracker using Date Opened)
 function addProduct() {
     let nameEl = document.getElementById('prod-name'); if(!nameEl) return;
     let name = nameEl.value; 
@@ -317,18 +231,23 @@ function addProduct() {
     let type = document.getElementById('prod-type') ? document.getElementById('prod-type').value : "Other"; 
     let paoEl = document.getElementById('prod-pao'); let pao = paoEl ? parseInt(paoEl.value) : 0;
     let price = document.getElementById('prod-price') ? document.getElementById('prod-price').value : ""; 
-    let url = document.getElementById('prod-url') ? document.getElementById('prod-url').value : "";
+    let openDate = document.getElementById('prod-open-date') ? document.getElementById('prod-open-date').value : "";
     let wish = document.getElementById('prod-wishlist') ? document.getElementById('prod-wishlist').checked : false; 
     let fav = document.getElementById('prod-fav') ? document.getElementById('prod-fav').checked : false;
     
-    if(!name) return; let exp = "N/A"; let addedTime = new Date().getTime();
-    if(pao && !wish) { let d = new Date(); d.setMonth(d.getMonth() + pao); exp = d.toLocaleDateString(); }
+    if(!name) return; let exp = "Sealed 🔒"; let addedTime = null;
+    if(pao && !wish && openDate) { 
+        let d = new Date(openDate); 
+        addedTime = d.getTime();
+        d.setMonth(d.getMonth() + pao); 
+        exp = `Exp: ${d.toLocaleDateString()}`; 
+    }
     
     let prods = JSON.parse(localStorage.getItem('products')) || [];
-    prods.push({ name, brand, type, pao, price, url, wish, fav, exp, addedTime });
+    prods.push({ name, brand, type, pao, price, wish, fav, exp, addedTime });
     localStorage.setItem('products', JSON.stringify(prods));
     
-    document.querySelectorAll('#skincare input[type="text"], #skincare input[type="number"]').forEach(i => i.value = '');
+    document.querySelectorAll('#skincare input[type="text"], #skincare input[type="number"], #skincare input[type="date"]').forEach(i => i.value = '');
     let wChk = document.getElementById('prod-wishlist'); if(wChk) wChk.checked = false;
     let fChk = document.getElementById('prod-fav'); if(fChk) fChk.checked = false;
     renderProducts();
@@ -352,7 +271,7 @@ function renderProducts() {
         if(p.pao && !p.wish && p.addedTime) {
             let daysPassed = (now - p.addedTime) / (1000 * 3600 * 24);
             let totalDays = p.pao * 30;
-            let percent = Math.min((daysPassed / totalDays) * 100, 100);
+            let percent = Math.max(0, Math.min((daysPassed / totalDays) * 100, 100));
             let barColor = percent < 60 ? '#66cc99' : (percent < 90 ? '#ffcc00' : '#cc0000');
             paoBarHTML = `<div class="pao-bar-container"><div class="pao-bar-fill" style="width: ${percent}%; background: ${barColor};"></div></div>`;
         }
@@ -362,45 +281,186 @@ function renderProducts() {
                 <div class="prod-header">${f}${p.name}</div>
                 <div><span class="prod-tag ${tagClass}">${p.type}</span></div>
                 <div style="font-size:0.75rem; color:#885566; margin-top:5px;">${p.brand} | ${p.price || "-"}</div>
-                ${p.exp !== "N/A" ? `<div style="font-size:0.75rem; margin-top:5px;">⏳ ${p.exp}</div>` : ''}
+                <div style="font-size:0.75rem; margin-top:5px; font-weight:bold;">${p.exp}</div>
                 ${paoBarHTML}
                 <button class="prod-del" onclick="removeProduct(${idx})">Remove</button>
             </div>`;
     });
 }
 
-function logHygiene(type) { 
-    let d = new Date().toLocaleDateString(); 
-    localStorage.setItem('pillowDate', d); 
-    let pEl = document.getElementById('pillowcase-date'); if(pEl) pEl.innerText = d; 
+// ==========================================
+// ROUTINE BUILDER & WEEKLY HEARTS
+// ==========================================
+let currentCheckType = ""; // Tracks if we are checking AM or PM
+
+function addRoutineStep() {
+    let dayEl = document.getElementById('routine-day-select'); let timeEl = document.getElementById('routine-time-select'); let stepEl = document.getElementById('new-routine-step');
+    if(!dayEl || !timeEl || !stepEl) return;
+    let day = dayEl.value; let time = timeEl.value; let step = stepEl.value; if(!step) return;
+    if(!userProfile.routine[day]) userProfile.routine[day] = {am:[], pm:[]};
+    userProfile.routine[day][time].push(step);
+    localStorage.setItem('userProfile', JSON.stringify(userProfile)); stepEl.value = '';
+    renderSettingsRoutine(); renderTodayRoutine();
 }
 
-// RECOVERY PANELS
-function toggleRecoveryPanel(panelId) {
-    let panel = document.getElementById(panelId);
-    if(!panel) return;
+function removeRoutineStep(day, time, index) {
+    if(!userProfile.routine[day] || !userProfile.routine[day][time]) return;
+    userProfile.routine[day][time].splice(index, 1); localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    renderSettingsRoutine(); renderTodayRoutine();
+}
+
+function renderSettingsRoutine() {
+    let dayEl = document.getElementById('routine-day-select'); let listAm = document.getElementById('settings-routine-list-am'); let listPm = document.getElementById('settings-routine-list-pm'); 
+    if(!dayEl || !listAm || !listPm) return;
+    listAm.innerHTML = ''; listPm.innerHTML = '';
+    let day = dayEl.value; let dayRoutines = userProfile.routine[day] || {am:[], pm:[]};
+    dayRoutines.am.forEach((step, idx) => { listAm.innerHTML += `<li style="display:flex; justify-content:space-between;">${step} <button class="prod-del" onclick="removeRoutineStep('${day}', 'am', ${idx})">X</button></li>`; });
+    dayRoutines.pm.forEach((step, idx) => { listPm.innerHTML += `<li style="display:flex; justify-content:space-between;">${step} <button class="prod-del" onclick="removeRoutineStep('${day}', 'pm', ${idx})">X</button></li>`; });
+}
+
+function renderTodayRoutine() {
+    let head = document.getElementById('today-routine-header'); let listAm = document.getElementById('custom-routine-list-am'); let listPm = document.getElementById('custom-routine-list-pm'); 
+    if(!head || !listAm || !listPm) return;
+    head.innerText = `✅ ${todayName}'s Routine`; listAm.innerHTML = ''; listPm.innerHTML = '';
     
-    // If it's the pacer, handle the breathing interval
-    if (panelId === 'somatic-pacer') {
-        const circle = document.getElementById('breath-circle');
-        const text = document.getElementById('breath-text');
-        if (panel.style.display === 'none') {
-            panel.style.display = 'block';
-            let phase = 0; clearInterval(breathingInterval);
-            breathingInterval = setInterval(() => {
-                if(phase === 0) { text.innerText = "Inhale..."; circle.classList.add('breathe-in'); circle.classList.remove('breathe-out'); }
-                else if(phase === 1) { text.innerText = "Hold..."; }
-                else if(phase === 2) { text.innerText = "Exhale..."; circle.classList.add('breathe-out'); circle.classList.remove('breathe-in'); }
-                else if(phase === 3) { text.innerText = "Hold..."; }
-                phase = (phase + 1) % 4;
-            }, 4000); 
-        } else {
-            panel.style.display = 'none'; clearInterval(breathingInterval);
-        }
-    } else {
-        // Normal toggle for text panels
-        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    let dayRoutines = userProfile.routine[todayName] || {am:[], pm:[]};
+    
+    dayRoutines.am.forEach((step, i) => { listAm.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk-am" onchange="checkRoutineCompletion('am')"> ${step}</label>`; });
+    if(dayRoutines.am.length === 0) listAm.innerHTML = "<p class='small-text'>No AM routine.</p>";
+    
+    dayRoutines.pm.forEach((step, i) => { listPm.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk-pm" onchange="checkRoutineCompletion('pm')"> ${step}</label>`; });
+    if(dayRoutines.pm.length === 0) listPm.innerHTML = "<p class='small-text'>No PM routine.</p>";
+}
+
+function checkRoutineCompletion(type) {
+    let boxes = document.querySelectorAll(`.routine-chk-${type}`);
+    let allChecked = Array.from(boxes).every(cb => cb.checked);
+    if(allChecked && boxes.length > 0) {
+        currentCheckType = type;
+        document.getElementById('routine-modal').style.display = 'flex';
     }
+}
+
+function confirmRoutineStamp() {
+    let heartsData = JSON.parse(localStorage.getItem('weeklyHearts')) || { "Monday":{am:false,pm:false}, "Tuesday":{am:false,pm:false}, "Wednesday":{am:false,pm:false}, "Thursday":{am:false,pm:false}, "Friday":{am:false,pm:false}, "Saturday":{am:false,pm:false}, "Sunday":{am:false,pm:false} };
+    heartsData[todayName][currentCheckType] = true;
+    localStorage.setItem('weeklyHearts', JSON.stringify(heartsData));
+    document.getElementById('routine-modal').style.display = 'none';
+    renderConsistencyBanner();
+}
+
+function renderConsistencyBanner() {
+    let container = document.getElementById('weekly-hearts-container'); if(!container) return;
+    container.innerHTML = '';
+    let heartsData = JSON.parse(localStorage.getItem('weeklyHearts')) || { "Monday":{am:false,pm:false}, "Tuesday":{am:false,pm:false}, "Wednesday":{am:false,pm:false}, "Thursday":{am:false,pm:false}, "Friday":{am:false,pm:false}, "Saturday":{am:false,pm:false}, "Sunday":{am:false,pm:false} };
+    
+    let totalHearts = 0;
+    const shortDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const fullDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    
+    fullDays.forEach((day, i) => {
+        let amImg = heartsData[day].am ? `<img src="Heart.png" style="width: 15px; height: 15px;">` : `<span style="opacity:0.3;">🤍</span>`;
+        let pmImg = heartsData[day].pm ? `<img src="Heart.png" style="width: 15px; height: 15px;">` : `<span style="opacity:0.3;">🤍</span>`;
+        if(heartsData[day].am) totalHearts++;
+        if(heartsData[day].pm) totalHearts++;
+        
+        container.innerHTML += `
+        <div style="display:flex; flex-direction:column; align-items:center; background:#fff; padding:5px; border-radius:10px; border:1px solid #ffccf2;">
+            <span style="font-size:0.7rem; font-weight:bold; color:#cc0066;">${shortDays[i]}</span>
+            <div style="display:flex; gap:2px;">${amImg} ${pmImg}</div>
+        </div>`;
+    });
+    
+    let text = document.getElementById('heart-status-text');
+    if(text) {
+        if(totalHearts === 14) text.innerText = "✨ BARRIER THRIVING! Flawless Consistency! ✨";
+        else text.innerText = `Collect 14 hearts for Barrier Thriving status! (${totalHearts}/14)`;
+    }
+}
+
+// ==========================================
+// RECOVERY & COACH
+// ==========================================
+function toggleRecoveryPanel(panelId) {
+    let panel = document.getElementById(panelId); if(!panel) return;
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    if (panelId === 'somatic-pacer' && panel.style.display === 'none') {
+        clearTimeout(breathingPhaseTimeout); clearInterval(breathingTimer);
+    }
+    if (panelId === 'lymphatic-sequence' && panel.style.display === 'none') {
+        clearInterval(lymphTimerInterval);
+    }
+}
+
+function toggleInfo(infoId) {
+    let el = document.getElementById(infoId);
+    if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function updateBreathingMode() {
+    clearTimeout(breathingPhaseTimeout); clearInterval(breathingTimer);
+    document.getElementById('breath-text').innerText = "Ready...";
+    document.getElementById('breath-circle').style.transform = "scale(1)";
+}
+
+function startBreathing() {
+    clearTimeout(breathingPhaseTimeout); clearInterval(breathingTimer);
+    let mode = document.getElementById('breathing-mode').value;
+    let circle = document.getElementById('breath-circle');
+    let text = document.getElementById('breath-text');
+    
+    if(mode === 'box') { runBreathingCycle(circle, text, [ {t:"Inhale...", s:1.8, ms:4000}, {t:"Hold...", s:1.8, ms:4000}, {t:"Exhale...", s:1, ms:4000}, {t:"Hold...", s:1, ms:4000} ]); }
+    else if(mode === 'sleep') { runBreathingCycle(circle, text, [ {t:"Inhale...", s:1.8, ms:4000}, {t:"Hold...", s:1.8, ms:7000}, {t:"Exhale...", s:1, ms:8000} ]); }
+    else if(mode === 'resonance') { runBreathingCycle(circle, text, [ {t:"Inhale...", s:1.8, ms:5000}, {t:"Exhale...", s:1, ms:5000} ]); }
+    else if(mode === 'sigh') { runBreathingCycle(circle, text, [ {t:"Inhale...", s:1.5, ms:1500}, {t:"Inhale Deeper...", s:1.8, ms:1000}, {t:"Long Exhale...", s:1, ms:6000} ]); }
+}
+
+function runBreathingCycle(circle, text, phases) {
+    let step = 0;
+    function nextPhase() {
+        let p = phases[step];
+        text.innerText = p.t;
+        circle.style.transition = `transform ${p.ms/1000}s linear`;
+        circle.style.transform = `scale(${p.s})`;
+        step = (step + 1) % phases.length;
+        breathingPhaseTimeout = setTimeout(nextPhase, p.ms);
+    }
+    nextPhase();
+}
+
+function startLymphTimer() {
+    clearInterval(lymphTimerInterval);
+    let display = document.getElementById('lymph-timer-display');
+    let text = document.getElementById('lymph-step-text');
+    let steps = [
+        { name: "1. Pump Clavicle (Collarbone)", time: 30 },
+        { name: "2. Pump Axillary (Armpits)", time: 30 },
+        { name: "3. Pump Inguinal (Hip Creases)", time: 30 },
+        { name: "4. Legs up the Wall (Rest)", time: 600 }
+    ];
+    let currentStep = 0; let timeLeft = steps[0].time;
+    
+    text.innerText = steps[0].name;
+    display.innerText = `00:${timeLeft}`;
+    
+    lymphTimerInterval = setInterval(() => {
+        timeLeft--;
+        let m = Math.floor(timeLeft / 60); let s = timeLeft % 60;
+        display.innerText = `${m < 10 ? '0':''}${m}:${s < 10 ? '0':''}${s}`;
+        
+        if(timeLeft <= 0) {
+            currentStep++;
+            if(currentStep >= steps.length) {
+                clearInterval(lymphTimerInterval);
+                text.innerText = "Sequence Complete! ✨";
+                display.innerText = "00:00";
+            } else {
+                timeLeft = steps[currentStep].time;
+                text.innerText = steps[currentStep].name;
+                // Play a cute chime noise if possible, otherwise just update text
+            }
+        }
+    }, 1000);
 }
 
 // SMART COACH
@@ -411,8 +471,7 @@ function addToVault() {
     if(!title || !duration) return;
     let vaults = JSON.parse(localStorage.getItem('vaults')) || [];
     vaults.push({ title, url, duration, focus }); localStorage.setItem('vaults', JSON.stringify(vaults));
-    titleEl.value = ''; document.getElementById('vault-url').value = ''; document.getElementById('vault-duration').value = '';
-    renderVault();
+    titleEl.value = ''; document.getElementById('vault-url').value = ''; document.getElementById('vault-duration').value = ''; renderVault();
 }
 
 function removeVault(idx) {
@@ -432,31 +491,29 @@ function smartSuggest() {
     let focusEl = document.getElementById('focus-selector'); if(!focusEl) return;
     let focus = focusEl.value; 
     let res = document.getElementById('vault-suggestion'); if(!res) return;
-    
-    let sleepEl = document.getElementById('sleep-hours');
-    let waterEl = document.getElementById('water-oz');
-    let sleep = sleepEl ? parseFloat(sleepEl.value) : 0;
-    let water = waterEl ? parseFloat(waterEl.value) : 0;
+    let sleepEl = document.getElementById('sleep-hours'); let waterEl = document.getElementById('water-oz');
+    let sleep = sleepEl ? parseFloat(sleepEl.value) : 0; let water = waterEl ? parseFloat(waterEl.value) : 0;
     
     res.style.display = 'block';
-    
     let nervePain = loggedBodyZones.some(log => log.type.includes("Nerve"));
     
     if (nervePain) { 
         res.innerHTML = "🚨 <strong>COACH VETO:</strong> Nerve tension detected. <em>Mandatory: Somatic Reset & Nerve Flossing only.</em>"; 
     } 
     else if (sleep < 6 || water < 30) {
-        res.innerHTML = `🚨 <strong>COACH VETO:</strong> You only logged ${sleep}hrs sleep and ${water}oz water. Your fascia is dehydrated and rigid today. Deep peak poses are highly dangerous in this state. <em>I am shifting your focus to Lymphatic Drainage and Mobility.</em>`;
+        res.innerHTML = `⚠️ <strong>COACH WARNING:</strong> You only logged ${sleep}hrs sleep and ${water}oz water. Your fascia is dehydrated. Deep peak poses are highly dangerous. The Oracle also drew [${currentDrawnCard}]. It is highly recommended to shift focus to Lymphatic Drainage, but if you proceed with ${focus}, mandate a long warm-up.`;
     }
     else if (focus === "Somatic Reset" || focus === "Lymphatic Drainage") { 
-        res.innerHTML = `✅ <strong>RECOVERY:</strong> Great choice. Check the Recovery box above.`; 
+        res.innerHTML = `✅ <strong>RECOVERY:</strong> Great choice. Use the Recovery tools above.`; 
     } 
     else { 
-        res.innerHTML = `✅ <strong>CONDITION GREEN:</strong> Your system is hydrated and primed for <strong>${focus}</strong>. Proceed with vault routines.`; 
+        res.innerHTML = `✅ <strong>CONDITION GREEN:</strong> System hydrated and primed for <strong>${focus}</strong>. Proceed.`; 
     }
 }
 
+// ==========================================
 // 5x5 ACADEMY
+// ==========================================
 function renderAcademy() {
     const container = document.getElementById('academy-courses-container'); if(!container) return;
     container.innerHTML = '';
@@ -527,7 +584,14 @@ function submitQuiz(answer) {
 
 function closeQuiz() { document.getElementById('quiz-modal').style.display = 'none'; activeQuizTier = null; }
 
-// DECK
+function checkSkillLocks() {
+    let skills = Array.from(document.querySelectorAll('.skill-chk:checked')).map(cb => cb.id);
+    if(skills.length > 0) localStorage.setItem('skillLocks', JSON.stringify(skills));
+}
+
+// ==========================================
+// ORACLE & LOGS
+// ==========================================
 const deck = [
     { suit: "Lunar", name: "🌑 The Void Moon", meaning: "Rest completely. No active holds." },
     { suit: "Lunar", name: "🌓 The Waxing Pull", meaning: "Building energy. Prep and hydrate." },
@@ -589,19 +653,21 @@ function drawCard() {
     let cMean = document.getElementById('card-meaning'); if(cMean) cMean.innerText = card.meaning;
 }
 
-// LOGS
 function compileJournal() {
-    if(hasCompiledToday) { alert("You have already compiled today's journal!"); return; }
+    if(hasCompiledToday) { alert("You have already compiled today's Daily Map!"); return; }
     
     let dumpEl = document.getElementById('brain-dump'); let dump = dumpEl ? dumpEl.value : "";
-    let routineChecked = Array.from(document.querySelectorAll('.routine-chk:checked')).map(cb => cb.value);
+    let routineAmChecked = Array.from(document.querySelectorAll('.routine-chk-am:checked')).map(cb => cb.value);
+    let routinePmChecked = Array.from(document.querySelectorAll('.routine-chk-pm:checked')).map(cb => cb.value);
+    let allRoutines = routineAmChecked.concat(routinePmChecked);
+    
     let faceData = loggedFaceZones.map(l => `${l.zone} (${l.type})`).join(", ") || "None";
     let bodyData = loggedBodyZones.map(l => `${l.zone} (${l.type})`).join(", ") || "None";
 
     let j = {
         date: new Date().toLocaleString(),
         weather: `Dew: ${liveData.dew}°F | UV: ${liveData.uv} | AQI: ${liveData.aqi} | Press: ${liveData.pressure}`,
-        routine: routineChecked.length > 0 ? routineChecked.join(", ") : "None Logged",
+        routine: allRoutines.length > 0 ? allRoutines.join(", ") : "None Logged",
         face: faceData, body: bodyData,
         card: currentDrawnCard, thoughts: dump || "No notes today."
     };
@@ -609,11 +675,11 @@ function compileJournal() {
     let journals = JSON.parse(localStorage.getItem('journals')) || []; journals.unshift(j); localStorage.setItem('journals', JSON.stringify(journals));
     localStorage.setItem('lastCompileDate', new Date().toLocaleDateString()); hasCompiledToday = true; 
     
-    let warnEl = document.getElementById('journal-warning'); if(warnEl) { warnEl.style.display = 'block'; warnEl.innerText = "✅ Journal compiled for today."; }
+    let warnEl = document.getElementById('journal-warning'); if(warnEl) { warnEl.style.display = 'block'; warnEl.innerText = "✅ Daily Map compiled for today."; }
 
     loggedFaceZones = []; localStorage.setItem('stagedFace', JSON.stringify(loggedFaceZones));
     loggedBodyZones = []; localStorage.setItem('stagedBody', JSON.stringify(loggedBodyZones));
-    document.querySelectorAll('.routine-chk').forEach(cb => cb.checked = false); if(dumpEl) dumpEl.value = '';
+    document.querySelectorAll('.routine-chk-am, .routine-chk-pm').forEach(cb => cb.checked = false); if(dumpEl) dumpEl.value = '';
     
     renderMapLogs('face'); renderMapLogs('body'); renderJournals();
 }
@@ -637,25 +703,17 @@ function renderJournals() {
     });
 }
 
-function checkWeeklyAura() {
-    let now = new Date();
-    if (now.getDay() === 0 && now.getHours() >= 12) {
-        let lastStampStr = localStorage.getItem('lastAuraStampDate');
-        if (!lastStampStr || now.toDateString() !== new Date(parseInt(lastStampStr)).toDateString()) { generateAuraLogic(now); } else { loadCurrentAura(); }
-    } else { loadCurrentAura(); }
+function logHygiene(type) { 
+    let d = new Date().toLocaleDateString(); 
+    localStorage.setItem('pillowDate', d); 
+    let pEl = document.getElementById('pillowcase-date'); if(pEl) pEl.innerText = d; 
 }
-function forceAuraGeneration() { generateAuraLogic(new Date()); }
 
-function generateAuraLogic(now) {
+function forceAuraGeneration() {
     let journals = JSON.parse(localStorage.getItem('journals')) || [];
     let name = "The Blank Slate Stamp"; let advice = "Not enough journal synthesis this week to form an Aura!";
     if (journals.length > 0) { name = "✨ The Synthesis Stamp ✨"; advice = "You successfully compiled journals this week. Keep tracking."; }
-    localStorage.setItem('currentAura', JSON.stringify({ name, advice })); localStorage.setItem('lastAuraStampDate', now.getTime().toString()); displayAura(name, advice);
-}
-function loadCurrentAura() {
-    let saved = localStorage.getItem('currentAura'); if (saved) { let p = JSON.parse(saved); displayAura(p.name, p.advice); }
-}
-function displayAura(name, advice) { 
+    localStorage.setItem('currentAura', JSON.stringify({ name, advice })); localStorage.setItem('lastAuraStampDate', new Date().getTime().toString()); 
     let nEl = document.getElementById('aura-name'); if(nEl) nEl.innerText = name; 
     let aEl = document.getElementById('aura-advice'); if(aEl) aEl.innerText = advice; 
 }
