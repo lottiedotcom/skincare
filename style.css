@@ -17,6 +17,7 @@ body {
     padding: 15px 10px;
     border-bottom: 3px solid #ff99cc;
     position: sticky; top: 0; z-index: 9000;
+    box-shadow: 0px 4px 10px rgba(255, 102, 178, 0.2);
 }
 .top-header h1 { font-size: 2rem; color: #fff; text-shadow: 2px 2px 4px rgba(255, 102, 178, 0.8); margin-bottom: 10px; }
 
@@ -89,7 +90,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .action-btn:active { transform: translateY(3px); box-shadow: 0px 0px 0px #cc0066; }
 
 /* ==========================================
-   CLEAN MAPS (No Dots)
+   CLEAN MAPS
    ========================================== */
 .map-container {
     position: relative; display: block; margin: 0 auto 15px auto;
@@ -129,15 +130,18 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
 .skill-tier h4 { color: #cc0066; margin-bottom: 5px; font-size: 1.1rem;}
 .tier-drills { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
 
+/* Sleek Circular Question Mark Buttons */
 .info-btn {
-    background: none; border: none; color: #cc0066; font-weight: bold; cursor: pointer; font-size: 0.9rem; margin-left: 5px; padding: 2px;
+    background: #ff66b2; color: white; border: none; font-weight: bold; cursor: pointer; 
+    font-size: 0.75rem; margin-left: 8px; width: 20px; height: 20px; border-radius: 50%;
+    display: inline-flex; justify-content: center; align-items: center;
+    box-shadow: 0px 2px 4px rgba(255, 102, 178, 0.4);
 }
-.info-btn:active { transform: translateY(2px); }
+.info-btn:active { transform: scale(0.9); }
 .info-drop {
-    display: none; background: #fff; border: 1px dashed #ff99cc; padding: 10px; border-radius: 10px; 
-    margin-top: 5px; font-size: 0.8rem; color: #885566; margin-bottom: 10px; box-shadow: 0px 4px 10px rgba(255, 102, 178, 0.2);
+    display: none; background: #fff; border: 2px dashed #ff99cc; padding: 10px; border-radius: 10px; 
+    margin-top: 5px; font-size: 0.85rem; color: #885566; margin-bottom: 10px; box-shadow: 0px 4px 10px rgba(255, 102, 178, 0.2);
 }
-.info-drop img { max-width: 100%; border-radius: 8px; margin-top: 5px; }
 
 /* ==========================================
    MODALS
@@ -161,8 +165,9 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #ff66b2
     transition: transform 1s linear;
 }
 .tap-dot { 
-    width: 30px; height: 30px; background: #ff66b2; border-radius: 50%; 
-    position: absolute; left: 0; transition: left 1s ease-in-out; 
+    width: 26px; height: 26px; background: #9966ff; border-radius: 50%; 
+    position: absolute; left: 0; top: 0; transition: left 1s ease-in-out; 
+    box-shadow: 0px 0px 10px rgba(153, 102, 255, 0.5);
 }
 
 /* ==========================================
