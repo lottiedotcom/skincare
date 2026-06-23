@@ -13,17 +13,7 @@ let breathingInterval;
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todayName = daysOfWeek[new Date().getDay()];
 
-// MAP ZONES (New Face2d.png 7-Zone Coordinates)
-const faceZones = [
-    { id: 1, name: 'Cheeks', x: 25, y: 60 }, { id: 1, name: 'Cheeks', x: 75, y: 60 },
-    { id: 2, name: 'Forehead', x: 50, y: 25 },
-    { id: 3, name: 'Glabella', x: 50, y: 42 },
-    { id: 4, name: 'Nose', x: 50, y: 55 },
-    { id: 5, name: 'Temples', x: 15, y: 35 }, { id: 5, name: 'Temples', x: 85, y: 35 },
-    { id: 6, name: 'Jawline', x: 30, y: 80 }, { id: 6, name: 'Jawline', x: 70, y: 80 },
-    { id: 7, name: 'Chin', x: 50, y: 88 }
-];
-
+// BODY ZONES
 const bodyZones = [
     { id: 1, name: 'Neck', x: 30, y: 10 }, { id: 2, name: 'L Shoulder', x: 15, y: 22 }, { id: 3, name: 'R Shoulder', x: 45, y: 22 },
     { id: 4, name: 'L Bicep', x: 10, y: 35 }, { id: 5, name: 'R Bicep', x: 50, y: 35 }, { id: 6, name: 'L Forearm', x: 5, y: 50 },
@@ -114,14 +104,25 @@ function saveSettings() {
     let focEl = document.getElementById('primary-focus'); if(focEl) userProfile.primaryFocus = focEl.value;
     
     localStorage.setItem('userProfile', JSON.stringify(userProfile));
-    updateSkinAnalysis(); // Live update
+    updateSkinAnalysis();
 }
 
 function loadData() {
     const savedProf = localStorage.getItem('userProfile');
     if (savedProf) {
         userProfile = JSON.parse(savedProf);
-        if(!userProfile.routine || Array.isArray(userProfile.routine)) userProfile.routine = { "Monday":[], "Tuesday":[], "Wednesday":[], "Thursday":[], "Friday":[], "Saturday":[], "Sunday":[] };
+        // Migrate old routine format to AM/PM structure
+        let needsMigration = false;
+        if(!userProfile.routine || Array.isArray(userProfile.routine)) needsMigration = true;
+        else if (userProfile.routine["Monday"] && Array.isArray(userProfile.routine["Monday"])) needsMigration = true;
+        
+        if (needsMigration) {
+            userProfile.routine = { 
+                "Monday":{am:[], pm:[]}, "Tuesday":{am:[], pm:[]}, "Wednesday":{am:[], pm:[]}, 
+                "Thursday":{am:[], pm:[]}, "Friday":{am:[], pm:[]}, "Saturday":{am:[], pm:[]}, "Sunday":{am:[], pm:[]} 
+            };
+        }
+        
         if(!userProfile.barrierState) userProfile.barrierState = 'Healthy';
         if(!userProfile.hormonePhase) userProfile.hormonePhase = 'Follicular';
         if(!userProfile.primaryFocus) userProfile.primaryFocus = 'Hydration';
@@ -134,7 +135,10 @@ function loadData() {
         let horEl = document.getElementById('hormone-phase'); if(horEl) horEl.value = userProfile.hormonePhase;
         let focEl = document.getElementById('primary-focus'); if(focEl) focEl.value = userProfile.primaryFocus;
     } else {
-        userProfile.routine = { "Monday":[], "Tuesday":[], "Wednesday":[], "Thursday":[], "Friday":[], "Saturday":[], "Sunday":[] };
+        userProfile.routine = { 
+            "Monday":{am:[], pm:[]}, "Tuesday":{am:[], pm:[]}, "Wednesday":{am:[], pm:[]}, 
+            "Thursday":{am:[], pm:[]}, "Friday":{am:[], pm:[]}, "Saturday":{am:[], pm:[]}, "Sunday":{am:[], pm:[]} 
+        };
     }
     
     loggedFaceZones = JSON.parse(localStorage.getItem('stagedFace')) || [];
@@ -153,8 +157,8 @@ function updateSkinAnalysis() {
     
     if (b === 'Compromised' && a > 20) {
         sa.innerText = `🚨 System Alert: PM2.5 pollution is high (${a}) and your barrier is Compromised. Skip exfoliants today; mandate heavy occlusives!`;
-    } else if (b === 'Healing') {
-        sa.innerText = `✨ Gentle Phase: Barrier is Healing. Stick to hydration, ceramide repair, and skip the harsh acids.`;
+    } else if (b === 'Healing' || b === 'OverExfoliated') {
+        sa.innerText = `✨ Gentle Phase: Barrier is fragile. Stick to hydration, ceramide repair, and skip the harsh acids.`;
     } else if (h === 'Luteal') {
         sa.innerText = `🩸 Hormonal Shift: You are in your Luteal phase. Sebum is spiking. Preemptively use BHA/Salicylic acid to clear congestion today.`;
     } else {
@@ -162,34 +166,64 @@ function updateSkinAnalysis() {
     }
 }
 
-// ROUTINE
+// AM/PM ROUTINE BUILDER
 function addRoutineStep() {
-    let dayEl = document.getElementById('routine-day-select'); let stepEl = document.getElementById('new-routine-step');
-    if(!dayEl || !stepEl) return;
-    let day = dayEl.value; let step = stepEl.value; if(!step) return;
-    if(!userProfile.routine[day]) userProfile.routine[day] = [];
-    userProfile.routine[day].push(step);
+    let dayEl = document.getElementById('routine-day-select'); 
+    let timeEl = document.getElementById('routine-time-select');
+    let stepEl = document.getElementById('new-routine-step');
+    if(!dayEl || !timeEl || !stepEl) return;
+    
+    let day = dayEl.value; let time = timeEl.value; let step = stepEl.value; 
+    if(!step) return;
+    
+    if(!userProfile.routine[day]) userProfile.routine[day] = {am:[], pm:[]};
+    userProfile.routine[day][time].push(step);
     localStorage.setItem('userProfile', JSON.stringify(userProfile)); stepEl.value = '';
     renderSettingsRoutine(); renderTodayRoutine();
 }
-function removeRoutineStep(day, index) {
-    if(!userProfile.routine[day]) return;
-    userProfile.routine[day].splice(index, 1); localStorage.setItem('userProfile', JSON.stringify(userProfile));
+
+function removeRoutineStep(day, time, index) {
+    if(!userProfile.routine[day] || !userProfile.routine[day][time]) return;
+    userProfile.routine[day][time].splice(index, 1); 
+    localStorage.setItem('userProfile', JSON.stringify(userProfile));
     renderSettingsRoutine(); renderTodayRoutine();
 }
+
 function renderSettingsRoutine() {
-    let dayEl = document.getElementById('routine-day-select'); let list = document.getElementById('settings-routine-list'); 
-    if(!dayEl || !list) return;
-    list.innerHTML = ''; let day = dayEl.value; let dayRoutines = userProfile.routine[day] || [];
-    dayRoutines.forEach((step, idx) => { list.innerHTML += `<li style="display:flex; justify-content:space-between;">${step} <button class="prod-del" onclick="removeRoutineStep('${day}', ${idx})">X</button></li>`; });
+    let dayEl = document.getElementById('routine-day-select'); 
+    let listAm = document.getElementById('settings-routine-list-am'); 
+    let listPm = document.getElementById('settings-routine-list-pm'); 
+    if(!dayEl || !listAm || !listPm) return;
+    
+    listAm.innerHTML = ''; listPm.innerHTML = '';
+    let day = dayEl.value; 
+    let dayRoutines = userProfile.routine[day] || {am:[], pm:[]};
+    
+    dayRoutines.am.forEach((step, idx) => { listAm.innerHTML += `<li style="display:flex; justify-content:space-between;">${step} <button class="prod-del" onclick="removeRoutineStep('${day}', 'am', ${idx})">X</button></li>`; });
+    dayRoutines.pm.forEach((step, idx) => { listPm.innerHTML += `<li style="display:flex; justify-content:space-between;">${step} <button class="prod-del" onclick="removeRoutineStep('${day}', 'pm', ${idx})">X</button></li>`; });
 }
+
 function renderTodayRoutine() {
-    let head = document.getElementById('today-routine-header'); let list = document.getElementById('custom-routine-list'); 
-    if(!head || !list) return;
-    head.innerText = `✅ ${todayName}'s Routine`; list.innerHTML = '';
-    let dayRoutines = userProfile.routine[todayName] || [];
-    if(dayRoutines.length === 0) { list.innerHTML = "<p class='small-text'>No routines set for today. Go to Settings!</p>"; return; }
-    dayRoutines.forEach(step => { list.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk" value="${step}"> ${step}</label>`; });
+    let head = document.getElementById('today-routine-header'); 
+    let listAm = document.getElementById('custom-routine-list-am'); 
+    let listPm = document.getElementById('custom-routine-list-pm'); 
+    if(!head || !listAm || !listPm) return;
+    
+    head.innerText = `✅ ${todayName}'s Routine`; 
+    listAm.innerHTML = ''; listPm.innerHTML = '';
+    
+    let dayRoutines = userProfile.routine[todayName] || {am:[], pm:[]};
+    
+    if(dayRoutines.am.length === 0 && dayRoutines.pm.length === 0) { 
+        listAm.innerHTML = "<p class='small-text'>No routines set for today. Go to Settings!</p>"; 
+        return; 
+    }
+    
+    dayRoutines.am.forEach(step => { listAm.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk" value="AM: ${step}"> ${step}</label>`; });
+    if(dayRoutines.am.length === 0) listAm.innerHTML = "<p class='small-text'>No AM routine.</p>";
+    
+    dayRoutines.pm.forEach(step => { listPm.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk" value="PM: ${step}"> ${step}</label>`; });
+    if(dayRoutines.pm.length === 0) listPm.innerHTML = "<p class='small-text'>No PM routine.</p>";
 }
 
 // WEATHER
@@ -207,7 +241,6 @@ async function fetchRealData() {
         let uvEl = document.getElementById('live-uv'); if(uvEl) uvEl.innerText = liveData.uv;
         let aqiEl = document.getElementById('live-aqi'); if(aqiEl) aqiEl.innerText = `${liveData.aqi} µg/m³`; 
         
-        // Sweeter Weather Text
         let presEl = document.getElementById('live-pressure'); if(presEl) presEl.innerText = `${liveData.pressure} inHg`;
         let actEl = document.getElementById('live-flex-action'); 
         if(actEl) {
@@ -223,8 +256,6 @@ async function fetchRealData() {
 
 // MAPS
 function populateSelects() {
-    let fSel = document.getElementById('face-zone-select'); 
-    if(fSel) { fSel.innerHTML = ''; faceZones.forEach(z => fSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`); }
     let bSel = document.getElementById('body-zone-select'); 
     if(bSel) { bSel.innerHTML = ''; bodyZones.forEach(z => bSel.innerHTML += `<option value="${z.id}: ${z.name}">${z.id}: ${z.name}</option>`); }
 }
@@ -251,18 +282,22 @@ function renderMapLogs(mapType) {
     let list = document.getElementById(`${mapType}-log-list`); if(!list) return;
     list.innerHTML = '';
     let logs = mapType === 'face' ? loggedFaceZones : loggedBodyZones;
-    let container = document.getElementById(`${mapType}-map-container`);
-    if(container) {
-        container.querySelectorAll('.target-dot').forEach(el => el.remove());
-        const zones = mapType === 'face' ? faceZones : bodyZones;
-        zones.forEach(zone => {
-            let dot = document.createElement('div'); dot.className = 'target-dot'; dot.style.left = `${zone.x}%`; dot.style.top = `${zone.y}%`; 
-            dot.innerText = zone.id;
-            let match = logs.find(l => parseInt(l.zone.split(":")[0]) === zone.id);
-            if(match) { dot.style.backgroundColor = match.color; dot.style.color = '#fff'; }
-            container.appendChild(dot);
-        });
+    
+    // Only draw dots for the Body map now. Face map has numbers baked in.
+    if(mapType === 'body') {
+        let container = document.getElementById(`body-map-container`);
+        if(container) {
+            container.querySelectorAll('.target-dot').forEach(el => el.remove());
+            bodyZones.forEach(zone => {
+                let dot = document.createElement('div'); dot.className = 'target-dot'; dot.style.left = `${zone.x}%`; dot.style.top = `${zone.y}%`; 
+                dot.innerText = zone.id;
+                let match = logs.find(l => parseInt(l.zone.split(":")[0]) === zone.id);
+                if(match) { dot.style.backgroundColor = match.color; dot.style.color = '#fff'; }
+                container.appendChild(dot);
+            });
+        }
     }
+
     logs.forEach((log, idx) => {
         list.innerHTML += `<li style="border-left: 5px solid ${log.color};"><strong>${log.zone}</strong>: ${log.type} <button class="prod-del" style="float:right;" onclick="removeMapLog('${mapType}', ${idx})">X</button></li>`;
     });
@@ -274,7 +309,7 @@ function removeMapLog(mapType, idx) {
     renderMapLogs(mapType);
 }
 
-// PRODUCT DIARY (Digital Vanity + PAO Bar)
+// PRODUCT DIARY
 function addProduct() {
     let nameEl = document.getElementById('prod-name'); if(!nameEl) return;
     let name = nameEl.value; 
@@ -340,26 +375,103 @@ function logHygiene(type) {
     let pEl = document.getElementById('pillowcase-date'); if(pEl) pEl.innerText = d; 
 }
 
-// 5x5 ACADEMY LOGIC
+// RECOVERY PANELS
+function toggleRecoveryPanel(panelId) {
+    let panel = document.getElementById(panelId);
+    if(!panel) return;
+    
+    // If it's the pacer, handle the breathing interval
+    if (panelId === 'somatic-pacer') {
+        const circle = document.getElementById('breath-circle');
+        const text = document.getElementById('breath-text');
+        if (panel.style.display === 'none') {
+            panel.style.display = 'block';
+            let phase = 0; clearInterval(breathingInterval);
+            breathingInterval = setInterval(() => {
+                if(phase === 0) { text.innerText = "Inhale..."; circle.classList.add('breathe-in'); circle.classList.remove('breathe-out'); }
+                else if(phase === 1) { text.innerText = "Hold..."; }
+                else if(phase === 2) { text.innerText = "Exhale..."; circle.classList.add('breathe-out'); circle.classList.remove('breathe-in'); }
+                else if(phase === 3) { text.innerText = "Hold..."; }
+                phase = (phase + 1) % 4;
+            }, 4000); 
+        } else {
+            panel.style.display = 'none'; clearInterval(breathingInterval);
+        }
+    } else {
+        // Normal toggle for text panels
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// SMART COACH
+function addToVault() {
+    let titleEl = document.getElementById('vault-title'); if(!titleEl) return;
+    let title = titleEl.value; let url = document.getElementById('vault-url') ? document.getElementById('vault-url').value : "";
+    let duration = document.getElementById('vault-duration') ? document.getElementById('vault-duration').value : ""; let focus = document.getElementById('vault-focus') ? document.getElementById('vault-focus').value : "";
+    if(!title || !duration) return;
+    let vaults = JSON.parse(localStorage.getItem('vaults')) || [];
+    vaults.push({ title, url, duration, focus }); localStorage.setItem('vaults', JSON.stringify(vaults));
+    titleEl.value = ''; document.getElementById('vault-url').value = ''; document.getElementById('vault-duration').value = '';
+    renderVault();
+}
+
+function removeVault(idx) {
+    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; vaults.splice(idx, 1); localStorage.setItem('vaults', JSON.stringify(vaults)); renderVault();
+}
+
+function renderVault() {
+    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; let list = document.getElementById('vault-list'); if(!list) return;
+    list.innerHTML = '';
+    vaults.forEach((v, idx) => {
+        let l = v.url ? `<a href="${v.url.startsWith('http') ? v.url : 'http://'+v.url}" target="_blank" style="color:#cc0066; font-weight:bold;">[Watch]</a>` : '';
+        list.innerHTML += `<li><strong>${v.title}</strong> (${v.duration}m) - <em>${v.focus}</em> ${l} <button class="prod-del" style="float:right;" onclick="removeVault(${idx})">X</button></li>`;
+    });
+}
+
+function smartSuggest() {
+    let focusEl = document.getElementById('focus-selector'); if(!focusEl) return;
+    let focus = focusEl.value; 
+    let res = document.getElementById('vault-suggestion'); if(!res) return;
+    
+    let sleepEl = document.getElementById('sleep-hours');
+    let waterEl = document.getElementById('water-oz');
+    let sleep = sleepEl ? parseFloat(sleepEl.value) : 0;
+    let water = waterEl ? parseFloat(waterEl.value) : 0;
+    
+    res.style.display = 'block';
+    
+    let nervePain = loggedBodyZones.some(log => log.type.includes("Nerve"));
+    
+    if (nervePain) { 
+        res.innerHTML = "🚨 <strong>COACH VETO:</strong> Nerve tension detected. <em>Mandatory: Somatic Reset & Nerve Flossing only.</em>"; 
+    } 
+    else if (sleep < 6 || water < 30) {
+        res.innerHTML = `🚨 <strong>COACH VETO:</strong> You only logged ${sleep}hrs sleep and ${water}oz water. Your fascia is dehydrated and rigid today. Deep peak poses are highly dangerous in this state. <em>I am shifting your focus to Lymphatic Drainage and Mobility.</em>`;
+    }
+    else if (focus === "Somatic Reset" || focus === "Lymphatic Drainage") { 
+        res.innerHTML = `✅ <strong>RECOVERY:</strong> Great choice. Check the Recovery box above.`; 
+    } 
+    else { 
+        res.innerHTML = `✅ <strong>CONDITION GREEN:</strong> Your system is hydrated and primed for <strong>${focus}</strong>. Proceed with vault routines.`; 
+    }
+}
+
+// 5x5 ACADEMY
 function renderAcademy() {
     const container = document.getElementById('academy-courses-container'); if(!container) return;
     container.innerHTML = '';
-    
     let savedProgress = JSON.parse(localStorage.getItem('academyProgress')) || {};
     
     academyData.forEach((path, pIdx) => {
         let pathHTML = `<div class="skill-path"><h3>🌳 ${path.title} Path</h3>`;
-        
         path.tiers.forEach((tier, tIdx) => {
             let tierId = `tier-${pIdx}-${tIdx}`;
-            // A tier is unlocked if it's level 1, OR if the previous tier is marked complete in localStorage
             let isUnlocked = (tIdx === 0) || (savedProgress[`tier-${pIdx}-${tIdx-1}`] === true);
             let isCompleted = savedProgress[tierId] === true;
             let lockedClass = isUnlocked ? '' : 'locked';
             let btnDisabled = isUnlocked && !isCompleted ? '' : 'disabled';
             
             let drillsHTML = tier.drills.map(d => `<label class="check-tag" style="justify-content:flex-start;"><input type="checkbox" class="drill-chk-${tierId}" ${isCompleted?'checked disabled':''}> ${d}</label>`).join('');
-            
             let actionBtn = isCompleted ? 
                 `<button class="action-btn" style="background:#66cc99;" disabled>✨ Mastered!</button>` :
                 `<button class="action-btn" ${btnDisabled} onclick="triggerQuiz(${pIdx}, ${tIdx})">🧠 Take Form Quiz to Unlock</button>`;
@@ -391,7 +503,6 @@ function triggerQuiz(pathIdx, tierIdx) {
     document.getElementById('quiz-opt-a').innerText = "A) " + quizData.a;
     document.getElementById('quiz-opt-b').innerText = "B) " + quizData.b;
     document.getElementById('quiz-feedback').style.display = 'none';
-    
     document.getElementById('quiz-modal').style.display = 'flex';
 }
 
@@ -403,85 +514,18 @@ function submitQuiz(answer) {
     if(answer === quizData.ans) {
         feedback.style.color = '#66cc99'; feedback.style.background = '#e6ffe6';
         feedback.innerText = "✨ Correct! Level Mastered. You have unlocked the next tier!";
-        
         let savedProgress = JSON.parse(localStorage.getItem('academyProgress')) || {};
-        savedProgress[activeQuizTier.tierId] = true;
-        localStorage.setItem('academyProgress', JSON.stringify(savedProgress));
-        
+        savedProgress[activeQuizTier.tierId] = true; localStorage.setItem('academyProgress', JSON.stringify(savedProgress));
         setTimeout(() => { closeQuiz(); renderAcademy(); }, 2000);
     } else {
         feedback.style.color = '#cc0066'; feedback.style.background = '#ffe6f2';
         feedback.innerText = quizData.fail;
-        // Uncheck boxes to force a retry tomorrow
         document.querySelectorAll(`.drill-chk-${activeQuizTier.tierId}`).forEach(cb => cb.checked = false);
         setTimeout(() => { closeQuiz(); }, 4000);
     }
 }
 
 function closeQuiz() { document.getElementById('quiz-modal').style.display = 'none'; activeQuizTier = null; }
-
-// RECOVERY
-function toggleSomaticReset() {
-    const pacer = document.getElementById('somatic-pacer'); const circle = document.getElementById('breath-circle'); const text = document.getElementById('breath-text');
-    if(!pacer) return;
-    if (pacer.style.display === 'none') {
-        pacer.style.display = 'block'; let phase = 0; clearInterval(breathingInterval);
-        breathingInterval = setInterval(() => {
-            if(phase === 0) { text.innerText = "Inhale..."; circle.classList.add('breathe-in'); circle.classList.remove('breathe-out'); }
-            else if(phase === 1) { text.innerText = "Hold..."; }
-            else if(phase === 2) { text.innerText = "Exhale..."; circle.classList.add('breathe-out'); circle.classList.remove('breathe-in'); }
-            else if(phase === 3) { text.innerText = "Hold..."; }
-            phase = (phase + 1) % 4;
-        }, 4000); 
-    } else { pacer.style.display = 'none'; clearInterval(breathingInterval); }
-}
-
-function generateLymphatic() {
-    const display = document.getElementById('lymphatic-sequence'); if(!display) return;
-    display.style.display = 'block';
-    display.innerHTML = `
-        <strong>Lymphatic Sequence:</strong><br><br>
-        1. <strong>Clavicle:</strong> Pump hollows above collarbone 15x.<br>
-        2. <strong>Axillary:</strong> Pump armpits 15x.<br>
-        3. <strong>Inguinal:</strong> Pump hip creases 15x.<br>
-        4. <strong>Legs up Wall:</strong> Rest inverted for 10 mins.
-    `;
-}
-
-// SMART COACH
-function addToVault() {
-    let titleEl = document.getElementById('vault-title'); if(!titleEl) return;
-    let title = titleEl.value; let url = document.getElementById('vault-url') ? document.getElementById('vault-url').value : "";
-    let duration = document.getElementById('vault-duration') ? document.getElementById('vault-duration').value : ""; let focus = document.getElementById('vault-focus') ? document.getElementById('vault-focus').value : "";
-    if(!title || !duration) return;
-    let vaults = JSON.parse(localStorage.getItem('vaults')) || [];
-    vaults.push({ title, url, duration, focus }); localStorage.setItem('vaults', JSON.stringify(vaults));
-    titleEl.value = ''; document.getElementById('vault-url').value = ''; document.getElementById('vault-duration').value = '';
-    renderVault();
-}
-
-function removeVault(idx) {
-    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; vaults.splice(idx, 1); localStorage.setItem('vaults', JSON.stringify(vaults)); renderVault();
-}
-
-function renderVault() {
-    let vaults = JSON.parse(localStorage.getItem('vaults')) || []; let list = document.getElementById('vault-list'); if(!list) return;
-    list.innerHTML = '';
-    vaults.forEach((v, idx) => {
-        let l = v.url ? `<a href="${v.url.startsWith('http') ? v.url : 'http://'+v.url}" target="_blank" style="color:#cc0066; font-weight:bold;">[Watch]</a>` : '';
-        list.innerHTML += `<li><strong>${v.title}</strong> (${v.duration}m) - <em>${v.focus}</em> ${l} <button class="prod-del" style="float:right;" onclick="removeVault(${idx})">X</button></li>`;
-    });
-}
-
-function smartSuggest() {
-    let focusEl = document.getElementById('focus-selector'); if(!focusEl) return;
-    let focus = focusEl.value; let res = document.getElementById('vault-suggestion'); if(!res) return;
-    res.style.display = 'block';
-    let nervePain = loggedBodyZones.some(log => log.type.includes("Nerve"));
-    if (nervePain) { res.innerHTML = "🚨 <strong>COACH VETO:</strong> Nerve tension detected. <em>Mandatory: Somatic Reset & Nerve Flossing only.</em>"; } 
-    else if (focus === "Somatic Reset" || focus === "Lymphatic Drainage") { res.innerHTML = `✅ <strong>RECOVERY:</strong> Great choice. Check the Recovery box above.`; } 
-    else { res.innerHTML = `✅ <strong>CONDITION GREEN:</strong> Your system is primed for <strong>${focus}</strong>. Proceed with vault routines.`; }
-}
 
 // DECK
 const deck = [
