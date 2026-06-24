@@ -14,8 +14,9 @@ let liveData = { dew: 0, uv: 0, aqi: 0, pressure: 0 };
 let currentDrawnCard = "None Drawn Today";
 let hasCompiledToday = false; 
 
-// Cumulative Coach Metrics (for biphasic sleep & daily water)
 let liveMetrics = JSON.parse(localStorage.getItem('liveMetrics')) || { sleep: 0, water: 0 };
+// New: Caches routine checkmarks for the current day
+let completedToday = JSON.parse(localStorage.getItem('completedToday')) || { date: new Date().toLocaleDateString("en-US", {timeZone: "America/Phoenix"}), am: [], pm: [] };
 
 // Timers & Intervals
 let breathingTimer; let breathingPhaseTimeout;
@@ -28,7 +29,6 @@ let decompTimerInterval;
 const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const todayName = daysOfWeek[new Date().getDay()];
 
-// Exact Muscle List from Diagram
 const bodyMuscles = [
     "Abdominals", "Abductors", "Biceps", "Brachioradialis", "Deltoid", "External oblique", 
     "Finger extensors", "Finger flexors", "Gastrocnemius", "Gluteus maximus", "Gluteus medius", 
@@ -39,6 +39,12 @@ const bodyMuscles = [
 
 window.onload = () => {
     try {
+        let todayStr = new Date().toLocaleDateString("en-US", {timeZone: "America/Phoenix"});
+        if(completedToday.date !== todayStr) {
+            completedToday = { date: todayStr, am: [], pm: [] };
+            localStorage.setItem('completedToday', JSON.stringify(completedToday));
+        }
+
         loadData(); 
         fetchRealData(); 
         populateSelects();
@@ -57,7 +63,7 @@ window.onload = () => {
         updateMetricsDisplay();
         
         let lastCompile = localStorage.getItem('lastCompileDate');
-        if(lastCompile === new Date().toLocaleDateString("en-US", {timeZone: "America/Phoenix"})) {
+        if(lastCompile === todayStr) {
             hasCompiledToday = true;
             let warning = document.getElementById('journal-warning');
             if(warning) { warning.style.display = 'block'; warning.innerText = "✅ Daily Map already compiled for today."; }
@@ -83,9 +89,13 @@ function check7AMResetEngine() {
         
         document.querySelectorAll('.routine-chk-am, .routine-chk-pm').forEach(cb => cb.checked = false);
         
+        // Wipe local caches
         liveMetrics = { sleep: 0, water: 0 };
         localStorage.setItem('liveMetrics', JSON.stringify(liveMetrics));
         updateMetricsDisplay();
+
+        completedToday = { date: currentMstDateStr, am: [], pm: [] };
+        localStorage.setItem('completedToday', JSON.stringify(completedToday));
 
         let dumpEl = document.getElementById('brain-dump'); if(dumpEl) dumpEl.value = '';
         
@@ -103,7 +113,7 @@ function check7AMResetEngine() {
         localStorage.setItem('lastAutoResetDate', currentMstDateStr);
         hasCompiledToday = false; 
         
-        renderMapLogs('face'); renderMapLogs('body'); 
+        renderMapLogs('face'); renderMapLogs('body'); renderTodayRoutine();
         console.log("7:00 AM MST Engine Fired: Log saved, slate wiped.");
     }
 }
@@ -185,7 +195,7 @@ function loadData() {
 }
 
 // ==========================================
-// 4. WEATHER, SKIN ANALYST & ADVANCED TARGET POD
+// 4. WEATHER, SKIN ANALYST, UTERINE BIO-WEATHER & TARGET POD
 // ==========================================
 async function fetchRealData() {
     let lat = userProfile.lat || '32.864'; let lon = userProfile.lon || '-108.222';
@@ -205,7 +215,7 @@ async function fetchRealData() {
         let actEl = document.getElementById('live-flex-action'); 
         if(actEl) {
             if(liveData.pressure < 29.8) {
-                actEl.innerText = "The pressure is dropping today! 🌧️ This can make your joints feel extra sticky and grumpy. Treat your body to a sweet 15-minute heated warm-up before you try to bend! 💕";
+                actEl.innerText = "The pressure is dropping today! 🌧️ This can make your joint capsules expand and feel extra sticky. Treat your body to a sweet 15-minute heated warm-up before you try to bend! 💕";
             } else {
                 actEl.innerText = "Pressure is optimal! ✨ Your body is primed, lubricated, and ready for deep, active holds. Have a beautiful session! 🎀";
             }
@@ -218,6 +228,7 @@ function updateSkinAnalysis() {
     let sa = document.getElementById('smart-skin-analysis'); 
     let dpBox = document.getElementById('dew-point-synergy');
     let fBox = document.getElementById('display-primary-focus');
+    let uwBox = document.getElementById('uterine-weather-output');
     
     let amStatus = document.getElementById('focus-am-status');
     let pmStatus = document.getElementById('focus-pm-status');
@@ -226,13 +237,13 @@ function updateSkinAnalysis() {
     let matchBox = document.getElementById('focus-matchmaker');
     let matchName = document.getElementById('matchmaker-suggestion');
     
-    let b = userProfile.barrierState; let h = userProfile.hormonePhase; let a = liveData.aqi || 0; let st = userProfile.skinType; let dew = liveData.dew;
+    let b = userProfile.barrierState; let h = userProfile.hormonePhase; let a = liveData.aqi || 0; let st = userProfile.skinType; let dew = liveData.dew; let p = liveData.pressure;
     
     // Matrix Warnings
     if(sa) {
         if (b === 'Compromised' && a > 20) { sa.innerText = `🚨 System Alert: PM2.5 pollution is high (${a}) and your barrier is Compromised. Skip exfoliants today; mandate heavy occlusives!`; } 
         else if (b === 'Healing' || b === 'OverExfoliated') { sa.innerText = `✨ Gentle Phase: Barrier is fragile. Stick to hydration, ceramide repair, and skip the harsh acids.`; } 
-        else if (h === 'Luteal' || h === 'Menstrual') { sa.innerText = `🩸 Hormonal Shift: You are in your ${h} phase. Sebum is spiking. Preemptively use BHA/Salicylic acid to clear congestion today.`; } 
+        else if (h.includes('Luteal') || h.includes('Menstrual')) { sa.innerText = `🩸 Hormonal Shift: You are in your ${h.split(' ')[0]} phase. Sebum is spiking. Preemptively use BHA/Salicylic acid to clear congestion today.`; } 
         else { sa.innerText = `🌸 Atmosphere and barrier are balanced! Proceed optimally with your ${userProfile.primaryFocus} routine.`; }
     }
 
@@ -242,6 +253,31 @@ function updateSkinAnalysis() {
         if ((st === 'oily' || st === 'combination') && dew > 65) { dpBox.innerText = `💧 High humidity detected (Dew: ${dew.toFixed(1)}°F). Skip heavy moisturizers today; your hydrating SPF will be enough.`; } 
         else if ((st === 'dry' || st === 'sensitive') && dew < 40) { dpBox.innerText = `🌵 Atmosphere is pulling moisture (Dew: ${dew.toFixed(1)}°F). TEWL risk is high. Seal your hydrating serums with a heavy occlusive layer today.`; } 
         else { dpBox.innerText = `🌡️ Dew point is balanced for your skin type. Normal hydration protocols apply.`; }
+    }
+
+    // Uterine Bio-Weather
+    if(uwBox && p !== 0) {
+        let uwText = "";
+        if (h.includes("Menstrual")) {
+            uwText = "🩸 <strong>Menstrual Phase:</strong> Estrogen/Progesterone crash. ";
+            if (p < 29.8) uwText += "<span style='color:#cc0000;'>Low atmospheric pressure detected! Pelvic blood vessels are dilating, increasing cramp severity and systemic inflammation. Use heat therapy and strictly avoid heavy contortion inversions.</span>";
+            else uwText += "Pressure is stable. Focus on gentle movement and restorative poses to manage shedding.";
+        } else if (h.includes("Follicular")) {
+            uwText = "🌱 <strong>Follicular Phase:</strong> Rising estrogen improves collagen synthesis. ";
+            if (p < 29.8) uwText += "Low pressure may cause slight joint ache due to fluid expansion, but your tissues are highly resilient right now.";
+            else uwText += "Optimal structural integrity and low inflammation. Push your active flexibility today.";
+        } else if (h.includes("Ovulatory")) {
+            uwText = "🥚 <strong>Ovulatory Phase:</strong> Peak testosterone/estrogen. Highest natural joint laxity. ";
+            if (p < 29.8) uwText += "<span style='color:#cc0000;'>⚠️ DANGER: Low pressure + Ovulatory laxity = Extreme risk of subluxation. Joint capsules are expanded. Focus purely on active strength, DO NOT push passive splits.</span>";
+            else uwText += "Great energy, but be deeply mindful of your end-ranges—you are extra hypermobile today!";
+        } else if (h.includes("Early Luteal")) {
+            uwText = "🍂 <strong>Early Luteal Phase:</strong> Progesterone rising, metabolism speeds up. Core body temperature is naturally higher, making your warm-ups faster and more efficient today.";
+        } else if (h.includes("Late Luteal")) {
+            uwText = "🥀 <strong>Late Luteal (PMS):</strong> Peak progesterone drops systemic serotonin. Inflammation rises. ";
+            if (p < 29.8) uwText += "<span style='color:#cc0000;'>Low pressure is compounding pelvic congestion and bloating. Expect heavy joint stiffness. Focus strictly on lymphatic drainage and somatic resets.</span>";
+            else uwText += "Prioritize structural stability. Ligaments are prone to inflammation and your body is hoarding water.";
+        }
+        uwBox.innerHTML = uwText;
     }
 
     // ADVANCED DAY/NIGHT FORMULATION CHEMIST
@@ -278,10 +314,8 @@ function updateSkinAnalysis() {
     
     let spfDetected = amText.includes("spf") || amText.includes("sunscreen") || amText.includes("zinc") || amText.includes("titanium");
 
-    // Reset displays
     starBox.style.display = 'none'; matchBox.style.display = 'none';
     
-    // Dynamic Split Logic
     if (userProfile.primaryFocus === "Fine Lines" || userProfile.primaryFocus === "Anti-Aging") {
         amStatus.innerText = amHasActive ? "☀️ AM Status: ✅ Day actives supporting cellular structure." : "☀️ AM Status: ➖ Focus on hydration & protection.";
         if (amHasActive && !spfDetected) amStatus.innerText = "☀️ AM Status: ⚠️ Actives detected without SPF! Accelerated aging risk.";
@@ -295,12 +329,11 @@ function updateSkinAnalysis() {
         amStatus.innerText = amHasActive ? "☀️ AM Status: ✅ Congestion control active." : "☀️ AM Status: ➖ Missing daytime BHA/Treatment.";
         pmStatus.innerText = pmHasActive ? "🌙 PM Status: ✅ Cell turnover/BHA detected." : "🌙 PM Status: ⚠️ Missing primary acne treatment step.";
     }
-    else { // Hydration
+    else { 
         amStatus.innerText = amHasActive ? "☀️ AM Status: ✅ Humectants optimizing hydration." : "☀️ AM Status: ⚠️ Lacking targeted hydrators.";
         pmStatus.innerText = pmHasActive ? "🌙 PM Status: ✅ Lipids/Ceramides restoring barrier." : "🌙 PM Status: ⚠️ Missing heavy hydration lock.";
     }
 
-    // Star Player Determination
     let activeRoster = amProds.concat(pmProds);
     let starProduct = activeRoster.find(p => targetActives.some(a => (p.ingredients||"").toLowerCase().includes(a) || p.name.toLowerCase().includes(a)));
     if (starProduct) {
@@ -308,7 +341,6 @@ function updateSkinAnalysis() {
         starName.innerText = `${starProduct.name} (${starProduct.brand})`;
     }
 
-    // Matchmaker / Suggestion Logic
     if (!amHasActive && !pmHasActive) {
         let suggestedSwap = unusedProds.find(p => targetActives.some(a => (p.ingredients||"").toLowerCase().includes(a) || p.name.toLowerCase().includes(a)));
         if (suggestedSwap) {
@@ -347,7 +379,6 @@ function analyzeRoutineLayering() {
     out.innerHTML = "<strong>🧪 Layering Analysis:</strong><br>";
     let warnings = 0;
 
-    // CYTOTOXIC / SEVERE BARRIER DESTROYERS
     if(pmStr.includes("hydrogen peroxide") || amStr.includes("hydrogen peroxide") || pmStr.includes("denatured alcohol") || amStr.includes("denatured alcohol") || pmStr.includes("isopropyl alcohol") || amStr.includes("isopropyl alcohol")) {
         out.innerHTML += `<span style="color:#cc0000; font-weight:bold;">🚨 CYTOTOXIC ALERT: Severe stripping agents (Peroxide/Harsh Alcohol) detected in your formulation! This destroys healthy skin cells and obliterates the barrier. Do NOT use this on your face!</span><br>`; warnings++;
     }
@@ -667,14 +698,29 @@ function renderTodayRoutine() {
     
     let dayRoutines = userProfile.routine[todayName] || {am:[], pm:[]};
     
-    dayRoutines.am.forEach((step, i) => { listAm.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk-am" onchange="checkRoutineCompletion('am')"> ${step}</label>`; });
+    dayRoutines.am.forEach((step, i) => { 
+        let isChecked = completedToday.am.includes(step) ? "checked" : "";
+        listAm.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk-am" value="${step}" ${isChecked} onchange="checkRoutineCompletion('am', this)"> ${step}</label>`; 
+    });
     if(dayRoutines.am.length === 0) listAm.innerHTML = "<p class='small-text'>No AM routine.</p>";
     
-    dayRoutines.pm.forEach((step, i) => { listPm.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk-pm" onchange="checkRoutineCompletion('pm')"> ${step}</label>`; });
+    dayRoutines.pm.forEach((step, i) => { 
+        let isChecked = completedToday.pm.includes(step) ? "checked" : "";
+        listPm.innerHTML += `<label class="check-tag"><input type="checkbox" class="routine-chk-pm" value="${step}" ${isChecked} onchange="checkRoutineCompletion('pm', this)"> ${step}</label>`; 
+    });
     if(dayRoutines.pm.length === 0) listPm.innerHTML = "<p class='small-text'>No PM routine.</p>";
 }
 
-function checkRoutineCompletion(type) {
+function checkRoutineCompletion(type, checkboxEl) {
+    let stepName = checkboxEl.value;
+    
+    if (checkboxEl.checked) {
+        if (!completedToday[type].includes(stepName)) completedToday[type].push(stepName);
+    } else {
+        completedToday[type] = completedToday[type].filter(s => s !== stepName);
+    }
+    localStorage.setItem('completedToday', JSON.stringify(completedToday));
+
     let boxes = document.querySelectorAll(`.routine-chk-${type}`);
     let allChecked = Array.from(boxes).every(cb => cb.checked);
     if(allChecked && boxes.length > 0) {
@@ -824,7 +870,7 @@ function startDecompTimer() {
 }
 
 // ==========================================
-// 10. SMART COACH, BIOMETRICS & GENERAL LOGS
+// 10. SMART COACH, BIOMETRICS & BIPHASIC RADAR
 // ==========================================
 function updateMetricsDisplay() {
     let dSleep = document.getElementById('display-sleep'); if(dSleep) dSleep.innerText = liveMetrics.sleep;
@@ -851,6 +897,65 @@ function clearCoachMetrics() {
     liveMetrics = { sleep: 0, water: 0 };
     localStorage.setItem('liveMetrics', JSON.stringify(liveMetrics));
     updateMetricsDisplay();
+    
+    let dial = document.getElementById('viscosity-radar-dial');
+    if(dial) dial.style.background = 'none';
+    let out = document.getElementById('viscosity-forecast-output');
+    if(out) out.style.display = 'none';
+}
+
+function calculateViscosityPeak() {
+    let s1s = document.getElementById('sleep-1-start').value;
+    let s1e = document.getElementById('sleep-1-end').value;
+    let s2s = document.getElementById('sleep-2-start').value;
+    let s2e = document.getElementById('sleep-2-end').value;
+    let out = document.getElementById('viscosity-forecast-output');
+    let dial = document.getElementById('viscosity-radar-dial');
+    
+    if(!s1e || !s2e) { 
+        out.style.display = 'block'; 
+        out.innerHTML = `<span style="color:#cc0000;">⚠️ Please log your Wake Times for both sleep blocks to forecast your peak.</span>`; 
+        return; 
+    }
+    
+    out.style.display = 'block';
+    let outHTML = "<strong>🔮 Thixotropic Forecast:</strong><br><br>";
+    
+    let wakeHour = parseInt(s2e.split(':')[0]);
+    let wakeMin = parseInt(s2e.split(':')[1]) / 60;
+    let decimalWake = wakeHour + wakeMin;
+    
+    let dangerStart = (decimalWake / 24) * 360;
+    let dangerEnd = ((decimalWake + 2) / 24) * 360;
+    let peakStart = ((decimalWake + 3) / 24) * 360;
+    let peakEnd = ((decimalWake + 6) / 24) * 360;
+    
+    dial.style.background = `conic-gradient(
+        from 0deg, 
+        #f0f8ff 0deg ${dangerStart}deg, 
+        #ff4d4d ${dangerStart}deg ${dangerEnd}deg, 
+        #f0f8ff ${dangerEnd}deg ${peakStart}deg, 
+        #66cc99 ${peakStart}deg ${peakEnd}deg, 
+        #f0f8ff ${peakEnd}deg 360deg
+    )`;
+    
+    // Formatting standard 12hr time for display
+    function formatTime(decimalHour) {
+        let h = Math.floor(decimalHour) % 24;
+        let m = Math.round((decimalHour - Math.floor(decimalHour)) * 60);
+        let ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12; h = h ? h : 12; 
+        return `${h}:${m < 10 ? '0'+m : m} ${ampm}`;
+    }
+
+    outHTML += `Your second sleep ended at <strong>${formatTime(decimalWake)}</strong>.<br><br>`;
+    outHTML += `🟥 <strong>Danger Zone (Spinal Stiffness):</strong><br> From ${formatTime(decimalWake)} to ${formatTime(decimalWake + 2)}. <em>Strict nerve flossing and light AROM only. Fascia is dehydrated and gel-like.</em><br><br>`;
+    outHTML += `🟩 <strong>Viscosity Peak (Optimal Fluidity):</strong><br> From ${formatTime(decimalWake + 3)} to ${formatTime(decimalWake + 6)}. <em>Prime window for deep end-range backbends and peak shapes.</em>`;
+    
+    if (liveData.pressure < 29.8) {
+        outHTML += `<br><br><em>⚠️ Barometric offset: Pressure is low. Add 15 mins to your heated warm-up before entering the peak window.</em>`;
+    }
+    out.innerHTML = outHTML;
 }
 
 function smartSuggest() {
@@ -1269,6 +1374,9 @@ function compileJournal(isAutoReset = false) {
         
         liveMetrics = { sleep: 0, water: 0 }; localStorage.setItem('liveMetrics', JSON.stringify(liveMetrics)); updateMetricsDisplay();
         
+        completedToday = { date: new Date().toLocaleDateString("en-US", {timeZone: "America/Phoenix"}), am: [], pm: [] };
+        localStorage.setItem('completedToday', JSON.stringify(completedToday));
+
         let faceBox = document.getElementById('face-map-analysis-box'); if(faceBox) faceBox.style.display = 'none';
         let bodyBox = document.getElementById('body-map-analysis-box'); if(bodyBox) bodyBox.style.display = 'none';
         
