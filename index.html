@@ -36,6 +36,7 @@
                     <div class="data-pod"><p class="small-text">Dew Point</p><p><strong id="live-dew">--</strong></p></div>
                     <div class="data-pod"><p class="small-text">UV Index</p><p><strong id="live-uv">--</strong></p></div>
                     <div class="data-pod"><p class="small-text">AQI</p><p><strong id="live-aqi">--</strong></p></div>
+                    <div class="data-pod"><p class="small-text">Pressure</p><p><strong id="live-pressure">--</strong></p></div>
                 </div>
                 <div id="bio-impact-warnings" style="margin-top: 10px;">
                     <p class="highlight-text" id="smart-skin-analysis" style="background:#e6f2ff; color:#0066cc;">Analyzing skin profile and atmosphere...</p>
@@ -43,23 +44,28 @@
                 </div>
             </div>
 
-            <!-- REWRITTEN: ADVANCED FORMULATION FOCUS POD -->
+            <!-- NEW: UTERINE & HORMONAL BIO-WEATHER -->
+            <div class="bubbly-box" style="background: #fff0f5; border-color: #ff99cc;">
+                <h3 style="color: #cc0066; border-bottom-color: #ff99cc;">🩸 Uterine & Hormonal Bio-Weather</h3>
+                <p class="small-text" style="color: #993366;">Cross-referencing your cycle phase with atmospheric barometric pressure.</p>
+                <div id="uterine-weather-output" class="highlight-text" style="background: #fff; color: #cc0066; border: 1px solid #ffb3d9; font-size: 0.85rem; line-height: 1.4;">
+                    Waiting for data synthesis...
+                </div>
+            </div>
+
             <div class="bubbly-box" style="background: #fff9e6; border-color: #ffcc66;">
                 <h3 style="color: #cc8800; border-bottom-color: #ffcc66;">🎯 Formulation Focus: <span id="display-primary-focus">Hydration</span></h3>
                 <p class="small-text" style="color: #996600;">Strategic ingredient pathway analysis based on your primary goal.</p>
                 
-                <!-- Day vs Night Splits -->
                 <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                     <div id="focus-am-status" class="highlight-text" style="margin-top:0; background: #fff; color: #cc8800; border: 1px dashed #ffcc66; font-size: 0.85rem;">☀️ AM Status: Awaiting routine data...</div>
                     <div id="focus-pm-status" class="highlight-text" style="margin-top:0; background: #f2e6ff; color: #4b0082; border: 1px dashed #cc99ff; font-size: 0.85rem;">🌙 PM Status: Awaiting routine data...</div>
                 </div>
 
-                <!-- Star Player Highlight -->
                 <div id="focus-star-player" class="highlight-text" style="display: none; background: #e6ffe6; color: #006600; border: 1px solid #99ff99; font-size: 0.85rem;">
                     🌟 <strong>Star Player:</strong> <span id="star-player-name">--</span>
                 </div>
 
-                <!-- Vanity Matchmaker -->
                 <div id="focus-matchmaker" class="highlight-text" style="display: none; background: #ffe6e6; color: #cc0000; border: 1px solid #ff9999; font-size: 0.85rem;">
                     💡 <strong>Matchmaker:</strong> <span id="matchmaker-suggestion">--</span>
                 </div>
@@ -167,33 +173,57 @@
         <section id="flexibility" class="tab-content">
             <h2>🎀 Contortion & Body Work</h2>
 
+            <!-- REWRITTEN: BIPHASIC VISCOSITY FORECASTER -->
             <div class="bubbly-box">
-                <h3>🔮 The Smart Coach</h3>
-                <p class="small-text">Log your cumulative rest and hydration metrics. Coach will clear your training safely based on your biometric baseline.</p>
+                <h3>🔮 The Biphasic Viscosity Forecaster</h3>
+                <p class="small-text">Log your biphasic sleep blocks and hydration. Coach calculates your exact thixotropic peak for safe end-range bending.</p>
                 
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
-                    <div style="flex:1; display:flex; flex-direction:column; min-width: 120px;">
-                        <span style="font-size:0.75rem; color:#cc0066; font-weight:bold; margin-bottom: 4px;">Total Sleep: <span id="display-sleep">0</span> hrs</span>
-                        <div style="display:flex; gap:4px;">
-                            <input type="number" id="sleep-input" placeholder="+ Hrs" style="margin:0; flex:1;">
-                            <button class="action-btn" onclick="addSleep()" style="margin:0; flex:1; background:#99ccff; box-shadow:0px 3px 0px #0066cc; padding: 5px;">💤 Add</button>
+                <!-- Biphasic Inputs -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <div class="data-pod" style="padding: 10px;">
+                        <span style="font-size:0.75rem; color:#4b0082; font-weight:bold;">Core Sleep (Block 1)</span>
+                        <div style="display: flex; gap: 4px; align-items: center; margin-top: 5px;">
+                            <input type="time" id="sleep-1-start" style="padding: 5px; margin: 0;"> 
+                            <span style="font-size: 0.8rem;">to</span> 
+                            <input type="time" id="sleep-1-end" style="padding: 5px; margin: 0;">
                         </div>
                     </div>
-                    <div style="flex:1; display:flex; flex-direction:column; min-width: 120px;">
-                        <span style="font-size:0.75rem; color:#cc0066; font-weight:bold; margin-bottom: 4px;">Total Water: <span id="display-water">0</span> oz</span>
-                        <button class="action-btn" onclick="addWater(16)" style="margin:0; background:#66ccff; box-shadow:0px 3px 0px #0066cc; height: 100%;">💧 +16 oz</button>
+                    <div class="data-pod" style="padding: 10px;">
+                        <span style="font-size:0.75rem; color:#cc0066; font-weight:bold;">Second Sleep (Block 2)</span>
+                        <div style="display: flex; gap: 4px; align-items: center; margin-top: 5px;">
+                            <input type="time" id="sleep-2-start" style="padding: 5px; margin: 0;"> 
+                            <span style="font-size: 0.8rem;">to</span> 
+                            <input type="time" id="sleep-2-end" style="padding: 5px; margin: 0;">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                    <div style="flex:1; display:flex; flex-direction:column; min-width: 120px; align-items: center;">
+                        <span style="font-size:0.75rem; color:#0066cc; font-weight:bold; margin-bottom: 4px;">Total Water: <span id="display-water">0</span> oz</span>
+                        <button class="action-btn" onclick="addWater(16)" style="margin:0; background:#66ccff; box-shadow:0px 3px 0px #0066cc; width: 100%;">💧 +16 oz</button>
+                    </div>
+                    <div style="flex:1; display:flex; flex-direction:column; min-width: 120px; justify-content: flex-end;">
+                        <button class="action-btn" onclick="calculateViscosityPeak()" style="margin:0; background:#cc0066; box-shadow:0px 3px 0px #99004d; width: 100%;">🔮 Forecast Peak</button>
                     </div>
                 </div>
                 
-                <button class="action-btn" onclick="clearCoachMetrics()" style="background:#ffccf2; color:#cc0066; width:100%; box-shadow: 0px 3px 0px #ff99cc; margin-bottom: 10px; font-size: 0.8rem; padding: 8px;">Reset Mistake / Clear Metrics</button>
+                <button class="action-btn" onclick="clearCoachMetrics()" style="background:#ffccf2; color:#cc0066; width:100%; box-shadow: 0px 3px 0px #ff99cc; margin-bottom: 15px; font-size: 0.8rem; padding: 6px;">Reset Sleep/Water Data</button>
                 
-                <button class="action-btn" onclick="smartSuggest()" style="background:#cc0066; width:100%;">🔮 Ask Smart Coach</button>
-                
-                <p id="vault-suggestion" class="highlight-text" style="display:none; margin-top: 15px; font-size: 0.95rem; line-height: 1.4;"></p>
-                
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ffb3d9;">
-                    <p class="small-text" style="margin-bottom: 5px;">Atmospheric Resistance:</p>
-                    <p class="highlight-text" id="live-flex-action" style="background: #ffe6f2; color: #cc0066; font-size: 0.85rem; margin-top:0;">Checking the skies...</p>
+                <!-- 24-Hour Circular Radar UI -->
+                <div style="text-align: center; margin: 20px 0;">
+                    <div class="viscosity-radar-container">
+                        <div id="viscosity-radar-dial"></div>
+                        <div class="radar-center-dot"></div>
+                        <div class="radar-label top">12 AM</div>
+                        <div class="radar-label right">6 AM</div>
+                        <div class="radar-label bottom">12 PM</div>
+                        <div class="radar-label left">6 PM</div>
+                    </div>
+                </div>
+
+                <div id="viscosity-forecast-output" class="highlight-text" style="display:none; font-size: 0.95rem; line-height: 1.4;">
+                    <!-- JS Injected Output -->
                 </div>
             </div>
 
@@ -337,7 +367,6 @@
                 <button class="action-btn" onclick="openTab('skill-tree-tab')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; width: 100%;">Enter Education & Skill Tree ➔</button>
             </div>
             
-            <!-- NEW: GENERAL FLEXIBILITY SESSION TRACKER -->
             <div class="bubbly-box">
                 <h3>📝 General Session Log</h3>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -387,7 +416,6 @@
                 </ul>
             </div>
 
-            <!-- Dynamic Courses populated by JS -->
             <div id="academy-courses-container"></div>
             
             <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; margin-bottom: 20px;">⬅ Back to Flexibility</button>
@@ -453,7 +481,6 @@
                 </div>
             </div>
 
-            <!-- NEW: BIOMETRICS FOR SMART COACH -->
             <div class="bubbly-box">
                 <h3>⚖️ Biometrics (Smart Coach Baseline)</h3>
                 <p class="small-text">Coach uses this to calculate optimal hydration and tension recovery.</p>
@@ -477,6 +504,7 @@
                 </div>
             </div>
 
+            <!-- EXPANDED: CLINICAL HORMONAL PHASES -->
             <div class="bubbly-box">
                 <h3>📋 Smart Clinical Skin Profile</h3>
                 <p class="small-text">This data feeds directly into the Skincare Tab's AI analyst.</p>
@@ -497,12 +525,13 @@
                     <option value="OverExfoliated">Over-Exfoliated</option>
                 </select>
 
-                <h3 style="margin-top: 15px; font-size: 1rem;">Hormonal Phase</h3>
+                <h3 style="margin-top: 15px; font-size: 1rem;">Clinical Hormonal Phase</h3>
                 <select id="hormone-phase" onchange="saveSettings()">
-                    <option value="Menstrual">Menstrual (Days 1-5)</option>
-                    <option value="Follicular">Follicular (Days 6-13)</option>
-                    <option value="Ovulatory">Ovulatory (Days 14-16)</option>
-                    <option value="Luteal">Luteal (Days 17-28)</option>
+                    <option value="Menstrual">Menstrual (Days 1-6) - Low Estrogen/Progesterone</option>
+                    <option value="Follicular">Follicular (Days 7-13) - Rising Estrogen/Collagen</option>
+                    <option value="Ovulatory">Ovulatory (Days 14-16) - Peak Estrogen/Testosterone</option>
+                    <option value="Early Luteal">Early Luteal (Days 17-22) - Rising Progesterone/Sebum</option>
+                    <option value="Late Luteal">Late Luteal/PMS (Days 23-28) - Peak Progesterone/Inflammation</option>
                 </select>
 
                 <h3 style="margin-top: 15px; font-size: 1rem;">Primary Focus</h3>
@@ -518,7 +547,6 @@
                 <input type="text" id="allergy-input" placeholder="e.g., Niacinamide" onchange="saveSettings()">
             </div>
 
-            <!-- REWRITTEN LINKED ROUTINE BUILDER BOX -->
             <div class="bubbly-box">
                 <h3>✅ Daily Routine Builder</h3>
                 <p class="small-text">Select a saved product from your database to chain to this step.</p>
