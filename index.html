@@ -8,13 +8,10 @@
 </head>
 <body>
 
-    <!-- STICKY TOP HEADER -->
     <header class="top-header">
         <h1>✨ Daily Wellness & Aura ✨</h1>
-        <!-- Always-Visible 14 Heart Slots -->
         <div id="top-hearts-container" class="hearts-row">
-            <!-- Populated by JS -->
-        </div>
+            </div>
         <nav class="tab-container">
             <button class="tab-btn active" onclick="openTab('skincare')">🧴 Skin</button>
             <button class="tab-btn" onclick="openTab('flexibility')">🧘 Flex</button>
@@ -26,7 +23,6 @@
 
     <main class="content-area">
         
-        <!-- SKINCARE PAGE -->
         <section id="skincare" class="tab-content active">
             <h2>🌸 Skincare & Barrier Health</h2>
             
@@ -44,7 +40,6 @@
                 </div>
             </div>
 
-            <!-- NEW: UTERINE & HORMONAL BIO-WEATHER -->
             <div class="bubbly-box" style="background: #fff0f5; border-color: #ff99cc;">
                 <h3 style="color: #cc0066; border-bottom-color: #ff99cc;">🩸 Uterine & Hormonal Bio-Weather</h3>
                 <p class="small-text" style="color: #993366;">Cross-referencing your cycle phase with atmospheric barometric pressure.</p>
@@ -169,48 +164,44 @@
             </div>
         </section>
 
-        <!-- FLEXIBILITY PAGE -->
         <section id="flexibility" class="tab-content">
             <h2>🎀 Contortion & Body Work</h2>
 
-            <!-- REWRITTEN: BIPHASIC VISCOSITY FORECASTER -->
             <div class="bubbly-box">
                 <h3>🔮 The Biphasic Viscosity Forecaster</h3>
                 <p class="small-text">Log your biphasic sleep blocks and hydration. Coach calculates your exact thixotropic peak for safe end-range bending.</p>
                 
-                <!-- Biphasic Inputs -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
                     <div class="data-pod" style="padding: 10px;">
                         <span style="font-size:0.75rem; color:#4b0082; font-weight:bold;">Core Sleep (Block 1)</span>
-                        <div style="display: flex; gap: 4px; align-items: center; margin-top: 5px;">
-                            <input type="time" id="sleep-1-start" style="padding: 5px; margin: 0;"> 
+                        <div style="display: flex; gap: 4px; align-items: center; margin-top: 5px; justify-content: center;">
+                            <input type="time" id="sleep-1-start" style="padding: 5px; margin: 0; flex: 1;"> 
                             <span style="font-size: 0.8rem;">to</span> 
-                            <input type="time" id="sleep-1-end" style="padding: 5px; margin: 0;">
+                            <input type="time" id="sleep-1-end" style="padding: 5px; margin: 0; flex: 1;">
                         </div>
                     </div>
                     <div class="data-pod" style="padding: 10px;">
                         <span style="font-size:0.75rem; color:#cc0066; font-weight:bold;">Second Sleep (Block 2)</span>
-                        <div style="display: flex; gap: 4px; align-items: center; margin-top: 5px;">
-                            <input type="time" id="sleep-2-start" style="padding: 5px; margin: 0;"> 
+                        <div style="display: flex; gap: 4px; align-items: center; margin-top: 5px; justify-content: center;">
+                            <input type="time" id="sleep-2-start" style="padding: 5px; margin: 0; flex: 1;"> 
                             <span style="font-size: 0.8rem;">to</span> 
-                            <input type="time" id="sleep-2-end" style="padding: 5px; margin: 0;">
+                            <input type="time" id="sleep-2-end" style="padding: 5px; margin: 0; flex: 1;">
                         </div>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-                    <div style="flex:1; display:flex; flex-direction:column; min-width: 120px; align-items: center;">
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+                    <div style="flex:1; display:flex; flex-direction:column; min-width: 140px; align-items: center;">
                         <span style="font-size:0.75rem; color:#0066cc; font-weight:bold; margin-bottom: 4px;">Total Water: <span id="display-water">0</span> oz</span>
                         <button class="action-btn" onclick="addWater(16)" style="margin:0; background:#66ccff; box-shadow:0px 3px 0px #0066cc; width: 100%;">💧 +16 oz</button>
                     </div>
-                    <div style="flex:1; display:flex; flex-direction:column; min-width: 120px; justify-content: flex-end;">
+                    <div style="flex:1; display:flex; flex-direction:column; min-width: 140px; justify-content: flex-end;">
                         <button class="action-btn" onclick="calculateViscosityPeak()" style="margin:0; background:#cc0066; box-shadow:0px 3px 0px #99004d; width: 100%;">🔮 Forecast Peak</button>
                     </div>
                 </div>
                 
                 <button class="action-btn" onclick="clearCoachMetrics()" style="background:#ffccf2; color:#cc0066; width:100%; box-shadow: 0px 3px 0px #ff99cc; margin-bottom: 15px; font-size: 0.8rem; padding: 6px;">Reset Sleep/Water Data</button>
                 
-                <!-- 24-Hour Circular Radar UI -->
                 <div style="text-align: center; margin: 20px 0;">
                     <div class="viscosity-radar-container">
                         <div id="viscosity-radar-dial"></div>
@@ -223,8 +214,7 @@
                 </div>
 
                 <div id="viscosity-forecast-output" class="highlight-text" style="display:none; font-size: 0.95rem; line-height: 1.4;">
-                    <!-- JS Injected Output -->
-                </div>
+                    </div>
             </div>
 
             <div class="bubbly-box">
@@ -261,7 +251,6 @@
                 <ul id="body-log-list" class="log-list"></ul>
             </div>
 
-            <!-- EXPANDED RECOVERY & REGULATION -->
             <div class="bubbly-box" style="background: #e6ffe6; border-color: #99ff99;">
                 <h3 style="color: #006600; border-bottom-color: #99ff99;">🌬️ Recovery & Regulation</h3>
                 <p class="small-text" style="color: #004d00;">Nervous system resets, flossing, and sensory intervention.</p>
@@ -275,7 +264,6 @@
                     <button class="action-btn" onclick="toggleRecoveryPanel('spinal-decompression')" style="background: #6699ff; box-shadow: 0px 3px 0px #0033cc; margin-top: 0;">Decompression</button>
                 </div>
                 
-                <!-- Panels -->
                 <div id="somatic-pacer" class="recovery-panel" style="display: none; text-align: center; margin-top: 20px; background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed #99ff99;">
                     <select id="breathing-mode" style="margin-bottom: 10px;" onchange="updateBreathingMode()">
                         <option value="box">Box Breathing (4-4-4-4)</option>
@@ -402,7 +390,6 @@
             </div>
         </section>
 
-        <!-- EDUCATION TAB -->
         <section id="skill-tree-tab" class="tab-content">
             <h2>🎓 5x5 Contortion Academy</h2>
             
@@ -421,7 +408,6 @@
             <button class="action-btn" onclick="openTab('flexibility')" style="background: #9999ff; box-shadow: 0px 3px 0px #6666ff; margin-bottom: 20px;">⬅ Back to Flexibility</button>
         </section>
 
-        <!-- ORACLE TAB -->
         <section id="oracle-aura" class="tab-content">
             <h2>🔮 Intuitive Oracle & Aura Synthesis</h2>
             
@@ -445,7 +431,6 @@
             </div>
         </section>
 
-        <!-- LOGS PAGE -->
         <section id="logs" class="tab-content">
             <h2>📝 Auto-Synthesis Archive</h2>
             
@@ -468,7 +453,6 @@
             </div>
         </section>
 
-        <!-- SETTINGS PAGE -->
         <section id="settings" class="tab-content">
             <h2>⚙️ System Settings & Profile</h2>
             
@@ -504,7 +488,6 @@
                 </div>
             </div>
 
-            <!-- EXPANDED: CLINICAL HORMONAL PHASES -->
             <div class="bubbly-box">
                 <h3>📋 Smart Clinical Skin Profile</h3>
                 <p class="small-text">This data feeds directly into the Skincare Tab's AI analyst.</p>
@@ -567,8 +550,7 @@
                             <option value="pm">PM 🌙</option>
                         </select>
                         <select id="routine-product-link" style="flex: 2; margin:0;">
-                            <!-- Populated with Vanity products dynamically -->
-                        </select>
+                            </select>
                     </div>
                     <div style="display: flex; gap: 8px;">
                         <input type="text" id="new-routine-step-note" placeholder="Application Note (e.g., Apply 3 drops, smooth gently)" style="flex: 2; margin:0;">
@@ -586,7 +568,6 @@
 
     </main>
 
-    <!-- NEW: MODAL OVERLAY FOR EDITING PRODUCTS -->
     <div id="edit-product-modal" class="modal-overlay">
         <div class="quiz-box" style="border-color: #9966ff; width: 95%; max-width: 450px;">
             <h3 style="color: #6633cc; border-bottom: 2px dashed #cc99ff;">📝 Edit Product Details</h3>
@@ -616,16 +597,13 @@
         </div>
     </div>
 
-    <!-- MODALS -->
-    <!-- NEW ACADEMY STREAK LOG MODAL -->
     <div id="academy-log-modal" class="modal-overlay">
         <div class="quiz-box">
             <h3 id="academy-log-title" style="color: #cc0066; border-bottom: 2px dashed #ffb3d9; padding-bottom: 5px;">Log Daily Practice</h3>
             <p id="academy-log-desc" style="font-size: 0.85rem; margin-top: 10px; margin-bottom: 15px; color: #885566;"></p>
             
             <div id="academy-log-questions" style="text-align: left; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
-                <!-- Populated by JS -->
-            </div>
+                </div>
             
             <button class="action-btn" onclick="submitAcademyLog()" style="background: #66cc99;">Stamp Practice ✨</button>
             <p id="academy-log-feedback" class="highlight-text" style="display:none; margin-top: 10px;"></p>
